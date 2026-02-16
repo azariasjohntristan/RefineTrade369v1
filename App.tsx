@@ -22,20 +22,277 @@ import TradeForm from './components/TradeForm';
 import StrategyBuilder from './components/StrategyBuilder';
 import { Trade, ViewState, Strategy } from './types';
 
-// Initial Mock Data
+// Initial Mock Data with 10 Feb Trades
 const INITIAL_TRADES: Trade[] = [
-  { id: 't1', time: '2023.10.24 14:20', pair: 'EUR/USD', type: 'LONG', size: '2.5 Lot', entry: 1.0542, exit: 1.0598, pnl: 1400.00, status: 'gain', selections: {} },
-  { id: 't2', time: '2023.10.24 11:05', pair: 'XAU/USD', type: 'SHORT', size: '1.0 Lot', entry: 1972.10, exit: 1980.45, pnl: -835.00, status: 'loss', selections: {} },
+  { 
+    id: 'f10', 
+    time: '2024-02-28T14:20:00Z', 
+    pair: 'EUR/JPY', 
+    type: 'SHORT', 
+    size: '1.5 Lot', 
+    entry: 162.45, 
+    exit: 162.90, 
+    pnl: -450.00, 
+    status: 'loss', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['FOREX'],
+      'cat-tf': ['M15'],
+      'cat-sr-logic': ['MINOR_S/R'],
+      'cat-risk-mgt': ['FIXED_1%'],
+      'cat-neural-state': ['HESITANT']
+    },
+    reflection: 'EXITS WERE SLOPPY. MOVED STOP TO BREAKEVEN TOO LATE.'
+  },
+  { 
+    id: 'f9', 
+    time: '2024-02-27T09:15:00Z', 
+    pair: 'USD/JPY', 
+    type: 'LONG', 
+    size: '2.0 Lot', 
+    entry: 150.10, 
+    exit: 150.85, 
+    pnl: 1500.00, 
+    status: 'gain', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['FOREX'],
+      'cat-tf': ['H1'],
+      'cat-sr-logic': ['MAJOR_S/R', 'VBP_POC'],
+      'cat-risk-mgt': ['SCALED_ENTRY'],
+      'cat-neural-state': ['OPTIMAL_FLOW']
+    },
+    reflection: 'SOLID CONFLUENCE AT PSYCHOLOGICAL LEVEL.'
+  },
+  { 
+    id: 'f8', 
+    time: '2024-02-25T20:30:00Z', 
+    pair: 'GBP/USD', 
+    type: 'SHORT', 
+    size: '1.0 Lot', 
+    entry: 1.2680, 
+    exit: 1.2630, 
+    pnl: 500.00, 
+    status: 'gain', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['FOREX'],
+      'cat-tf': ['H4'],
+      'cat-sr-logic': ['DYNAMIC_EMA'],
+      'cat-risk-mgt': ['FIXED_1%'],
+      'cat-neural-state': ['OPTIMAL_FLOW']
+    },
+    reflection: 'TREND FOLLOWING AT ITS BEST. CLEAN REJECTION.'
+  },
+  { 
+    id: 'f7', 
+    time: '2024-02-22T15:00:00Z', 
+    pair: 'ETH/USD', 
+    type: 'LONG', 
+    size: '5.0 ETH', 
+    entry: 2950.00, 
+    exit: 2910.00, 
+    pnl: -200.00, 
+    status: 'loss', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['CRYPTO'],
+      'cat-tf': ['H1'],
+      'cat-sr-logic': ['VBP_POC'],
+      'cat-risk-mgt': ['AGGRESSIVE'],
+      'cat-neural-state': ['FOMO_IMPULSE']
+    },
+    reflection: 'CHASED THE PUMP. LEARN TO WAIT FOR THE PULLBACK.'
+  },
+  { 
+    id: 'f6', 
+    time: '2024-02-19T11:45:00Z', 
+    pair: 'XAU/USD', 
+    type: 'LONG', 
+    size: '0.5 Lot', 
+    entry: 2015.00, 
+    exit: 2032.00, 
+    pnl: 850.00, 
+    status: 'gain', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['COMMODITIES'],
+      'cat-tf': ['H4'],
+      'cat-sr-logic': ['MAJOR_S/R'],
+      'cat-risk-mgt': ['FIXED_1%'],
+      'cat-neural-state': ['OPTIMAL_FLOW']
+    },
+    reflection: 'PATIENT EXECUTION AT PREVIOUS DAY LOW.'
+  },
+  { 
+    id: 'f5', 
+    time: '2024-02-15T13:20:00Z', 
+    pair: 'EUR/USD', 
+    type: 'SHORT', 
+    size: '3.0 Lot', 
+    entry: 1.0780, 
+    exit: 1.0815, 
+    pnl: -1050.00, 
+    status: 'loss', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['FOREX'],
+      'cat-tf': ['M15'],
+      'cat-sr-logic': ['DYNAMIC_EMA'],
+      'cat-risk-mgt': ['FIXED_1%'],
+      'cat-neural-state': ['HESITANT']
+    },
+    reflection: 'COUNTER-TREND ATTEMPT FAILED. STICK TO THE BIAS.'
+  },
+  { 
+    id: 'f4', 
+    time: '2024-02-12T08:00:00Z', 
+    pair: 'GBP/JPY', 
+    type: 'SHORT', 
+    size: '2.0 Lot', 
+    entry: 189.50, 
+    exit: 188.20, 
+    pnl: 1730.00, 
+    status: 'gain', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['FOREX'],
+      'cat-tf': ['H1'],
+      'cat-sr-logic': ['MAJOR_S/R'],
+      'cat-risk-mgt': ['SCALED_ENTRY'],
+      'cat-neural-state': ['OPTIMAL_FLOW']
+    },
+    reflection: 'LONDON OPEN VOLATILITY WORKED IN FAVOR.'
+  },
+  { 
+    id: 'f3', 
+    time: '2024-02-08T16:40:00Z', 
+    pair: 'BTC/USD', 
+    type: 'LONG', 
+    size: '0.1 BTC', 
+    entry: 44200.00, 
+    exit: 45800.00, 
+    pnl: 160.00, 
+    status: 'gain', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['CRYPTO'],
+      'cat-tf': ['D1'],
+      'cat-sr-logic': ['VBP_POC', 'MAJOR_S/R'],
+      'cat-risk-mgt': ['FIXED_1%'],
+      'cat-neural-state': ['OPTIMAL_FLOW']
+    },
+    reflection: 'LONG TERM POSITIONING. MACRO BIAS IS BULLISH.'
+  },
+  { 
+    id: 'f2', 
+    time: '2024-02-04T12:10:00Z', 
+    pair: 'XAU/USD', 
+    type: 'SHORT', 
+    size: '1.2 Lot', 
+    entry: 2045.50, 
+    exit: 2055.00, 
+    pnl: -1140.00, 
+    status: 'loss', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['COMMODITIES'],
+      'cat-tf': ['M15'],
+      'cat-sr-logic': ['MINOR_S/R'],
+      'cat-risk-mgt': ['AGGRESSIVE'],
+      'cat-neural-state': ['FOMO_IMPULSE']
+    },
+    reflection: 'STOP HUNTED BEFORE THE MOVE. SPREADS WERE WIDE.'
+  },
+  { 
+    id: 'f1', 
+    time: '2024-02-01T10:00:00Z', 
+    pair: 'EUR/USD', 
+    type: 'LONG', 
+    size: '2.5 Lot', 
+    entry: 1.0820, 
+    exit: 1.0895, 
+    pnl: 1875.00, 
+    status: 'gain', 
+    strategyId: 'strat-default-sr',
+    selections: {
+      'cat-asset-class': ['FOREX'],
+      'cat-tf': ['H1'],
+      'cat-sr-logic': ['MAJOR_S/R'],
+      'cat-risk-mgt': ['FIXED_1%'],
+      'cat-neural-state': ['OPTIMAL_FLOW']
+    },
+    reflection: 'INITIAL FEB GAIN. FOLLOWED THE PLAN PERFECTLY.'
+  },
 ];
 
-const EQUITY_DATA_BASE = [
-  { name: 'Oct 01', value: 135000 },
-  { name: 'Oct 05', value: 136200 },
-  { name: 'Oct 10', value: 138500 },
-  { name: 'Oct 15', value: 137800 },
-  { name: 'Oct 20', value: 140500 },
-  { name: 'Oct 24', value: 142850 },
-];
+const DEFAULT_STRATEGY: Strategy = {
+  id: 'strat-default-sr',
+  name: 'SUPPORT AND RESISTANCE',
+  layers: {
+    layer1: [
+      {
+        id: 'cat-asset-class',
+        name: 'ASSET_CLASS',
+        selectionType: 'single',
+        tags: [
+          { text: 'FOREX', color: '#3b82f6' },
+          { text: 'CRYPTO', color: '#f59e0b' },
+          { text: 'COMMODITIES', color: '#10b981' }
+        ]
+      },
+      {
+        id: 'cat-tf',
+        name: 'TIMEFRAME',
+        selectionType: 'single',
+        tags: [
+          { text: 'M15', color: '#64748b' },
+          { text: 'H1', color: '#14b8a6' },
+          { text: 'H4', color: '#8b5cf6' },
+          { text: 'D1', color: '#a855f7' }
+        ]
+      }
+    ],
+    layer2: [
+      {
+        id: 'cat-sr-logic',
+        name: 'ZONE_IDENTIFIER',
+        selectionType: 'multi',
+        tags: [
+          { text: 'MAJOR_S/R', color: '#8b5cf6' },
+          { text: 'MINOR_S/R', color: '#06b6d4' },
+          { text: 'DYNAMIC_EMA', color: '#3b82f6' },
+          { text: 'VBP_POC', color: '#f59e0b' }
+        ]
+      }
+    ],
+    layer3: [
+      {
+        id: 'cat-risk-mgt',
+        name: 'RISK_PROTOCOL',
+        selectionType: 'single',
+        tags: [
+          { text: 'FIXED_1%', color: '#10b981' },
+          { text: 'SCALED_ENTRY', color: '#06b6d4' },
+          { text: 'AGGRESSIVE', color: '#f43f5e' }
+        ]
+      }
+    ],
+    layer4: [
+      {
+        id: 'cat-neural-state',
+        name: 'PSYCH_INDEX',
+        selectionType: 'single',
+        tags: [
+          { text: 'OPTIMAL_FLOW', color: '#10b981' },
+          { text: 'HESITANT', color: '#f59e0b' },
+          { text: 'FOMO_IMPULSE', color: '#f43f5e' }
+        ]
+      }
+    ]
+  },
+  createdAt: new Date().toLocaleDateString()
+};
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewState>('overview');
@@ -48,7 +305,7 @@ const App: React.FC = () => {
   });
   const [strategies, setStrategies] = useState<Strategy[]>(() => {
     const saved = localStorage.getItem('strategies_v2');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : [DEFAULT_STRATEGY];
   });
 
   useEffect(() => {

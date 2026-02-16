@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Strategy, Category, Tag } from '../types';
-import { Plus, Trash2, Settings2, X, Hash, Layers, ChevronDown, Edit3, Check, AlertTriangle } from 'lucide-react';
+import { Plus, Trash2, Settings2, X, Hash, Layers, ChevronDown, Edit3, Check, AlertTriangle, Info } from 'lucide-react';
 
 interface StrategyBuilderProps {
   strategies: Strategy[];
@@ -9,7 +9,18 @@ interface StrategyBuilderProps {
   onUpdateStrategy: (strategy: Strategy) => void;
 }
 
-const COLOR_OPTIONS = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#a855f7', '#64748b'];
+const COLOR_OPTIONS = [
+  '#f59e0b', // Amber
+  '#10b981', // Emerald
+  '#14b8a6', // Teal
+  '#06b6d4', // Cyan
+  '#3b82f6', // Blue
+  '#8b5cf6', // Violet
+  '#a855f7', // Purple
+  '#ec4899', // Pink
+  '#f43f5e', // Rose
+  '#64748b'  // Slate
+];
 
 const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddStrategy, onDeleteStrategy, onUpdateStrategy }) => {
   const [activeModelId, setActiveModelId] = useState<string | null>(strategies[0]?.id || null);
@@ -22,6 +33,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
   
   const [isAddingCategory, setIsAddingCategory] = useState<{ layer: keyof Strategy['layers'] } | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [categoryModalError, setCategoryModalError] = useState<string | null>(null);
 
   const selectorRef = useRef<HTMLDivElement>(null);
 
@@ -77,7 +89,18 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
   };
 
   const handleAddCategory = () => {
-    if (!activeStrategy || !isAddingCategory || !newCategoryName) return;
+    if (!activeStrategy) {
+      setCategoryModalError("INITIALIZATION_FAILED: NO_ACTIVE_STRATEGY_MODEL. PLEASE CREATE A MODEL FIRST.");
+      return;
+    }
+    
+    if (!newCategoryName) {
+      setCategoryModalError("VALIDATION_ERROR: CATEGORY_IDENTIFIER_REQUIRED.");
+      return;
+    }
+
+    if (!isAddingCategory) return;
+
     const newCat: Category = {
       id: `cat-${Date.now()}`,
       name: newCategoryName.toUpperCase(),
@@ -89,6 +112,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
     onUpdateStrategy(updated);
     setNewCategoryName('');
     setIsAddingCategory(null);
+    setCategoryModalError(null);
   };
 
   const handleAddTag = (layerKey: keyof Strategy['layers'], categoryId: string, tagText: string, color: string) => {
@@ -199,7 +223,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
                   <Plus size={16} />
                 </button>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {COLOR_OPTIONS.map(c => (
                   <button 
                     key={c}
@@ -217,7 +241,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
         ))}
 
         <button 
-          onClick={() => setIsAddingCategory({ layer: layerKey })}
+          onClick={() => { setCategoryModalError(null); setIsAddingCategory({ layer: layerKey }); }}
           className="bg-slate-800/10 border border-dashed border-slate-700/50 rounded-sm flex flex-col items-center justify-center gap-4 p-12 text-slate-600 hover:text-slate-300 hover:border-slate-500 transition-all group"
         >
           <div className="w-12 h-12 rounded-full border border-slate-700/50 flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -230,126 +254,128 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
   );
 
   return (
-    <div className="space-y-12 pb-32 animate-slide-up">
-      {/* Header Area */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-800 pb-10">
-        <div>
-          <h2 className="text-5xl font-extrabold text-slate-100 tracking-tight mb-3 uppercase">Customize_Tags</h2>
-          <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500 uppercase tracking-widest">
-            <span>STRATEGY PARAMETER INDEX</span>
-            <span className="text-slate-700">•</span>
-            <span className="text-slate-300">{activeStrategy?.name || 'NULL'}</span>
+    <>
+      <div className="space-y-12 pb-32 animate-slide-up">
+        {/* Header Area */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-800 pb-10">
+          <div>
+            <h2 className="text-5xl font-extrabold text-slate-100 tracking-tight mb-3 uppercase">Customize_Tags</h2>
+            <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500 uppercase tracking-widest">
+              <span>STRATEGY PARAMETER INDEX</span>
+              <span className="text-slate-700">•</span>
+              <span className="text-slate-300">{activeStrategy?.name || 'NULL'}</span>
+            </div>
           </div>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="flex items-center">
-            {/* Improved Custom Selector UI */}
-            <div className="relative" ref={selectorRef}>
-              <button 
-                onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-                className={`flex items-center justify-between gap-6 bg-slate-900 border px-6 py-2.5 min-w-[160px] text-xs font-mono transition-all duration-200 ${
-                  isSelectorOpen ? 'border-accent-gain ring-1 ring-accent-gain/20' : 'border-slate-800 hover:border-slate-600'
-                }`}
-              >
-                <span className={`uppercase tracking-[0.2em] ${activeStrategy ? 'text-slate-200' : 'text-slate-600'}`}>
-                  {activeStrategy?.name || 'SELECT_MODEL'}
-                </span>
-                <ChevronDown size={14} className={`text-slate-500 transition-transform duration-200 ${isSelectorOpen ? 'rotate-180 text-accent-gain' : ''}`} />
-              </button>
-              
-              {isSelectorOpen && (
-                <div className="absolute top-[calc(100%+4px)] right-0 w-full min-w-[200px] bg-slate-900 border border-slate-700 shadow-2xl z-[150] animate-slide-up py-1">
-                  <div className="px-4 py-2 border-b border-slate-800 bg-slate-950/50">
-                    <span className="text-[8px] font-bold text-slate-600 uppercase tracking-[0.2em]">AVAILABLE_MODELS</span>
-                  </div>
-                  <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                    {strategies.map(s => (
-                      <button
-                        key={s.id}
-                        onClick={() => {
-                          setActiveModelId(s.id);
-                          setIsSelectorOpen(false);
-                        }}
-                        className={`w-full text-left px-4 py-3 text-[10px] font-mono transition-all flex justify-between items-center group/item ${
-                          s.id === activeModelId ? 'bg-slate-800 text-accent-gain' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100'
-                        }`}
-                      >
-                        <span className="uppercase tracking-widest">{s.name}</span>
-                        {s.id === activeModelId && <Check size={12} className="text-accent-gain" />}
-                      </button>
-                    ))}
-                  </div>
-                  {strategies.length === 0 && (
-                    <div className="px-4 py-6 text-center italic text-[9px] text-slate-700 font-mono uppercase tracking-widest">
-                      NO_MODELS_FOUND
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center">
+              {/* Improved Custom Selector UI */}
+              <div className="relative" ref={selectorRef}>
+                <button 
+                  onClick={() => setIsSelectorOpen(!isSelectorOpen)}
+                  className={`flex items-center justify-between gap-6 bg-slate-900 border px-6 py-2.5 min-w-[160px] text-xs font-mono transition-all duration-200 ${
+                    isSelectorOpen ? 'border-accent-gain ring-1 ring-accent-gain/20' : 'border-slate-800 hover:border-slate-600'
+                  }`}
+                >
+                  <span className={`uppercase tracking-[0.2em] ${activeStrategy ? 'text-slate-200' : 'text-slate-600'}`}>
+                    {activeStrategy?.name || 'SELECT_MODEL'}
+                  </span>
+                  <ChevronDown size={14} className={`text-slate-500 transition-transform duration-200 ${isSelectorOpen ? 'rotate-180 text-accent-gain' : ''}`} />
+                </button>
+                
+                {isSelectorOpen && (
+                  <div className="absolute top-[calc(100%+4px)] right-0 w-full min-w-[200px] bg-slate-900 border border-slate-700 shadow-2xl z-[150] animate-slide-up py-1">
+                    <div className="px-4 py-2 border-b border-slate-800 bg-slate-950/50">
+                      <span className="text-[8px] font-bold text-slate-600 uppercase tracking-[0.2em]">AVAILABLE_MODELS</span>
                     </div>
-                  )}
+                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
+                      {strategies.map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => {
+                            setActiveModelId(s.id);
+                            setIsSelectorOpen(false);
+                          }}
+                          className={`w-full text-left px-4 py-3 text-[10px] font-mono transition-all flex justify-between items-center group/item ${
+                            s.id === activeModelId ? 'bg-slate-800 text-accent-gain' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100'
+                          }`}
+                        >
+                          <span className="uppercase tracking-widest">{s.name}</span>
+                          {s.id === activeModelId && <Check size={12} className="text-accent-gain" />}
+                        </button>
+                      ))}
+                    </div>
+                    {strategies.length === 0 && (
+                      <div className="px-4 py-6 text-center italic text-[9px] text-slate-700 font-mono uppercase tracking-widest">
+                        NO_MODELS_FOUND
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              {activeStrategy && (
+                <div className="flex items-center">
+                  <button 
+                    onClick={() => {
+                      setRenameValue(activeStrategy.name);
+                      setIsRenamingModel(true);
+                    }}
+                    className="bg-slate-900 border border-slate-800 p-2.5 text-slate-500 hover:text-slate-100 hover:bg-slate-800 transition-all border-l-0"
+                    title="Rename Model"
+                  >
+                    <Edit3 size={16} />
+                  </button>
+                  <button 
+                    onClick={() => setIsDeletingModel(true)}
+                    className="bg-slate-900 border border-slate-800 p-2.5 text-slate-500 hover:text-accent-loss hover:bg-slate-800 transition-all border-l-0"
+                    title="Delete Model"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               )}
             </div>
-            
-            {activeStrategy && (
-              <div className="flex items-center">
-                <button 
-                  onClick={() => {
-                    setRenameValue(activeStrategy.name);
-                    setIsRenamingModel(true);
-                  }}
-                  className="bg-slate-900 border border-slate-800 p-2.5 text-slate-500 hover:text-slate-100 hover:bg-slate-800 transition-all border-l-0"
-                  title="Rename Model"
-                >
-                  <Edit3 size={16} />
-                </button>
-                <button 
-                  onClick={() => setIsDeletingModel(true)}
-                  className="bg-slate-900 border border-slate-800 p-2.5 text-slate-500 hover:text-accent-loss hover:bg-slate-800 transition-all border-l-0"
-                  title="Delete Model"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            )}
-          </div>
 
-          <button 
-            onClick={() => setIsAddingModel(true)}
-            className="bg-slate-100 text-slate-900 px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest hover:bg-white transition-all flex items-center gap-2 shadow-lg ml-2"
-          >
-            <Plus size={16} /> New Model
-          </button>
+            <button 
+              onClick={() => setIsAddingModel(true)}
+              className="bg-slate-100 text-slate-900 px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest hover:bg-white transition-all flex items-center gap-2 shadow-lg ml-2"
+            >
+              <Plus size={16} /> New Model
+            </button>
+          </div>
+        </div>
+
+        {/* Layers Container */}
+        <div className="space-y-20">
+          <LayerSection 
+            title="Layer_01 // Identity" 
+            desc="Define instrument IDs and core asset identifiers." 
+            layerKey="layer1" 
+          />
+          <LayerSection 
+            title="Layer_02 // Strategy & Logic" 
+            desc="Establish market bias, execution engines, and confluence signatures." 
+            layerKey="layer2" 
+          />
+          <LayerSection 
+            title="Layer_03 // Temporal & Risk" 
+            desc="Set time window constraints and risk management parameters." 
+            layerKey="layer3" 
+          />
+          <LayerSection 
+            title="Layer_04 // Reflection" 
+            desc="Post-execution data points and neural state tracking." 
+            layerKey="layer4" 
+          />
         </div>
       </div>
 
-      {/* Layers Container */}
-      <div className="space-y-20">
-        <LayerSection 
-          title="Layer_01 // Identity" 
-          desc="Define instrument IDs and core asset identifiers." 
-          layerKey="layer1" 
-        />
-        <LayerSection 
-          title="Layer_02 // Strategy & Logic" 
-          desc="Establish market bias, execution engines, and confluence signatures." 
-          layerKey="layer2" 
-        />
-        <LayerSection 
-          title="Layer_03 // Temporal & Risk" 
-          desc="Set time window constraints and risk management parameters." 
-          layerKey="layer3" 
-        />
-        <LayerSection 
-          title="Layer_04 // Reflection" 
-          desc="Post-execution data points and neural state tracking." 
-          layerKey="layer4" 
-        />
-      </div>
-
-      {/* Add Model Modal */}
+      {/* Modals outside the animated view to ensure proper fixed centering */}
       {isAddingModel && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-transparent backdrop-blur-sm" onClick={() => setIsAddingModel(false)} />
-          <form onSubmit={handleAddModel} className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-8 space-y-6 shadow-2xl">
+          <form onSubmit={handleAddModel} className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-8 space-y-6 shadow-2xl animate-slide-up">
             <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Initialize New Model</h3>
             <input 
               autoFocus
@@ -363,11 +389,10 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
         </div>
       )}
 
-      {/* Rename Model Modal */}
       {isRenamingModel && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-transparent backdrop-blur-sm" onClick={() => setIsRenamingModel(false)} />
-          <form onSubmit={handleRenameModel} className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-8 space-y-6 shadow-2xl">
+          <form onSubmit={handleRenameModel} className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-8 space-y-6 shadow-2xl animate-slide-up">
             <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Rename Strategy Model</h3>
             <input 
               autoFocus
@@ -381,9 +406,8 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
       {isDeletingModel && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-transparent backdrop-blur-sm" onClick={() => setIsDeletingModel(false)} />
           <div className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-10 space-y-8 shadow-2xl animate-slide-up">
             <div className="flex flex-col items-center text-center space-y-4">
@@ -416,11 +440,10 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
         </div>
       )}
 
-      {/* Add Category Modal */}
       {isAddingCategory && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-transparent backdrop-blur-sm" onClick={() => setIsAddingCategory(null)} />
-          <div className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-8 space-y-8 shadow-2xl">
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-transparent backdrop-blur-sm" onClick={() => { setIsAddingCategory(null); setCategoryModalError(null); }} />
+          <div className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-8 space-y-8 shadow-2xl animate-slide-up">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
                 <div className="flex items-center gap-3 text-sm font-bold text-slate-100 uppercase tracking-widest">
@@ -431,8 +454,17 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
                   Layer: {isAddingCategory.layer} // Neural Node Initialization
                 </div>
               </div>
-              <button onClick={() => setIsAddingCategory(null)} className="text-slate-500 hover:text-white"><X size={18} /></button>
+              <button onClick={() => { setIsAddingCategory(null); setCategoryModalError(null); }} className="text-slate-500 hover:text-white"><X size={18} /></button>
             </div>
+
+            {categoryModalError && (
+              <div className="bg-accent-loss/10 border border-accent-loss/30 p-4 flex gap-3 animate-slide-up">
+                <AlertTriangle size={16} className="text-accent-loss shrink-0" />
+                <p className="text-[9px] font-mono text-accent-loss leading-relaxed uppercase font-bold">
+                  {categoryModalError}
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Category Identifier</label>
@@ -441,7 +473,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
                 className="w-full bg-slate-950 border border-slate-800 p-5 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
                 placeholder="E.G. LIQUIDITY_TYPE"
                 value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
+                onChange={(e) => { setNewCategoryName(e.target.value); setCategoryModalError(null); }}
               />
             </div>
 
@@ -463,7 +495,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
