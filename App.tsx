@@ -3,7 +3,7 @@ import {
   LayoutDashboard, 
   ScrollText, 
   BarChart2, 
-  ShieldAlert, 
+ 
   Settings,
   Bell,
   Search,
@@ -477,7 +477,7 @@ const App: React.FC = () => {
             { id: 'log', label: 'Trade Log', icon: ScrollText },
             { id: 'strategy', label: 'Strategy Parameters', icon: Layers },
             { id: 'analytics', label: 'Analytics', icon: BarChart2 },
-            { id: 'risk', label: 'Risk Manager', icon: ShieldAlert },
+
             { id: 'settings', label: 'Settings', icon: Settings },
           ].map((item) => {
             const Icon = item.icon;
@@ -667,12 +667,7 @@ const App: React.FC = () => {
               <AnalyticsView trades={filteredTrades} strategies={strategies} activeStrategyId={activeStrategyId} />
             )}
 
-            {(activeView === 'risk' || activeView === 'settings') && (
-                <div className="flex flex-col items-center justify-center h-[50vh] text-center">
-                    <div className="w-12 h-12 border-2 border-slate-800 border-t-accent-gain rounded-full animate-spin mb-6"></div>
-                    <h3 className="text-lg font-bold text-slate-300 uppercase tracking-widest">Optimizing Module...</h3>
-                </div>
-            )}
+
           </div>
         </main>
 
