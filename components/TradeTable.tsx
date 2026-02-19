@@ -164,16 +164,16 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, onUpdateTra
 
   return (
     <div className={`w-full ${!showTitle ? 'border-t-2 border-slate-700' : ''} animate-slide-up`} style={{ animationDelay: '0.4s' }}>
-      <div className="overflow-x-auto">
+      {showTitle && (
+        <div className="pb-8 md:pb-10">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-slate-100 tracking-tight uppercase">Performance Log</h2>
+        </div>
+      )}
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm text-left border-collapse">
           <thead className="sticky top-[-48px] bg-[#0c0d0e] z-30">
-            {showTitle && (
-              <tr>
-                <th colSpan={5} className="pt-0 pb-10 text-left">
-                  <h2 className="text-3xl font-extrabold text-slate-100 tracking-tight uppercase">Performance Log</h2>
-                </th>
-              </tr>
-            )}
             <tr className="border-b border-structural-border">
               <th className="py-6 px-4 text-slate-500 font-normal uppercase tracking-wider text-[0.7rem]">Date</th>
               <th className="py-6 px-4 text-slate-500 font-normal uppercase tracking-wider text-[0.7rem]">Instrument</th>
@@ -221,6 +221,46 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, onUpdateTra
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {trades.map((trade, idx) => (
+          <div 
+            key={trade.id} 
+            className="bg-slate-800/40 border border-slate-800 p-4 rounded-sm space-y-4 animate-slide-up"
+            style={{ animationDelay: `${0.5 + idx * 0.1}s` }}
+          >
+            <div className="flex justify-between items-start">
+              <div className="space-y-1">
+                <div className="text-[10px] font-mono text-slate-500 uppercase">
+                  {new Date(trade.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="bg-slate-900 text-slate-200 px-2 py-1 text-[10px] font-mono border border-slate-800 uppercase">
+                    {trade.pair}
+                  </span>
+                  <span className={`font-black text-[10px] ${trade.type === 'LONG' ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                    {trade.type}
+                  </span>
+                </div>
+              </div>
+              <div className={`px-3 py-1.5 rounded-sm font-bold text-xs ${
+                trade.pnl >= 0 
+                  ? 'bg-accent-gain/5 text-accent-gain border border-accent-gain/10' 
+                  : 'bg-accent-loss/5 text-accent-loss border border-accent-loss/10'
+              }`}>
+                {trade.pnl > 0 ? '+' : ''}{trade.pnl.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-4 pt-2 border-t border-slate-800/50">
+              <button onClick={() => handleOpenModal(trade, 'view')} className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><Eye size={14} /> View</button>
+              <button onClick={() => handleOpenModal(trade, 'edit')} className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest"><Edit3 size={14} /> Edit</button>
+              <button onClick={() => handleOpenModal(trade, 'delete')} className="flex items-center gap-2 text-[10px] font-bold text-accent-loss uppercase tracking-widest"><Trash2 size={14} /> Delete</button>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* --- View Modal --- */}

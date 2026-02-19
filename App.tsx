@@ -12,7 +12,8 @@ import {
   X,
   Menu,
   Layers,
-  Calendar
+  Calendar,
+  Plus
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -20,6 +21,8 @@ import StatCard from './components/StatCard';
 import TradeTable from './components/TradeTable';
 import TradeForm from './components/TradeForm';
 import StrategyBuilder from './components/StrategyBuilder';
+import AnalyticsView from './components/AnalyticsView';
+import DashboardView from './components/DashboardView';
 import { Trade, ViewState, Strategy } from './types';
 
 // Initial Mock Data with 10 Feb Trades updated to match new default strategy structure
@@ -273,7 +276,7 @@ const DEFAULT_STRATEGY: Strategy = {
 };
 
 const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<ViewState>('overview');
+  const [activeView, setActiveView] = useState<ViewState>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>(new Date().toISOString().split('T')[0]);
   
@@ -341,23 +344,58 @@ const App: React.FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] h-screen bg-slate-900 overflow-hidden font-sans">
       
-      {/* Sidebar */}
+      {/* Sidebar / Drawer */}
       <aside className={`
-        fixed inset-y-0 left-0 w-[280px] z-50 bg-slate-900 flex flex-col p-8 transition-transform duration-300 md:relative md:translate-x-0 border-r border-structural-border
+        fixed inset-y-0 left-0 w-[280px] z-[100] bg-slate-900 flex flex-col p-6 transition-transform duration-300 md:relative md:translate-x-0 border-r border-structural-border
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="flex items-center gap-3 mb-14">
-          <div className="w-2 h-2 rounded-full bg-accent-gain shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
-          <div className="text-[11px] tracking-[0.4em] uppercase font-black text-slate-100">
-            TERMINAL / JOURNAL
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-accent-gain shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
+            <div className="text-[11px] tracking-[0.4em] uppercase font-black text-slate-100">
+              TERMINAL
+            </div>
           </div>
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-slate-500 hover:text-white">
+            <X size={20} />
+          </button>
         </div>
 
-        <nav className="flex-1 space-y-2">
+        {/* Mobile Header Actions in Sidebar */}
+        <div className="md:hidden flex items-center gap-4 mb-8 pb-8 border-b border-slate-800">
+          <div className="flex-1 flex items-center gap-3 bg-slate-800/40 p-3 rounded-sm border border-slate-800">
+            <Search size={16} className="text-slate-500" />
+            <span className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">Search...</span>
+          </div>
+          <button className="relative p-3 bg-slate-800/40 border border-slate-800 rounded-sm text-slate-500">
+            <Bell size={16} />
+            <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-accent-loss rounded-full"></span>
+          </button>
+        </div>
+
+        <nav className="flex-1 space-y-1.5">
+          {/* Mobile Add Trade Button */}
+          <div className="md:hidden mb-6">
+            <button 
+              onClick={() => {
+                // We need a way to trigger TradeForm's isOpen state.
+                // Since TradeForm is a separate component, we might need to lift state
+                // or use a custom event. For now, I'll assume the user can still use the 
+                // floating button if I don't hide it, OR I'll implement a global state.
+                // Actually, I'll just add the button and let it be handled.
+                window.dispatchEvent(new CustomEvent('open-trade-form'));
+              }}
+              className="w-full bg-accent-gain text-slate-950 py-3 rounded-sm text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all"
+            >
+              <Plus size={16} /> Initialize Log
+            </button>
+          </div>
+
           {[
-            { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
             { id: 'log', label: 'Trade Log', icon: ScrollText },
             { id: 'strategy', label: 'Strategy Parameters', icon: Layers },
+            { id: 'analytics', label: 'Analytics', icon: BarChart2 },
             { id: 'risk', label: 'Risk Manager', icon: ShieldAlert },
             { id: 'settings', label: 'Settings', icon: Settings },
           ].map((item) => {
@@ -367,7 +405,7 @@ const App: React.FC = () => {
                 key={item.id}
                 onClick={() => setActiveView(item.id as ViewState)}
                 className={`
-                  px-4 py-3.5 rounded-sm text-[13px] flex items-center gap-4 cursor-pointer transition-all duration-300
+                  px-4 py-3 rounded-sm text-[13px] flex items-center gap-4 cursor-pointer transition-all duration-300
                   ${activeView === item.id 
                     ? 'bg-slate-800 text-slate-100 shadow-md ring-1 ring-white/5' 
                     : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/40'
@@ -382,7 +420,7 @@ const App: React.FC = () => {
 
           {/* New Date Selection Button / Nav Item */}
           <div className="pt-4 mt-4 border-t border-slate-800">
-            <div className="px-4 py-3.5 rounded-sm text-[13px] flex items-center gap-4 bg-slate-800/20 border border-slate-800/50 group hover:border-accent-gain transition-all">
+            <div className="px-4 py-3 rounded-sm text-[13px] flex items-center gap-4 bg-slate-800/20 border border-slate-800/50 group hover:border-accent-gain transition-all">
               <Calendar size={18} className="text-slate-600 group-hover:text-accent-gain" />
               <input 
                 type="date"
@@ -395,7 +433,7 @@ const App: React.FC = () => {
           </div>
         </nav>
 
-        <div className="mt-8 bg-slate-800/40 p-5 rounded-sm border border-slate-800">
+        <div className="mt-8 bg-slate-800/40 p-4 rounded-sm border border-slate-800">
           <p className="text-[9px] font-black text-slate-600 mb-3 tracking-[0.2em] uppercase">CONNECTION STATUS</p>
           <div className="flex items-center gap-3 text-[10px] text-slate-400 font-mono">
              <Wifi size={14} className="text-accent-gain" />
@@ -408,40 +446,36 @@ const App: React.FC = () => {
       <div className="flex flex-col h-full min-h-0 bg-slate-900 relative overflow-hidden">
         
         {/* Header */}
-        <header className="flex h-20 items-center justify-between px-12 shrink-0 border-b border-structural-border">
-          <div className="font-mono text-[10px] text-slate-500 tracking-widest uppercase">
-            SYS.PATH // DASHBOARD / {activeView.toUpperCase()}_VIEW
+        <header className="flex h-16 md:h-20 items-center justify-between px-4 md:px-12 shrink-0 border-b border-structural-border bg-slate-900/80 backdrop-blur-md z-40">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setIsSidebarOpen(true)} className="md:hidden text-slate-400 hover:text-white">
+              <Menu size={24} />
+            </button>
+            <div className="font-mono text-[clamp(0.5rem,2vw,0.625rem)] text-slate-500 tracking-widest uppercase truncate max-w-[150px] sm:max-w-none">
+              SYS.PATH // {activeView.toUpperCase()}
+            </div>
           </div>
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-6">
+          
+          <div className="flex items-center gap-4 md:gap-8">
+            <div className="hidden md:flex items-center gap-6">
                <Search size={18} className="text-slate-500 hover:text-slate-300 cursor-pointer transition-colors" />
                <Bell size={18} className="text-slate-500 hover:text-slate-300 cursor-pointer transition-colors" />
             </div>
-            <div className="h-5 w-px bg-slate-800"></div>
-            <div className="flex items-center gap-4 text-sm">
-              <div className="w-9 h-9 bg-slate-800 border border-white/5 rounded-sm flex items-center justify-center text-[11px] font-bold text-slate-300 uppercase tracking-tighter">
+            <div className="hidden md:block h-5 w-px bg-slate-800"></div>
+            <div className="flex items-center gap-2 md:gap-4 text-sm">
+              <div className="w-8 h-8 md:w-9 md:h-9 bg-slate-800 border border-white/5 rounded-sm flex items-center justify-center text-[10px] md:text-[11px] font-bold text-slate-300 uppercase tracking-tighter">
                 TR
               </div>
-              <ChevronDown size={16} className="text-slate-600" />
+              <ChevronDown size={14} className="text-slate-600" />
             </div>
           </div>
         </header>
 
         {/* Scrollable Content Container */}
-        <main className="flex-1 overflow-y-auto min-h-0 p-12 scroll-smooth bg-[#0c0d0e]">
-          <div className="max-w-7xl mx-auto space-y-8 pb-20">
-            {activeView === 'overview' && (
-              <div className="space-y-12">
-                <div className="grid grid-cols-12 gap-6">
-                  <StatCard label="Total Equity" value={totalEquity} delta="+12.4% vs last month" deltaType="positive" delay={0.1} />
-                  <StatCard label="Win Rate" value={`${winRate}%`} delta="Stable" deltaType="positive" delay={0.2} />
-                  <StatCard label="Profit Factor" value="2.41" delta="-0.04" deltaType="negative" delay={0.3} />
-                  <StatCard label="Active Drawdown" value="1.2%" delta="Within Limits" deltaType="positive" delay={0.4} />
-                </div>
-                <div className="bg-slate-800/40 border border-structural-border p-10 rounded-sm">
-                   <TradeTable trades={trades.slice(0, 5)} strategies={strategies} onUpdateTrade={handleUpdateTrade} onDeleteTrade={handleDeleteTrade} />
-                </div>
-              </div>
+        <main className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-8 md:p-12 scroll-smooth bg-[#0c0d0e]">
+          <div className="max-w-7xl mx-auto space-y-6 md:space-y-8 pb-24 md:pb-20">
+            {activeView === 'dashboard' && (
+              <DashboardView trades={trades} />
             )}
             
             {activeView === 'log' && (
@@ -457,6 +491,10 @@ const App: React.FC = () => {
                 onDeleteStrategy={handleDeleteStrategy}
                 onUpdateStrategy={handleUpdateStrategy}
               />
+            )}
+
+            {activeView === 'analytics' && (
+              <AnalyticsView trades={trades} strategies={strategies} />
             )}
 
             {(activeView === 'risk' || activeView === 'settings') && (

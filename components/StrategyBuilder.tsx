@@ -193,30 +193,30 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
   const LayerSection = ({ title, desc, layerKey }: { title: string, desc: string, layerKey: keyof Strategy['layers'] }) => (
     <div className="space-y-6">
       <div className="flex items-center gap-4 border-b border-slate-800 pb-4">
-        <div className="w-10 h-10 bg-slate-800 border border-slate-700 flex items-center justify-center rounded-sm">
+        <div className="w-10 h-10 bg-slate-800 border border-slate-700 flex items-center justify-center rounded-sm shrink-0">
           <Layers size={16} className="text-accent-gain" />
         </div>
         <div>
-          <h3 className="text-base font-bold text-slate-200 tracking-[0.2em] uppercase">{title}</h3>
-          <p className="text-[10px] text-slate-600 font-mono uppercase tracking-tighter mt-0.5">{desc}</p>
+          <h3 className="text-[clamp(0.875rem,2.5vw,1rem)] font-bold text-slate-200 tracking-[0.2em] uppercase">{title}</h3>
+          <p className="text-[clamp(0.5rem,1.5vw,0.625rem)] text-slate-600 font-mono uppercase tracking-tighter mt-0.5">{desc}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         {activeStrategy?.layers[layerKey].map((cat) => (
-          <div key={cat.id} className="bg-slate-800/40 border border-slate-700/50 p-6 rounded-sm flex flex-col group min-h-[240px] relative">
+          <div key={cat.id} className="bg-slate-800/40 border border-slate-700/50 p-5 md:p-6 rounded-sm flex flex-col group min-h-[220px] md:min-h-[240px] relative">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">{cat.name}</span>
+                  <span className="text-[clamp(0.6875rem,2vw,0.75rem)] font-bold text-slate-300 uppercase tracking-widest">{cat.name}</span>
                   <button 
                     onClick={() => toggleSelectionType(layerKey, cat.id)} 
-                    className="text-[8px] bg-slate-700 px-1.5 py-0.5 border border-slate-600 rounded-sm text-slate-400 hover:text-slate-200 uppercase font-bold tracking-tighter"
+                    className="text-[7px] md:text-[8px] bg-slate-700 px-1.5 py-0.5 border border-slate-600 rounded-sm text-slate-400 hover:text-slate-200 uppercase font-bold tracking-tighter"
                   >
                     {cat.selectionType}
                   </button>
                 </div>
-                <div className="text-[9px] text-slate-600 font-mono uppercase tracking-tighter">Active_Identifier_Index</div>
+                <div className="text-[clamp(0.5rem,1.5vw,0.5625rem)] text-slate-600 font-mono uppercase tracking-tighter">Active_Identifier_Index</div>
               </div>
               {cat.name !== 'INSTRUMENT' && (
                 <button onClick={() => removeCategory(layerKey, cat.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-accent-loss">
@@ -227,21 +227,21 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
 
             <div className="flex-1 flex flex-wrap gap-2 content-start mb-6">
               {cat.tags.map((tag, tIdx) => (
-                <div key={tIdx} className="bg-slate-900 px-3 py-1.5 flex items-center gap-3 border-l-2 shadow-sm" style={{ borderLeftColor: tag.color }}>
-                  <span className="text-[10px] font-mono text-slate-200 uppercase">{tag.text}</span>
+                <div key={tIdx} className="bg-slate-900 px-3 py-1.5 flex items-center gap-2.5 border-l-2 shadow-sm" style={{ borderLeftColor: tag.color }}>
+                  <span className="text-[clamp(0.5625rem,1.8vw,0.625rem)] font-mono text-slate-200 uppercase">{tag.text}</span>
                   <button onClick={() => removeTag(layerKey, cat.id, tIdx)} className="text-slate-600 hover:text-white transition-colors">
                     <X size={10} />
                   </button>
                 </div>
               ))}
-              {cat.tags.length === 0 && <div className="text-[10px] text-slate-700 font-mono italic p-2 border border-dashed border-slate-700/50 w-full text-center uppercase">Empty_Node</div>}
+              {cat.tags.length === 0 && <div className="text-[9px] md:text-[10px] text-slate-700 font-mono italic p-3 border border-dashed border-slate-700/50 w-full text-center uppercase">Empty_Node</div>}
             </div>
 
             <div className="mt-auto space-y-4 pt-4 border-t border-slate-700/30">
-              <div className="flex gap-2">
+              <div className="flex bg-slate-900 border border-slate-700">
                 <input 
-                  className="flex-1 bg-slate-900 border border-slate-700 px-3 py-2 text-[11px] text-slate-300 font-mono outline-none focus:border-slate-500 placeholder:text-slate-700"
-                  placeholder="ADD_PARAMETER..."
+                  className="flex-1 bg-transparent px-3 py-2.5 text-[clamp(0.625rem,2vw,0.6875rem)] text-slate-300 font-mono outline-none placeholder:text-slate-700"
+                  placeholder="ADD PARAMETER..."
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       const input = e.currentTarget;
@@ -252,7 +252,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
                   }}
                 />
                 <button 
-                  className="w-10 h-10 bg-slate-200 text-slate-900 flex items-center justify-center hover:bg-white transition-colors"
+                  className="w-10 h-10 md:w-11 md:h-11 bg-slate-200 text-slate-900 flex items-center justify-center hover:bg-white transition-colors shrink-0 border-l border-slate-700"
                   onClick={(e) => {
                     const input = e.currentTarget.previousSibling as HTMLInputElement;
                     const color = input.getAttribute('data-active-color') || COLOR_OPTIONS[0];
@@ -282,12 +282,12 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
 
         <button 
           onClick={() => { setCategoryModalError(null); setIsAddingCategory({ layer: layerKey }); }}
-          className="bg-slate-800/10 border border-dashed border-slate-700/50 rounded-sm flex flex-col items-center justify-center gap-4 p-12 text-slate-600 hover:text-slate-300 hover:border-slate-500 transition-all group"
+          className="bg-slate-800/10 border border-dashed border-slate-700/50 rounded-sm flex flex-col items-center justify-center gap-4 p-10 md:p-12 text-slate-600 hover:text-slate-300 hover:border-slate-500 transition-all group"
         >
           <div className="w-12 h-12 rounded-full border border-slate-700/50 flex items-center justify-center group-hover:scale-110 transition-transform">
             <Plus size={24} />
           </div>
-          <span className="text-xs font-bold uppercase tracking-widest">Initialize_Node</span>
+          <span className="text-[clamp(0.6875rem,2vw,0.75rem)] font-bold uppercase tracking-widest">Initialize_Node</span>
         </button>
       </div>
     </div>
@@ -295,32 +295,32 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
 
   return (
     <>
-      <div className="space-y-12 pb-32 animate-slide-up">
+      <div className="space-y-8 md:space-y-12 pb-32 animate-slide-up">
         {/* Header Area */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-800 pb-10">
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 border-b border-slate-800 pb-8 md:pb-10">
           <div>
-            <h2 className="text-5xl font-extrabold text-slate-100 tracking-tight mb-3 uppercase">Customize_Tags</h2>
-            <div className="flex items-center gap-3 text-[11px] font-mono text-slate-500 uppercase tracking-widest">
+            <h2 className="text-[clamp(1.875rem,5vw,3rem)] font-extrabold text-slate-100 tracking-tight mb-3 uppercase">Customize_Tags</h2>
+            <div className="flex flex-wrap items-center gap-2 md:gap-3 text-[clamp(0.5rem,1.8vw,0.6875rem)] font-mono text-slate-500 uppercase tracking-widest">
               <span>STRATEGY PARAMETER INDEX</span>
-              <span className="text-slate-700">•</span>
+              <span className="text-slate-700 hidden sm:inline">•</span>
               <span className="text-slate-300">{activeStrategy?.name || 'NULL'}</span>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
-            <div className="flex items-center">
+          <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3 md:gap-4 w-full xl:w-auto">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center flex-1 xl:flex-none bg-slate-900 border border-slate-800 rounded-sm overflow-hidden">
               {/* Improved Custom Selector UI */}
-              <div className="relative" ref={selectorRef}>
+              <div className="relative flex-1 xl:flex-none" ref={selectorRef}>
                 <button 
                   onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-                  className={`flex items-center justify-between gap-6 bg-slate-900 border px-6 py-2.5 min-w-[160px] text-xs font-mono transition-all duration-200 ${
-                    isSelectorOpen ? 'border-accent-gain ring-1 ring-accent-gain/20' : 'border-slate-800 hover:border-slate-600'
+                  className={`flex items-center justify-between gap-4 md:gap-6 px-4 md:px-6 py-2.5 w-full xl:min-w-[160px] text-[clamp(0.6875rem,2vw,0.75rem)] font-mono transition-all duration-200 ${
+                    isSelectorOpen ? 'text-accent-gain' : ''
                   }`}
                 >
-                  <span className={`uppercase tracking-[0.2em] ${activeStrategy ? 'text-slate-200' : 'text-slate-600'}`}>
+                  <span className={`uppercase tracking-[0.2em] truncate ${activeStrategy ? 'text-slate-200' : 'text-slate-600'}`}>
                     {activeStrategy?.name || 'SELECT_MODEL'}
                   </span>
-                  <ChevronDown size={14} className={`text-slate-500 transition-transform duration-200 ${isSelectorOpen ? 'rotate-180 text-accent-gain' : ''}`} />
+                  <ChevronDown size={14} className={`text-slate-500 transition-transform duration-200 shrink-0 ${isSelectorOpen ? 'rotate-180 text-accent-gain' : ''}`} />
                 </button>
                 
                 {isSelectorOpen && (
@@ -355,20 +355,20 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
               </div>
               
               {activeStrategy && (
-                <div className="flex items-center">
+                <div className="flex items-center border-l border-slate-800">
                   <button 
                     onClick={() => {
                       setRenameValue(activeStrategy.name);
                       setIsRenamingModel(true);
                     }}
-                    className="bg-slate-900 border border-slate-800 p-2.5 text-slate-500 hover:text-slate-100 hover:bg-slate-800 transition-all border-l-0"
+                    className="p-2.5 text-slate-500 hover:text-slate-100 hover:bg-slate-800 transition-all"
                     title="Rename Model"
                   >
                     <Edit3 size={16} />
                   </button>
                   <button 
                     onClick={() => setIsDeletingModel(true)}
-                    className="bg-slate-900 border border-slate-800 p-2.5 text-slate-500 hover:text-accent-loss hover:bg-slate-800 transition-all border-l-0"
+                    className="p-2.5 text-slate-500 hover:text-accent-loss hover:bg-slate-800 transition-all border-l border-slate-800"
                     title="Delete Model"
                   >
                     <Trash2 size={16} />
@@ -379,15 +379,15 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
 
             <button 
               onClick={() => setIsAddingModel(true)}
-              className="bg-slate-100 text-slate-900 px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest hover:bg-white transition-all flex items-center gap-2 shadow-lg ml-2"
+              className="bg-slate-100 text-slate-900 px-4 md:px-6 py-2.5 text-[clamp(0.625rem,2vw,0.6875rem)] font-bold uppercase tracking-widest hover:bg-white transition-all flex items-center justify-center gap-2 shadow-lg rounded-sm"
             >
-              <Plus size={16} /> New Model
+              <Plus size={16} /> <span className="inline">NEW MODEL</span>
             </button>
           </div>
         </div>
 
         {/* Layers Container */}
-        <div className="space-y-20">
+        <div className="space-y-12 md:space-y-20">
           <LayerSection 
             title="Layer_01 // Identity" 
             desc="Define instrument IDs and core asset identifiers." 

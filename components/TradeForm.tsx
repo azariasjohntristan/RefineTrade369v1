@@ -28,6 +28,12 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
   });
 
   useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('open-trade-form', handleOpen);
+    return () => window.removeEventListener('open-trade-form', handleOpen);
+  }, []);
+
+  useEffect(() => {
     if (!formData.strategyId && strategies.length > 0) {
       setFormData(prev => ({ ...prev, strategyId: strategies[0].id }));
     }
@@ -167,9 +173,9 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 bg-white text-slate-900 rounded-sm shadow-2xl flex items-center justify-center z-50 transition-all active:scale-95 group"
+        className="hidden md:flex fixed bottom-8 right-8 w-14 h-14 bg-white text-slate-950 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)] items-center justify-center z-50 transition-all hover:scale-105 active:scale-95 group border border-white/10"
       >
-        <Plus size={36} className="group-hover:rotate-90 transition-transform duration-500" />
+        <Plus size={28} className="group-hover:rotate-90 transition-transform duration-500" />
       </button>
 
       {isOpen && createPortal(
