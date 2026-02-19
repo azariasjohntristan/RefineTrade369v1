@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Trade, Strategy, Category } from '../types';
-import { Plus, X, ChevronDown, Check, Calendar, Brain, Clock, ShieldCheck, TrendingUp, TrendingDown } from 'lucide-react';
+import { Plus, X, ChevronDown, Check, Calendar, Brain, Clock, ShieldCheck, TrendingUp, TrendingDown, Camera, Image as ImageIcon } from 'lucide-react';
 
 interface TradeFormProps {
   onAddTrade: (trade: Omit<Trade, 'id' | 'status'>) => void;
@@ -10,6 +10,9 @@ interface TradeFormProps {
 const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [screenshots, setScreenshots] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [formData, setFormData] = useState({
     dateValue: new Date().toISOString().split('T')[0],
     pair: '',
@@ -23,15 +26,31 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
     reflection: '',
   });
 
-  // Keep strategy selection in sync and ensure it reflects updates from the StrategyBuilder
   useEffect(() => {
     if (!formData.strategyId && strategies.length > 0) {
       setFormData(prev => ({ ...prev, strategyId: strategies[0].id }));
     }
   }, [strategies, formData.strategyId]);
 
-  // Always find the latest strategy object from the prop to ensure new tags/categories are reflected
   const selectedStrategy = strategies.find(s => s.id === formData.strategyId);
+  const instrumentCat = selectedStrategy?.layers.layer1.find(c => c.name === 'INSTRUMENT');
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file: File) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setScreenshots(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeScreenshot = (idx: number) => {
+    setScreenshots(prev => prev.filter((_, i) => i !== idx));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +66,8 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
       pnl: parseFloat(formData.pnl) || 0,
       strategyId: formData.strategyId,
       selections: formData.selections,
-      reflection: formData.reflection
+      reflection: formData.reflection,
+      screenshots: screenshots
     });
 
     setFormData(prev => ({
@@ -62,6 +82,7 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
       selections: {},
       reflection: '',
     }));
+    setScreenshots([]);
     setIsOpen(false);
   };
 
@@ -135,7 +156,6 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                 </button>
               );
             })}
-            {cat.tags.length === 0 && <div className="p-4 text-[10px] text-slate-600 italic font-mono text-center uppercase">No Nodes Available</div>}
           </div>
         )}
       </div>
@@ -181,7 +201,6 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
               <div className="space-y-6">
                 <SectionHeader title="LAYER_01 // IDENTITY" />
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {/* Execution Date */}
                   <div className="space-y-2">
                     <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">Execution Date</label>
                     <div className="relative group/date">
@@ -195,7 +214,6 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                     </div>
                   </div>
 
-                  {/* Trade Type Selection */}
                   <div className="space-y-2">
                     <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">Trade Type</label>
                     <div className="grid grid-cols-2 h-[52px] border border-slate-800 bg-slate-900 overflow-hidden">
@@ -226,13 +244,51 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                     </div>
                   </div>
 
-                  {selectedStrategy?.layers.layer1.map(cat => <CategoryInput key={cat.id} cat={cat} />)}
-                  
-                  {!selectedStrategy?.layers.layer1.length && selectedStrategy && (
-                    <div className="md:col-span-1 lg:col-span-1 py-4 text-center border border-dashed border-slate-800/50 flex items-center justify-center">
-                       <span className="text-[9px] font-mono text-slate-700 uppercase tracking-widest">No Identity Nodes</span>
+                  {/* Instrument Selection */}
+                  <div className="space-y-2 flex-1 relative">
+                    <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">Instrument</label>
+                    <div 
+                      onClick={() => setOpenDropdownId(openDropdownId === 'pair-select' ? null : 'pair-select')}
+                      className={`w-full bg-slate-900 border border-slate-800/80 p-3.5 flex items-center justify-between min-h-[48px] cursor-pointer transition-all hover:bg-slate-800/40 ${
+                        openDropdownId === 'pair-select' ? 'border-accent-gain' : 'hover:border-slate-700'
+                      }`}
+                    >
+                      <span className={`text-[11px] font-mono uppercase ${formData.pair ? 'text-slate-200' : 'text-slate-700'}`}>
+                        {formData.pair || 'SELECT_INSTRUMENT'}
+                      </span>
+                      <ChevronDown className={`transition-transform ${openDropdownId === 'pair-select' ? 'rotate-180 text-accent-gain' : 'text-slate-700'}`} size={14} />
                     </div>
-                  )}
+                    
+                    {openDropdownId === 'pair-select' && instrumentCat && (
+                      <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-slate-800 border border-slate-700 shadow-2xl z-[150] p-1.5 space-y-1 max-h-[200px] overflow-y-auto custom-scrollbar">
+                        {instrumentCat.tags.map(tag => (
+                          <button
+                            key={tag.text}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFormData({
+                                ...formData, 
+                                pair: tag.text,
+                                selections: { ...formData.selections, [instrumentCat.id]: [tag.text] }
+                              });
+                              setOpenDropdownId(null);
+                            }}
+                            className={`w-full text-left px-4 py-3 text-[10px] font-mono transition-colors flex justify-between items-center uppercase ${
+                              formData.pair === tag.text ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:bg-slate-700/50'
+                            }`}
+                          >
+                            {tag.text}
+                            {formData.pair === tag.text && <Check size={12} className="text-accent-gain" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {selectedStrategy?.layers.layer1.map(cat => (
+                    cat.name !== 'INSTRUMENT' && <CategoryInput key={cat.id} cat={cat} />
+                  ))}
                 </div>
               </div>
 
@@ -241,11 +297,6 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                 <SectionHeader title="LAYER_02 // STRATEGY & LOGIC" />
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                   {selectedStrategy?.layers.layer2.map(cat => <CategoryInput key={cat.id} cat={cat} />)}
-                  {!selectedStrategy?.layers.layer2.length && (
-                    <div className="col-span-full py-6 text-center border border-dashed border-slate-800/50">
-                       <span className="text-[9px] font-mono text-slate-700 uppercase tracking-widest">NO LOGIC PARAMETERS CONFIGURED</span>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -254,11 +305,6 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                 <SectionHeader title="LAYER_03 // TEMPORAL & RISK" />
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                   {selectedStrategy?.layers.layer3.map(cat => <CategoryInput key={cat.id} cat={cat} />)}
-                  {!selectedStrategy?.layers.layer3.length && (
-                    <div className="col-span-full py-6 text-center border border-dashed border-slate-800/50">
-                       <span className="text-[9px] font-mono text-slate-700 uppercase tracking-widest">NO TEMPORAL PARAMETERS CONFIGURED</span>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -281,12 +327,53 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                   <div className="col-span-full space-y-3">
                     <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">NEURAL REFLECTION</label>
                     <textarea 
-                      className="w-full bg-slate-900 border border-slate-800 p-6 text-[11px] font-mono text-slate-300 outline-none focus:border-slate-700 min-h-[180px] resize-none leading-relaxed"
+                      className="w-full bg-slate-900 border border-slate-800 p-6 text-[11px] font-mono text-slate-300 outline-none focus:border-slate-700 min-h-[140px] resize-none leading-relaxed"
                       placeholder="LOG INTERNAL STATE AND TACTICAL REFINEMENTS..."
                       value={formData.reflection}
                       onChange={e => setFormData({...formData, reflection: e.target.value})}
                     />
                   </div>
+                </div>
+              </div>
+
+              {/* Layer 05: Visual Assets */}
+              <div className="space-y-6">
+                <SectionHeader title="LAYER_05 // VISUAL ASSETS" />
+                <div className="space-y-6">
+                  <div 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-32 bg-slate-900 border border-dashed border-slate-800 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-accent-gain/40 hover:bg-slate-800/40 transition-all group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Camera size={18} className="text-slate-600 group-hover:text-accent-gain" />
+                    </div>
+                    <span className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">UPLOAD_EXECUTION_SCREENSHOTS</span>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      multiple 
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+
+                  {screenshots.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {screenshots.map((src, idx) => (
+                        <div key={idx} className="relative aspect-video bg-slate-950 border border-slate-800 group/item overflow-hidden">
+                          <img src={src} className="w-full h-full object-cover opacity-70 group-hover/item:opacity-100 transition-opacity" alt={`Trace ${idx}`} />
+                          <button 
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); removeScreenshot(idx); }}
+                            className="absolute top-2 right-2 p-1.5 bg-slate-950/80 text-slate-500 hover:text-accent-loss opacity-0 group-hover/item:opacity-100 transition-opacity"
+                          >
+                            <X size={12} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 

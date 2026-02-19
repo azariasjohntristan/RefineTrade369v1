@@ -64,7 +64,22 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
     const newModel: Strategy = {
       id: `strat-${Date.now()}`,
       name: newModelName,
-      layers: { layer1: [], layer2: [], layer3: [], layer4: [] },
+      layers: { 
+        layer1: [
+          {
+            id: `cat-instrument-${Date.now()}`,
+            name: 'INSTRUMENT',
+            tags: [
+              { text: 'NQ', color: '#06b6d4' },
+              { text: 'ES', color: '#f43f5e' }
+            ],
+            selectionType: 'single'
+          }
+        ], 
+        layer2: [], 
+        layer3: [], 
+        layer4: [] 
+      },
       createdAt: new Date().toLocaleDateString()
     };
     onAddStrategy(newModel);
@@ -94,16 +109,39 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
       return;
     }
     
-    if (!newCategoryName) {
+    const trimmedName = newCategoryName.trim();
+    if (!trimmedName) {
       setCategoryModalError("VALIDATION_ERROR: CATEGORY_IDENTIFIER_REQUIRED.");
+      return;
+    }
+
+    if (trimmedName.length < 2) {
+      setCategoryModalError("VALIDATION_ERROR: IDENTIFIER_TOO_SHORT. MINIMUM 2 CHARACTERS.");
       return;
     }
 
     if (!isAddingCategory) return;
 
+    const nameUpper = trimmedName.toUpperCase();
+    
+    // Check for duplicates across all layers
+    const allCategories = [
+      ...activeStrategy.layers.layer1,
+      ...activeStrategy.layers.layer2,
+      ...activeStrategy.layers.layer3,
+      ...activeStrategy.layers.layer4
+    ];
+    
+    const isDuplicate = allCategories.some(cat => cat.name === nameUpper);
+    
+    if (isDuplicate) {
+      setCategoryModalError(`DUPLICATE_ERROR: CATEGORY "${nameUpper}" ALREADY EXISTS IN THIS MODEL.`);
+      return;
+    }
+
     const newCat: Category = {
       id: `cat-${Date.now()}`,
-      name: newCategoryName.toUpperCase(),
+      name: nameUpper,
       tags: [],
       selectionType: 'single'
     };
@@ -180,9 +218,11 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
                 </div>
                 <div className="text-[9px] text-slate-600 font-mono uppercase tracking-tighter">Active_Identifier_Index</div>
               </div>
-              <button onClick={() => removeCategory(layerKey, cat.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-accent-loss">
-                <Trash2 size={14} />
-              </button>
+              {cat.name !== 'INSTRUMENT' && (
+                <button onClick={() => removeCategory(layerKey, cat.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-accent-loss">
+                  <Trash2 size={14} />
+                </button>
+              )}
             </div>
 
             <div className="flex-1 flex flex-wrap gap-2 content-start mb-6">
@@ -194,7 +234,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
                   </button>
                 </div>
               ))}
-              {cat.tags.length === 0 && <div className="text-[10px] text-slate-700 font-mono italic p-2 border border-dashed border-slate-700/50 w-full text-center">EMPTY_NODE</div>}
+              {cat.tags.length === 0 && <div className="text-[10px] text-slate-700 font-mono italic p-2 border border-dashed border-slate-700/50 w-full text-center uppercase">Empty_Node</div>}
             </div>
 
             <div className="mt-auto space-y-4 pt-4 border-t border-slate-700/30">

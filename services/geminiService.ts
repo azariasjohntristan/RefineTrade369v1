@@ -1,15 +1,18 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { Trade } from '../types';
 
-// Initialize the Gemini API client
-/* Gemini API client initialization following Google GenAI SDK guidelines */
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
+/**
+ * Service to analyze trading performance using Gemini API.
+ * Follows Google GenAI SDK guidelines for initialization and content generation.
+ */
 export const analyzeTradingPerformance = async (trades: Trade[], query: string): Promise<string> => {
+  // Use process.env.API_KEY directly as required by guidelines.
   if (!process.env.API_KEY) {
     return "API Key not configured. Please check your environment variables.";
   }
+
+  // Initialize the Gemini API client inside the function to ensure up-to-date configuration.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
   /* Extract trade context from the generic selections record on the Trade object */
   const tradeContext = trades.map(t => {
@@ -47,6 +50,7 @@ export const analyzeTradingPerformance = async (trades: Trade[], query: string):
       }
     });
 
+    // Access .text property directly as per SDK guidelines.
     return response.text || "Analysis complete, but no text returned.";
   } catch (error) {
     console.error("Gemini Analysis Error:", error);

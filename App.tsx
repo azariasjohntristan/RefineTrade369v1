@@ -20,24 +20,24 @@ import StatCard from './components/StatCard';
 import TradeTable from './components/TradeTable';
 import TradeForm from './components/TradeForm';
 import StrategyBuilder from './components/StrategyBuilder';
+import AIAnalyst from './components/AIAnalyst';
 import { Trade, ViewState, Strategy } from './types';
 
-// Initial Mock Data with 10 Feb Trades
+// Initial Mock Data with 10 Feb Trades updated to match new default strategy structure
 const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f10', 
     time: '2024-02-28T14:20:00Z', 
-    pair: 'EUR/JPY', 
+    pair: 'NQ', 
     type: 'SHORT', 
     size: '1.5 Lot', 
-    entry: 162.45, 
-    exit: 162.90, 
+    entry: 17850.25, 
+    exit: 17900.50, 
     pnl: -450.00, 
     status: 'loss', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['FOREX'],
-      'cat-tf': ['M15'],
+      'cat-instrument': ['NQ'],
       'cat-sr-logic': ['MINOR_S/R'],
       'cat-risk-mgt': ['FIXED_1%'],
       'cat-neural-state': ['HESITANT']
@@ -47,17 +47,16 @@ const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f9', 
     time: '2024-02-27T09:15:00Z', 
-    pair: 'USD/JPY', 
+    pair: 'NQ', 
     type: 'LONG', 
     size: '2.0 Lot', 
-    entry: 150.10, 
-    exit: 150.85, 
+    entry: 17750.00, 
+    exit: 17825.00, 
     pnl: 1500.00, 
     status: 'gain', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['FOREX'],
-      'cat-tf': ['H1'],
+      'cat-instrument': ['NQ'],
       'cat-sr-logic': ['MAJOR_S/R', 'VBP_POC'],
       'cat-risk-mgt': ['SCALED_ENTRY'],
       'cat-neural-state': ['OPTIMAL_FLOW']
@@ -67,17 +66,16 @@ const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f8', 
     time: '2024-02-25T20:30:00Z', 
-    pair: 'GBP/USD', 
+    pair: 'ES', 
     type: 'SHORT', 
     size: '1.0 Lot', 
-    entry: 1.2680, 
-    exit: 1.2630, 
+    entry: 5080.25, 
+    exit: 5070.25, 
     pnl: 500.00, 
     status: 'gain', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['FOREX'],
-      'cat-tf': ['H4'],
+      'cat-instrument': ['ES'],
       'cat-sr-logic': ['DYNAMIC_EMA'],
       'cat-risk-mgt': ['FIXED_1%'],
       'cat-neural-state': ['OPTIMAL_FLOW']
@@ -87,17 +85,16 @@ const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f7', 
     time: '2024-02-22T15:00:00Z', 
-    pair: 'ETH/USD', 
+    pair: 'NQ', 
     type: 'LONG', 
-    size: '5.0 ETH', 
-    entry: 2950.00, 
-    exit: 2910.00, 
+    size: '1.0 Lot', 
+    entry: 17950.00, 
+    exit: 17940.00, 
     pnl: -200.00, 
     status: 'loss', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['CRYPTO'],
-      'cat-tf': ['H1'],
+      'cat-instrument': ['NQ'],
       'cat-sr-logic': ['VBP_POC'],
       'cat-risk-mgt': ['AGGRESSIVE'],
       'cat-neural-state': ['FOMO_IMPULSE']
@@ -107,17 +104,16 @@ const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f6', 
     time: '2024-02-19T11:45:00Z', 
-    pair: 'XAU/USD', 
+    pair: 'NQ', 
     type: 'LONG', 
     size: '0.5 Lot', 
-    entry: 2015.00, 
-    exit: 2032.00, 
+    entry: 17815.00, 
+    exit: 17832.00, 
     pnl: 850.00, 
     status: 'gain', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['COMMODITIES'],
-      'cat-tf': ['H4'],
+      'cat-instrument': ['NQ'],
       'cat-sr-logic': ['MAJOR_S/R'],
       'cat-risk-mgt': ['FIXED_1%'],
       'cat-neural-state': ['OPTIMAL_FLOW']
@@ -127,17 +123,16 @@ const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f5', 
     time: '2024-02-15T13:20:00Z', 
-    pair: 'EUR/USD', 
+    pair: 'ES', 
     type: 'SHORT', 
     size: '3.0 Lot', 
-    entry: 1.0780, 
-    exit: 1.0815, 
+    entry: 5078.00, 
+    exit: 5081.50, 
     pnl: -1050.00, 
     status: 'loss', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['FOREX'],
-      'cat-tf': ['M15'],
+      'cat-instrument': ['ES'],
       'cat-sr-logic': ['DYNAMIC_EMA'],
       'cat-risk-mgt': ['FIXED_1%'],
       'cat-neural-state': ['HESITANT']
@@ -147,17 +142,16 @@ const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f4', 
     time: '2024-02-12T08:00:00Z', 
-    pair: 'GBP/JPY', 
+    pair: 'NQ', 
     type: 'SHORT', 
     size: '2.0 Lot', 
-    entry: 189.50, 
-    exit: 188.20, 
+    entry: 17989.50, 
+    exit: 17988.20, 
     pnl: 1730.00, 
     status: 'gain', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['FOREX'],
-      'cat-tf': ['H1'],
+      'cat-instrument': ['NQ'],
       'cat-sr-logic': ['MAJOR_S/R'],
       'cat-risk-mgt': ['SCALED_ENTRY'],
       'cat-neural-state': ['OPTIMAL_FLOW']
@@ -167,17 +161,16 @@ const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f3', 
     time: '2024-02-08T16:40:00Z', 
-    pair: 'BTC/USD', 
+    pair: 'NQ', 
     type: 'LONG', 
     size: '0.1 BTC', 
-    entry: 44200.00, 
-    exit: 45800.00, 
+    entry: 17844.00, 
+    exit: 17845.00, 
     pnl: 160.00, 
     status: 'gain', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['CRYPTO'],
-      'cat-tf': ['D1'],
+      'cat-instrument': ['NQ'],
       'cat-sr-logic': ['VBP_POC', 'MAJOR_S/R'],
       'cat-risk-mgt': ['FIXED_1%'],
       'cat-neural-state': ['OPTIMAL_FLOW']
@@ -187,17 +180,16 @@ const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f2', 
     time: '2024-02-04T12:10:00Z', 
-    pair: 'XAU/USD', 
+    pair: 'NQ', 
     type: 'SHORT', 
     size: '1.2 Lot', 
-    entry: 2045.50, 
-    exit: 2055.00, 
+    entry: 17820.50, 
+    exit: 17830.00, 
     pnl: -1140.00, 
     status: 'loss', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['COMMODITIES'],
-      'cat-tf': ['M15'],
+      'cat-instrument': ['NQ'],
       'cat-sr-logic': ['MINOR_S/R'],
       'cat-risk-mgt': ['AGGRESSIVE'],
       'cat-neural-state': ['FOMO_IMPULSE']
@@ -207,17 +199,16 @@ const INITIAL_TRADES: Trade[] = [
   { 
     id: 'f1', 
     time: '2024-02-01T10:00:00Z', 
-    pair: 'EUR/USD', 
+    pair: 'NQ', 
     type: 'LONG', 
     size: '2.5 Lot', 
-    entry: 1.0820, 
-    exit: 1.0895, 
+    entry: 17808.20, 
+    exit: 17810.95, 
     pnl: 1875.00, 
     status: 'gain', 
     strategyId: 'strat-default-sr',
     selections: {
-      'cat-asset-class': ['FOREX'],
-      'cat-tf': ['H1'],
+      'cat-instrument': ['NQ'],
       'cat-sr-logic': ['MAJOR_S/R'],
       'cat-risk-mgt': ['FIXED_1%'],
       'cat-neural-state': ['OPTIMAL_FLOW']
@@ -232,24 +223,12 @@ const DEFAULT_STRATEGY: Strategy = {
   layers: {
     layer1: [
       {
-        id: 'cat-asset-class',
-        name: 'ASSET_CLASS',
+        id: 'cat-instrument',
+        name: 'INSTRUMENT',
         selectionType: 'single',
         tags: [
-          { text: 'FOREX', color: '#3b82f6' },
-          { text: 'CRYPTO', color: '#f59e0b' },
-          { text: 'COMMODITIES', color: '#10b981' }
-        ]
-      },
-      {
-        id: 'cat-tf',
-        name: 'TIMEFRAME',
-        selectionType: 'single',
-        tags: [
-          { text: 'M15', color: '#64748b' },
-          { text: 'H1', color: '#14b8a6' },
-          { text: 'H4', color: '#8b5cf6' },
-          { text: 'D1', color: '#a855f7' }
+          { text: 'NQ', color: '#06b6d4' },
+          { text: 'ES', color: '#f43f5e' }
         ]
       }
     ],
@@ -330,6 +309,17 @@ const App: React.FC = () => {
     setTrades([newTrade, ...trades]);
   };
 
+  const handleUpdateTrade = (updatedTrade: Trade) => {
+    setTrades(trades.map(t => t.id === updatedTrade.id ? {
+      ...updatedTrade,
+      status: updatedTrade.pnl >= 0 ? 'gain' : 'loss'
+    } : t));
+  };
+
+  const handleDeleteTrade = (id: string) => {
+    setTrades(trades.filter(t => t.id !== id));
+  };
+
   const handleAddStrategy = (newStrat: Strategy) => {
     setStrategies([...strategies, newStrat]);
   };
@@ -369,7 +359,7 @@ const App: React.FC = () => {
             { id: 'overview', label: 'Overview', icon: LayoutDashboard },
             { id: 'log', label: 'Trade Log', icon: ScrollText },
             { id: 'strategy', label: 'Strategy Parameters', icon: Layers },
-            { id: 'analytics', label: 'Analytics', icon: BarChart2 },
+            { id: 'analytics', label: 'AI Analyst', icon: BarChart2 },
             { id: 'risk', label: 'Risk Manager', icon: ShieldAlert },
             { id: 'settings', label: 'Settings', icon: Settings },
           ].map((item) => {
@@ -451,15 +441,14 @@ const App: React.FC = () => {
                   <StatCard label="Active Drawdown" value="1.2%" delta="Within Limits" deltaType="positive" delay={0.4} />
                 </div>
                 <div className="bg-slate-800/40 border border-structural-border p-10 rounded-sm">
-                   <TradeTable trades={trades.slice(0, 5)} />
+                   <TradeTable trades={trades.slice(0, 5)} strategies={strategies} onUpdateTrade={handleUpdateTrade} onDeleteTrade={handleDeleteTrade} />
                 </div>
               </div>
             )}
             
             {activeView === 'log' && (
-                <div className="animate-slide-up space-y-8">
-                    <h2 className="text-3xl font-extrabold text-slate-100 tracking-tight uppercase">Performance Log</h2>
-                    <TradeTable trades={trades} />
+                <div className="animate-slide-up">
+                    <TradeTable trades={trades} strategies={strategies} onUpdateTrade={handleUpdateTrade} onDeleteTrade={handleDeleteTrade} showTitle={true} />
                 </div>
             )}
 
@@ -472,7 +461,14 @@ const App: React.FC = () => {
               />
             )}
 
-            {(activeView === 'analytics' || activeView === 'risk' || activeView === 'settings') && (
+            {activeView === 'analytics' && (
+              <div className="space-y-8">
+                <h2 className="text-3xl font-extrabold text-slate-100 tracking-tight uppercase">Neural Intelligence Analysis</h2>
+                <AIAnalyst trades={trades} />
+              </div>
+            )}
+
+            {(activeView === 'risk' || activeView === 'settings') && (
                 <div className="flex flex-col items-center justify-center h-[50vh] text-center">
                     <div className="w-12 h-12 border-2 border-slate-800 border-t-accent-gain rounded-full animate-spin mb-6"></div>
                     <h3 className="text-lg font-bold text-slate-300 uppercase tracking-widest">Optimizing Module...</h3>

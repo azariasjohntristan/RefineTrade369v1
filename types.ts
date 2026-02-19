@@ -12,6 +12,7 @@ export interface Trade {
   strategyId?: string;
   selections: Record<string, string[]>; // categoryId -> array of tag texts
   reflection?: string;
+  screenshots?: string[]; // Array of base64 data URLs
 }
 
 export interface StatMetric {
