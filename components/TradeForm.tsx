@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Trade, Strategy, Category } from '../types';
 import { Plus, X, ChevronDown, Check, Calendar, Brain, Clock, ShieldCheck, TrendingUp, TrendingDown, Camera, Image as ImageIcon } from 'lucide-react';
 
@@ -171,9 +172,9 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
         <Plus size={36} className="group-hover:rotate-90 transition-transform duration-500" />
       </button>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" onClick={() => setOpenDropdownId(null)}>
-          <div className="absolute inset-0 bg-transparent backdrop-blur-sm" onClick={() => setIsOpen(false)} />
+          <div className="absolute inset-0 bg-slate-900/85 backdrop-blur-md" onClick={() => setIsOpen(false)} />
           
           <div className="relative w-full max-w-5xl bg-slate-900/95 backdrop-blur-md border border-white/5 shadow-2xl animate-slide-up flex flex-col max-h-[95vh] overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-10 flex justify-between items-start">
@@ -388,7 +389,8 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
 
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

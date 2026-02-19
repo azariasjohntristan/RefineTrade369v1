@@ -46,4 +46,4 @@ export interface Strategy {
   createdAt: string;
 }
 
-export type ViewState = 'overview' | 'log' | 'analytics' | 'risk' | 'settings' | 'strategy';
+export type ViewState = 'overview' | 'log' | 'risk' | 'settings' | 'strategy';

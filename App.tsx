@@ -20,7 +20,6 @@ import StatCard from './components/StatCard';
 import TradeTable from './components/TradeTable';
 import TradeForm from './components/TradeForm';
 import StrategyBuilder from './components/StrategyBuilder';
-import AIAnalyst from './components/AIAnalyst';
 import { Trade, ViewState, Strategy } from './types';
 
 // Initial Mock Data with 10 Feb Trades updated to match new default strategy structure
@@ -359,7 +358,6 @@ const App: React.FC = () => {
             { id: 'overview', label: 'Overview', icon: LayoutDashboard },
             { id: 'log', label: 'Trade Log', icon: ScrollText },
             { id: 'strategy', label: 'Strategy Parameters', icon: Layers },
-            { id: 'analytics', label: 'AI Analyst', icon: BarChart2 },
             { id: 'risk', label: 'Risk Manager', icon: ShieldAlert },
             { id: 'settings', label: 'Settings', icon: Settings },
           ].map((item) => {
@@ -459,13 +457,6 @@ const App: React.FC = () => {
                 onDeleteStrategy={handleDeleteStrategy}
                 onUpdateStrategy={handleUpdateStrategy}
               />
-            )}
-
-            {activeView === 'analytics' && (
-              <div className="space-y-8">
-                <h2 className="text-3xl font-extrabold text-slate-100 tracking-tight uppercase">Neural Intelligence Analysis</h2>
-                <AIAnalyst trades={trades} />
-              </div>
             )}
 
             {(activeView === 'risk' || activeView === 'settings') && (
