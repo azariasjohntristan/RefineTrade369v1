@@ -13,7 +13,10 @@ import {
   Menu,
   Layers,
   Calendar,
-  Plus
+  Plus,
+  Edit3,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -222,6 +225,7 @@ const INITIAL_TRADES: Trade[] = [
 const DEFAULT_STRATEGY: Strategy = {
   id: 'strat-default-sr',
   name: 'SUPPORT AND RESISTANCE',
+  startingEquity: 10000,
   layers: {
     layer1: [
       {
@@ -288,6 +292,20 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('strategies_v2');
     return saved ? JSON.parse(saved) : [DEFAULT_STRATEGY];
   });
+  const [activeStrategyId, setActiveStrategyId] = useState<string>(() => {
+    const saved = localStorage.getItem('activeStrategyId');
+    return saved && strategies.find(s => s.id === saved) ? saved : (strategies[0]?.id || 'strat-default-sr');
+  });
+
+  const [isEditingWorkspace, setIsEditingWorkspace] = useState(false);
+  const [isAddingWorkspace, setIsAddingWorkspace] = useState(false);
+  const [isDeletingWorkspace, setIsDeletingWorkspace] = useState(false);
+  const [workspaceToEdit, setWorkspaceToEdit] = useState<Strategy | null>(null);
+  const [workspaceToDelete, setWorkspaceToDelete] = useState<Strategy | null>(null);
+  const [editWorkspaceName, setEditWorkspaceName] = useState('');
+  const [editWorkspaceEquity, setEditWorkspaceEquity] = useState('');
+  const [newWorkspaceName, setNewWorkspaceName] = useState('');
+  const [newWorkspaceEquity, setNewWorkspaceEquity] = useState('10000');
 
   useEffect(() => {
     localStorage.setItem('trades', JSON.stringify(trades));
@@ -296,6 +314,10 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('strategies_v2', JSON.stringify(strategies));
   }, [strategies]);
+
+  useEffect(() => {
+    localStorage.setItem('activeStrategyId', activeStrategyId);
+  }, [activeStrategyId]);
 
   // Close sidebar on view change for mobile
   useEffect(() => {
@@ -306,7 +328,8 @@ const App: React.FC = () => {
     const newTrade: Trade = {
       ...newTradeData,
       id: `t${Date.now()}`,
-      status: newTradeData.pnl >= 0 ? 'gain' : 'loss'
+      status: newTradeData.pnl >= 0 ? 'gain' : 'loss',
+      strategyId: activeStrategyId // Force the active strategy
     };
     setTrades([newTrade, ...trades]);
   };
@@ -326,19 +349,77 @@ const App: React.FC = () => {
     setStrategies([...strategies, newStrat]);
   };
 
+  const handleCreateWorkspace = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newWorkspaceName) return;
+
+    const newModel: Strategy = {
+      id: `strat-${Date.now()}`,
+      name: newWorkspaceName,
+      startingEquity: parseFloat(newWorkspaceEquity) || 10000,
+      layers: { 
+        layer1: [
+          {
+            id: `cat-instrument-${Date.now()}`,
+            name: 'INSTRUMENT',
+            tags: [
+              { text: 'NQ', color: '#06b6d4' },
+              { text: 'ES', color: '#f43f5e' }
+            ],
+            selectionType: 'single'
+          }
+        ], 
+        layer2: [], 
+        layer3: [], 
+        layer4: [] 
+      },
+      createdAt: new Date().toLocaleDateString()
+    };
+
+    handleAddStrategy(newModel);
+    setActiveStrategyId(newModel.id);
+    setNewWorkspaceName('');
+    setNewWorkspaceEquity('10000');
+    setIsAddingWorkspace(false);
+  };
+
   const handleDeleteStrategy = (id: string) => {
+    if (id === 'strat-default-sr') return;
     setStrategies(strategies.filter(s => s.id !== id));
+    setTrades(trades.filter(t => t.strategyId !== id));
+    if (activeStrategyId === id) {
+      const remaining = strategies.filter(s => s.id !== id);
+      setActiveStrategyId(remaining[0]?.id || 'strat-default-sr');
+    }
   };
 
   const handleUpdateStrategy = (updated: Strategy) => {
     setStrategies(strategies.map(s => s.id === updated.id ? updated : s));
   };
 
+  const handleUpdateWorkspace = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!workspaceToEdit) return;
+    
+    const updated: Strategy = {
+      ...workspaceToEdit,
+      name: editWorkspaceName,
+      startingEquity: parseFloat(editWorkspaceEquity) || workspaceToEdit.startingEquity
+    };
+    
+    handleUpdateStrategy(updated);
+    setIsEditingWorkspace(false);
+    setWorkspaceToEdit(null);
+  };
+
   // Derived stats
-  const totalPnLValue = trades.reduce((sum, t) => sum + t.pnl, 0);
-  const winCount = trades.filter(t => t.status === 'gain').length;
-  const winRate = trades.length > 0 ? (winCount / trades.length * 100).toFixed(1) : '0';
-  const totalEquityValue = 142850.42 + totalPnLValue;
+  const activeStrategy = strategies.find(s => s.id === activeStrategyId) || strategies[0];
+  const filteredTrades = trades.filter(t => t.strategyId === activeStrategyId);
+  
+  const totalPnLValue = filteredTrades.reduce((sum, t) => sum + t.pnl, 0);
+  const winCount = filteredTrades.filter(t => t.status === 'gain').length;
+  const winRate = filteredTrades.length > 0 ? (winCount / filteredTrades.length * 100).toFixed(1) : '0';
+  const totalEquityValue = (activeStrategy?.startingEquity || 10000) + totalPnLValue;
   const totalEquity = totalEquityValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
   return (
@@ -462,11 +543,101 @@ const App: React.FC = () => {
                <Bell size={18} className="text-slate-500 hover:text-slate-300 cursor-pointer transition-colors" />
             </div>
             <div className="hidden md:block h-5 w-px bg-slate-800"></div>
-            <div className="flex items-center gap-2 md:gap-4 text-sm">
-              <div className="w-8 h-8 md:w-9 md:h-9 bg-slate-800 border border-white/5 rounded-sm flex items-center justify-center text-[10px] md:text-[11px] font-bold text-slate-300 uppercase tracking-tighter">
-                TR
+            
+            {/* Profile & Strategy Switcher Dropdown */}
+            <div className="relative group">
+              <div className="flex items-center gap-2 md:gap-4 text-sm cursor-pointer hover:opacity-80 transition-opacity">
+                <div className="w-8 h-8 md:w-9 md:h-9 bg-slate-800 border border-white/5 rounded-sm flex items-center justify-center text-[10px] md:text-[11px] font-bold text-slate-300 uppercase tracking-tighter">
+                  TR
+                </div>
+                <div className="hidden sm:flex flex-col items-start">
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Workspace</span>
+                  <span className="text-[11px] font-bold text-slate-200 uppercase truncate max-w-[100px]">
+                    {activeStrategy?.name || 'Select'}
+                  </span>
+                </div>
+                <ChevronDown size={14} className="text-slate-600 transition-transform group-hover:rotate-180" />
               </div>
-              <ChevronDown size={14} className="text-slate-600" />
+
+              {/* Dropdown Menu */}
+              <div className="absolute top-full right-0 mt-2 w-72 bg-slate-900 border border-slate-700 shadow-2xl rounded-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                <div className="p-4 border-b border-slate-800">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-slate-800 border border-white/5 rounded-sm flex items-center justify-center text-xs font-bold text-slate-300">
+                      TR
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-100">TERMINAL_USER</p>
+                      <p className="text-[9px] font-mono text-slate-500">ID: 230934-ALPHA</p>
+                    </div>
+                  </div>
+                  <div className="h-px bg-slate-800 w-full mb-4"></div>
+                  <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Switch Workspace</span>
+                </div>
+                
+                <div className="max-h-64 overflow-y-auto custom-scrollbar">
+                  {strategies.map(s => (
+                    <div 
+                      key={s.id}
+                      className={`group/row px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-800 transition-colors ${activeStrategyId === s.id ? 'bg-slate-800/50 border-l-2 border-accent-gain' : ''}`}
+                    >
+                      <div className="flex flex-col flex-1" onClick={() => setActiveStrategyId(s.id)}>
+                        <span className={`text-[11px] font-bold uppercase ${activeStrategyId === s.id ? 'text-accent-gain' : 'text-slate-300'}`}>
+                          {s.name}
+                        </span>
+                        <span className="text-[9px] font-mono text-slate-500">
+                          Equity: ${(s.startingEquity ?? 10000).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setWorkspaceToEdit(s);
+                            setEditWorkspaceName(s.name);
+                            setEditWorkspaceEquity((s.startingEquity ?? 10000).toString());
+                            setIsEditingWorkspace(true);
+                          }}
+                          className="p-1 text-slate-500 hover:text-slate-200"
+                        >
+                          <Edit3 size={12} />
+                        </button>
+                        {s.id !== 'strat-default-sr' && (
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setWorkspaceToDelete(s);
+                              setIsDeletingWorkspace(true);
+                            }}
+                            className="p-1 text-slate-500 hover:text-accent-loss"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        )}
+                      </div>
+                      {activeStrategyId === s.id && <div className="w-1.5 h-1.5 rounded-full bg-accent-gain shadow-[0_0_8px_rgba(74,222,128,0.6)] ml-2"></div>}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-2 border-t border-slate-800">
+                  <button 
+                    onClick={() => setIsAddingWorkspace(true)}
+                    className="w-full text-left px-3 py-2 text-[10px] font-mono text-accent-gain hover:bg-slate-800 transition-all uppercase tracking-[0.2em] flex items-center gap-2"
+                  >
+                    <Plus size={12} /> New Workspace
+                  </button>
+                  <button 
+                    onClick={() => setActiveView('settings')}
+                    className="w-full text-left px-3 py-2 text-[10px] font-mono text-slate-500 hover:text-slate-200 hover:bg-slate-800 transition-all uppercase tracking-widest"
+                  >
+                    Account Settings
+                  </button>
+                  <button className="w-full text-left px-3 py-2 text-[10px] font-mono text-accent-loss hover:bg-slate-800 transition-all uppercase tracking-widest">
+                    Terminate Session
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -475,26 +646,25 @@ const App: React.FC = () => {
         <main className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-8 md:p-12 scroll-smooth bg-[#0c0d0e]">
           <div className="max-w-7xl mx-auto space-y-6 md:space-y-8 pb-24 md:pb-20">
             {activeView === 'dashboard' && (
-              <DashboardView trades={trades} />
+              <DashboardView trades={filteredTrades} startingEquity={activeStrategy?.startingEquity || 10000} />
             )}
             
             {activeView === 'log' && (
                 <div className="animate-slide-up">
-                    <TradeTable trades={trades} strategies={strategies} onUpdateTrade={handleUpdateTrade} onDeleteTrade={handleDeleteTrade} showTitle={true} />
+                    <TradeTable trades={filteredTrades} strategies={strategies} onUpdateTrade={handleUpdateTrade} onDeleteTrade={handleDeleteTrade} showTitle={true} />
                 </div>
             )}
 
             {activeView === 'strategy' && (
               <StrategyBuilder 
                 strategies={strategies} 
-                onAddStrategy={handleAddStrategy}
-                onDeleteStrategy={handleDeleteStrategy}
+                activeStrategyId={activeStrategyId}
                 onUpdateStrategy={handleUpdateStrategy}
               />
             )}
 
             {activeView === 'analytics' && (
-              <AnalyticsView trades={trades} strategies={strategies} />
+              <AnalyticsView trades={filteredTrades} strategies={strategies} />
             )}
 
             {(activeView === 'risk' || activeView === 'settings') && (
@@ -508,6 +678,118 @@ const App: React.FC = () => {
 
         {/* Trade Form Trigger */}
         <TradeForm onAddTrade={handleAddTrade} strategies={strategies} />
+
+        {/* Workspace Edit Modal */}
+        {isEditingWorkspace && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setIsEditingWorkspace(false)} />
+            <form onSubmit={handleUpdateWorkspace} className="relative w-full max-w-md bg-slate-900 border border-slate-800 p-8 space-y-6 shadow-2xl animate-slide-up">
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Edit Workspace</h3>
+                <button type="button" onClick={() => setIsEditingWorkspace(false)} className="text-slate-500 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Workspace Name</label>
+                  <input 
+                    autoFocus
+                    className="w-full bg-slate-950 border border-slate-800 p-4 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
+                    value={editWorkspaceName}
+                    onChange={(e) => setEditWorkspaceName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
+                  <input 
+                    type="number"
+                    className="w-full bg-slate-950 border border-slate-800 p-4 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
+                    value={editWorkspaceEquity}
+                    onChange={(e) => setEditWorkspaceEquity(e.target.value)}
+                  />
+                </div>
+              </div>
+              <button className="w-full bg-slate-100 text-slate-900 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white transition-all">Save Changes</button>
+            </form>
+          </div>
+        )}
+
+        {/* Workspace Add Modal */}
+        {isAddingWorkspace && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onClick={() => setIsAddingWorkspace(false)} />
+            <form onSubmit={handleCreateWorkspace} className="relative w-full max-w-md bg-slate-900 border border-slate-800 p-8 space-y-6 shadow-2xl animate-slide-up">
+              <div className="flex justify-between items-center">
+                <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Initialize New Workspace</h3>
+                <button type="button" onClick={() => setIsAddingWorkspace(false)} className="text-slate-500 hover:text-white">
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Workspace Name</label>
+                  <input 
+                    autoFocus
+                    className="w-full bg-slate-950 border border-slate-800 p-4 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
+                    placeholder="E.G. SCALPING_PRO"
+                    value={newWorkspaceName}
+                    onChange={(e) => setNewWorkspaceName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
+                  <input 
+                    type="number"
+                    className="w-full bg-slate-950 border border-slate-800 p-4 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
+                    placeholder="10000"
+                    value={newWorkspaceEquity}
+                    onChange={(e) => setNewWorkspaceEquity(e.target.value)}
+                  />
+                </div>
+              </div>
+              <button className="w-full bg-slate-100 text-slate-900 py-4 text-xs font-bold uppercase tracking-widest hover:bg-white transition-all">Commit_Workspace</button>
+            </form>
+          </div>
+        )}
+
+        {/* Workspace Delete Confirmation Modal */}
+        {isDeletingWorkspace && workspaceToDelete && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={() => setIsDeletingWorkspace(false)} />
+            <div className="relative w-full max-w-md bg-slate-900 border border-slate-800 p-10 space-y-8 shadow-2xl animate-slide-up">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-16 h-16 bg-accent-loss/10 border border-accent-loss/20 flex items-center justify-center rounded-full">
+                  <AlertTriangle size={32} className="text-accent-loss" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-black text-slate-100 uppercase tracking-widest">Delete Workspace?</h3>
+                  <p className="text-[10px] text-slate-500 font-mono uppercase tracking-tighter leading-relaxed">
+                    This action will permanently purge the workspace <span className="text-slate-300 font-bold">"{workspaceToDelete.name}"</span> and all associated trade data. This cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <button 
+                  onClick={() => setIsDeletingWorkspace(false)}
+                  className="py-4 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-700 hover:text-slate-100 transition-all border border-slate-700"
+                >
+                  Abort_Action
+                </button>
+                <button 
+                  onClick={() => {
+                    handleDeleteStrategy(workspaceToDelete.id);
+                    setIsDeletingWorkspace(false);
+                  }}
+                  className="py-4 bg-accent-loss/80 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-accent-loss transition-all shadow-xl"
+                >
+                  Confirm_Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

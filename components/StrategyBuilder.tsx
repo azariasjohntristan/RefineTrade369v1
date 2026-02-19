@@ -4,8 +4,7 @@ import { Plus, Trash2, Settings2, X, Hash, Layers, ChevronDown, Edit3, Check, Al
 
 interface StrategyBuilderProps {
   strategies: Strategy[];
-  onAddStrategy: (strategy: Strategy) => void;
-  onDeleteStrategy: (id: string) => void;
+  activeStrategyId: string;
   onUpdateStrategy: (strategy: Strategy) => void;
 }
 
@@ -22,86 +21,12 @@ const COLOR_OPTIONS = [
   '#64748b'  // Slate
 ];
 
-const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddStrategy, onDeleteStrategy, onUpdateStrategy }) => {
-  const [activeModelId, setActiveModelId] = useState<string | null>(strategies[0]?.id || null);
-  const [isAddingModel, setIsAddingModel] = useState(false);
-  const [isRenamingModel, setIsRenamingModel] = useState(false);
-  const [isDeletingModel, setIsDeletingModel] = useState(false);
-  const [newModelName, setNewModelName] = useState('');
-  const [renameValue, setRenameValue] = useState('');
-  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
-  
+const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, activeStrategyId, onUpdateStrategy }) => {
   const [isAddingCategory, setIsAddingCategory] = useState<{ layer: keyof Strategy['layers'] } | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [categoryModalError, setCategoryModalError] = useState<string | null>(null);
 
-  const selectorRef = useRef<HTMLDivElement>(null);
-
-  // Sync active model if list changes or starts empty
-  useEffect(() => {
-    if (strategies.length > 0 && (!activeModelId || !strategies.find(s => s.id === activeModelId))) {
-      setActiveModelId(strategies[0].id);
-    } else if (strategies.length === 0) {
-      setActiveModelId(null);
-    }
-  }, [strategies, activeModelId]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (selectorRef.current && !selectorRef.current.contains(event.target as Node)) {
-        setIsSelectorOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const activeStrategy = strategies.find(s => s.id === activeModelId);
-
-  const handleAddModel = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newModelName) return;
-    const newModel: Strategy = {
-      id: `strat-${Date.now()}`,
-      name: newModelName,
-      layers: { 
-        layer1: [
-          {
-            id: `cat-instrument-${Date.now()}`,
-            name: 'INSTRUMENT',
-            tags: [
-              { text: 'NQ', color: '#06b6d4' },
-              { text: 'ES', color: '#f43f5e' }
-            ],
-            selectionType: 'single'
-          }
-        ], 
-        layer2: [], 
-        layer3: [], 
-        layer4: [] 
-      },
-      createdAt: new Date().toLocaleDateString()
-    };
-    onAddStrategy(newModel);
-    setActiveModelId(newModel.id);
-    setNewModelName('');
-    setIsAddingModel(false);
-  };
-
-  const handleRenameModel = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!activeStrategy || !renameValue) return;
-    const updated = { ...activeStrategy, name: renameValue };
-    onUpdateStrategy(updated);
-    setIsRenamingModel(false);
-  };
-
-  const executeDeleteModel = () => {
-    if (!activeModelId) return;
-    onDeleteStrategy(activeModelId);
-    setIsDeletingModel(false);
-    // Active model will be updated by the useEffect hook
-  };
+  const activeStrategy = strategies.find(s => s.id === activeStrategyId);
 
   const handleAddCategory = () => {
     if (!activeStrategy) {
@@ -306,84 +231,6 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
               <span className="text-slate-300">{activeStrategy?.name || 'NULL'}</span>
             </div>
           </div>
-          
-          <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3 md:gap-4 w-full xl:w-auto">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center flex-1 xl:flex-none bg-slate-900 border border-slate-800 rounded-sm overflow-hidden">
-              {/* Improved Custom Selector UI */}
-              <div className="relative flex-1 xl:flex-none" ref={selectorRef}>
-                <button 
-                  onClick={() => setIsSelectorOpen(!isSelectorOpen)}
-                  className={`flex items-center justify-between gap-4 md:gap-6 px-4 md:px-6 py-2.5 w-full xl:min-w-[160px] text-[clamp(0.6875rem,2vw,0.75rem)] font-mono transition-all duration-200 ${
-                    isSelectorOpen ? 'text-accent-gain' : ''
-                  }`}
-                >
-                  <span className={`uppercase tracking-[0.2em] truncate ${activeStrategy ? 'text-slate-200' : 'text-slate-600'}`}>
-                    {activeStrategy?.name || 'SELECT_MODEL'}
-                  </span>
-                  <ChevronDown size={14} className={`text-slate-500 transition-transform duration-200 shrink-0 ${isSelectorOpen ? 'rotate-180 text-accent-gain' : ''}`} />
-                </button>
-                
-                {isSelectorOpen && (
-                  <div className="absolute top-[calc(100%+4px)] right-0 w-full min-w-[200px] bg-slate-900 border border-slate-700 shadow-2xl z-[150] animate-slide-up py-1">
-                    <div className="px-4 py-2 border-b border-slate-800 bg-slate-950/50">
-                      <span className="text-[8px] font-bold text-slate-600 uppercase tracking-[0.2em]">AVAILABLE_MODELS</span>
-                    </div>
-                    <div className="max-h-[300px] overflow-y-auto custom-scrollbar">
-                      {strategies.map(s => (
-                        <button
-                          key={s.id}
-                          onClick={() => {
-                            setActiveModelId(s.id);
-                            setIsSelectorOpen(false);
-                          }}
-                          className={`w-full text-left px-4 py-3 text-[10px] font-mono transition-all flex justify-between items-center group/item ${
-                            s.id === activeModelId ? 'bg-slate-800 text-accent-gain' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100'
-                          }`}
-                        >
-                          <span className="uppercase tracking-widest">{s.name}</span>
-                          {s.id === activeModelId && <Check size={12} className="text-accent-gain" />}
-                        </button>
-                      ))}
-                    </div>
-                    {strategies.length === 0 && (
-                      <div className="px-4 py-6 text-center italic text-[9px] text-slate-700 font-mono uppercase tracking-widest">
-                        NO_MODELS_FOUND
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {activeStrategy && (
-                <div className="flex items-center border-l border-slate-800">
-                  <button 
-                    onClick={() => {
-                      setRenameValue(activeStrategy.name);
-                      setIsRenamingModel(true);
-                    }}
-                    className="p-2.5 text-slate-500 hover:text-slate-100 hover:bg-slate-800 transition-all"
-                    title="Rename Model"
-                  >
-                    <Edit3 size={16} />
-                  </button>
-                  <button 
-                    onClick={() => setIsDeletingModel(true)}
-                    className="p-2.5 text-slate-500 hover:text-accent-loss hover:bg-slate-800 transition-all border-l border-slate-800"
-                    title="Delete Model"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <button 
-              onClick={() => setIsAddingModel(true)}
-              className="bg-slate-100 text-slate-900 px-4 md:px-6 py-2.5 text-[clamp(0.625rem,2vw,0.6875rem)] font-bold uppercase tracking-widest hover:bg-white transition-all flex items-center justify-center gap-2 shadow-lg rounded-sm"
-            >
-              <Plus size={16} /> <span className="inline">NEW MODEL</span>
-            </button>
-          </div>
         </div>
 
         {/* Layers Container */}
@@ -410,75 +257,6 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, onAddS
           />
         </div>
       </div>
-
-      {/* Modals outside the animated view to ensure proper fixed centering */}
-      {isAddingModel && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-transparent backdrop-blur-sm" onClick={() => setIsAddingModel(false)} />
-          <form onSubmit={handleAddModel} className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-8 space-y-6 shadow-2xl animate-slide-up">
-            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Initialize New Model</h3>
-            <input 
-              autoFocus
-              className="w-full bg-slate-950 border border-slate-800 p-5 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
-              placeholder="MODEL_IDENTIFIER"
-              value={newModelName}
-              onChange={(e) => setNewModelName(e.target.value)}
-            />
-            <button className="w-full bg-slate-100 text-slate-900 py-5 text-xs font-bold uppercase tracking-widest hover:bg-white transition-all">Commit_Model</button>
-          </form>
-        </div>
-      )}
-
-      {isRenamingModel && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-transparent backdrop-blur-sm" onClick={() => setIsRenamingModel(false)} />
-          <form onSubmit={handleRenameModel} className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-8 space-y-6 shadow-2xl animate-slide-up">
-            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-widest">Rename Strategy Model</h3>
-            <input 
-              autoFocus
-              className="w-full bg-slate-950 border border-slate-800 p-5 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
-              placeholder="NEW_MODEL_IDENTIFIER"
-              value={renameValue}
-              onChange={(e) => setRenameValue(e.target.value)}
-            />
-            <button className="w-full bg-slate-100 text-slate-900 py-5 text-xs font-bold uppercase tracking-widest hover:bg-white transition-all">Apply_Rename</button>
-          </form>
-        </div>
-      )}
-
-      {isDeletingModel && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
-          <div className="absolute inset-0 bg-transparent backdrop-blur-sm" onClick={() => setIsDeletingModel(false)} />
-          <div className="relative w-full max-w-md bg-slate-900/95 backdrop-blur-md border border-slate-800 p-10 space-y-8 shadow-2xl animate-slide-up">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-accent-loss/10 border border-accent-loss/20 flex items-center justify-center rounded-full">
-                <AlertTriangle size={32} className="text-accent-loss" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-black text-slate-100 uppercase tracking-widest">Delete Strategy Model?</h3>
-                <p className="text-[10px] text-slate-500 font-mono uppercase tracking-tighter leading-relaxed">
-                  This action will permanently purge the model <span className="text-slate-300 font-bold">"{activeStrategy?.name}"</span> and all associated nodal structures. This cannot be undone.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button 
-                onClick={() => setIsDeletingModel(false)}
-                className="py-4 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-700 hover:text-slate-100 transition-all border border-slate-700"
-              >
-                Abort_Action
-              </button>
-              <button 
-                onClick={executeDeleteModel}
-                className="py-4 bg-accent-loss/80 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-accent-loss transition-all shadow-xl"
-              >
-                Confirm_Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {isAddingCategory && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">

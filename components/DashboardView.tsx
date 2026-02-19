@@ -33,9 +33,10 @@ import { Trade } from '../types';
 
 interface DashboardViewProps {
   trades: Trade[];
+  startingEquity: number;
 }
 
-const DashboardView: React.FC<DashboardViewProps> = ({ trades }) => {
+const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity }) => {
   const [rules, setRules] = useState<string[]>(() => {
     const saved = localStorage.getItem('trading_rules');
     return saved ? JSON.parse(saved) : [
@@ -75,14 +76,14 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades }) => {
 
   // Equity Curve Data
   const equityData = (() => {
-    let currentEquity = 10000; // Starting base
+    let currentEquity = startingEquity; // Starting base
     const sortedTrades = [...trades].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
     
     // If no trades, show a flat line
     if (sortedTrades.length === 0) {
         return [
-            { name: 'Start', equity: 10000 },
-            { name: 'Now', equity: 10000 }
+            { name: 'Start', equity: startingEquity },
+            { name: 'Now', equity: startingEquity }
         ];
     }
 
@@ -156,7 +157,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades }) => {
             GLOBAL CUMULATIVE EQUITY <Activity size={10} className="text-accent-gain" />
           </p>
           <p className="text-3xl font-black text-accent-gain tracking-tight">
-            ${(10000 + totalPnL).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${(startingEquity + totalPnL).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
       </div>

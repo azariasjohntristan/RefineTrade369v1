@@ -37,6 +37,7 @@ export interface Category {
 export interface Strategy {
   id: string;
   name: string;
+  startingEquity: number;
   layers: {
     layer1: Category[];
     layer2: Category[];
