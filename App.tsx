@@ -664,7 +664,7 @@ const App: React.FC = () => {
             )}
 
             {activeView === 'analytics' && (
-              <AnalyticsView trades={filteredTrades} strategies={strategies} />
+              <AnalyticsView trades={filteredTrades} strategies={strategies} activeStrategyId={activeStrategyId} />
             )}
 
             {(activeView === 'risk' || activeView === 'settings') && (

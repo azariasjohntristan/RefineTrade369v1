@@ -5,6 +5,7 @@ import { Trophy, BarChart3, Target, TrendingUp, TrendingDown, ChevronRight, Filt
 interface AnalyticsViewProps {
   trades: Trade[];
   strategies: Strategy[];
+  activeStrategyId: string;
 }
 
 interface TagStats {
@@ -18,20 +19,19 @@ interface TagStats {
   avgPnL: number;
 }
 
-const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies }) => {
-  const [selectedStrategyId, setSelectedStrategyId] = useState<string>(strategies[0]?.id || '');
+const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activeStrategyId }) => {
   const [selectedLayer, setSelectedLayer] = useState<string>('all');
 
   const selectedStrategy = useMemo(() => 
-    strategies.find(s => s.id === selectedStrategyId),
-    [strategies, selectedStrategyId]
+    strategies.find(s => s.id === activeStrategyId),
+    [strategies, activeStrategyId]
   );
 
   const statsByTag = useMemo(() => {
     if (!selectedStrategy) return [];
 
     const tagMap: Record<string, TagStats & { layerKey: string }> = {};
-    const strategyTrades = trades.filter(t => t.strategyId === selectedStrategyId);
+    const strategyTrades = trades.filter(t => t.strategyId === activeStrategyId);
 
     strategyTrades.forEach(trade => {
       Object.entries(trade.selections).forEach(([catId, tags]) => {
@@ -83,7 +83,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies }) => 
     }
 
     return results.sort((a, b) => b.winRate - a.winRate || b.totalPnL - a.totalPnL);
-  }, [trades, selectedStrategy, selectedStrategyId, selectedLayer]);
+  }, [trades, selectedStrategy, activeStrategyId, selectedLayer]);
 
   const leaderboard = useMemo(() => {
     const layers = ['layer1', 'layer2', 'layer3', 'layer4'];
@@ -220,17 +220,6 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies }) => 
         <div>
           <h2 className="text-[clamp(1.875rem,5vw,3rem)] font-black text-slate-100 uppercase tracking-tight mb-2">Neural Edge Analytics</h2>
           <p className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em]">Statistical validation of execution variables</p>
-        </div>
-        
-        <div className="flex items-center gap-3 bg-slate-800/40 border border-slate-800 p-2 rounded-sm">
-          <span className="text-[9px] font-mono text-slate-600 uppercase tracking-widest ml-2">Active_Strategy:</span>
-          <select 
-            className="bg-transparent border-none text-[11px] font-mono text-slate-200 uppercase tracking-widest outline-none cursor-pointer hover:text-white pr-8"
-            value={selectedStrategyId}
-            onChange={(e) => setSelectedStrategyId(e.target.value)}
-          >
-            {strategies.map(s => <option key={s.id} value={s.id} className="bg-slate-900">{s.name}</option>)}
-          </select>
         </div>
       </div>
 
