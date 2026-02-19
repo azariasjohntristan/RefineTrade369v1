@@ -434,7 +434,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-accent-gain shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
             <div className="text-[11px] tracking-[0.4em] uppercase font-black text-slate-100">
-              TERMINAL
+              REFINE TRADE
             </div>
           </div>
           <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-slate-500 hover:text-white">
@@ -500,18 +500,7 @@ const App: React.FC = () => {
           })}
 
           {/* New Date Selection Button / Nav Item */}
-          <div className="pt-4 mt-4 border-t border-slate-800">
-            <div className="px-4 py-3 rounded-sm text-[13px] flex items-center gap-4 bg-slate-800/20 border border-slate-800/50 group hover:border-accent-gain transition-all">
-              <Calendar size={18} className="text-slate-600 group-hover:text-accent-gain" />
-              <input 
-                type="date"
-                className="bg-transparent text-slate-500 text-[11px] font-mono outline-none cursor-pointer uppercase w-full"
-                value={selectedDateFilter}
-                onChange={(e) => setSelectedDateFilter(e.target.value)}
-              />
-            </div>
-            <p className="text-[8px] text-slate-700 font-mono mt-2 ml-4 uppercase tracking-widest">Global Date Pointer</p>
-          </div>
+
         </nav>
 
         <div className="mt-8 bg-slate-800/40 p-4 rounded-sm border border-slate-800">
