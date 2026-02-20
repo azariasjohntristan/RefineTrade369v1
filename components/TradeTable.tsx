@@ -115,6 +115,21 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
   const editStrategy = strategies.find(s => s.id === editFormData.strategyId);
   const instrumentCat = editStrategy?.layers.layer1.find(c => c.name === 'INSTRUMENT');
 
+  // Helper to get category name from trade's strategy for view modal
+  const getCategoryName = (catId: string): string => {
+    const tradeStrategy = strategies.find(s => s.id === selectedTrade?.strategyId);
+    if (!tradeStrategy) return catId.split('-').pop()?.replace('_', ' ') || catId;
+    
+    const allCategories = [
+      ...tradeStrategy.layers.layer1,
+      ...tradeStrategy.layers.layer2,
+      ...tradeStrategy.layers.layer3,
+      ...tradeStrategy.layers.layer4
+    ];
+    const category = allCategories.find(c => c.id === catId);
+    return category?.name || catId.split('-').pop()?.replace('_', ' ') || catId;
+  };
+
   const CategoryDropdown: React.FC<{ cat: Category }> = ({ cat }) => {
     const isDropdownOpen = openDropdownId === cat.id;
     const selections = (editFormData.selections || {})[cat.id] || [];
@@ -318,7 +333,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
                   <div className="grid grid-cols-2 gap-4">
                     {Object.entries(selectedTrade.selections).map(([catId, tags]) => (
                       <div key={catId} className="space-y-1">
-                        <div className="text-[7px] text-slate-600 font-mono uppercase tracking-tighter">{catId.split('-').pop()?.replace('_', ' ')}</div>
+                        <div className="text-[7px] text-slate-600 font-mono uppercase tracking-tighter">{getCategoryName(catId)}</div>
                         <div className="flex flex-wrap gap-1.5">
                           {(tags as string[]).map(tag => (
                             <span key={tag} className="bg-slate-800 text-slate-100 px-2 py-1 text-[8px] font-mono border border-slate-700 uppercase">
@@ -380,6 +395,16 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
               <div>
                 <h3 className="text-[11px] font-black text-slate-100 uppercase tracking-[0.4em] mb-2">RECONFIGURE EXECUTION LOG</h3>
                 <div className="text-[8px] font-mono text-slate-600 uppercase tracking-widest">RECORD_ID: {selectedTrade.id}</div>
+                <div className="flex items-center gap-3 mt-3">
+                  <div className="text-[8px] font-mono text-slate-600 uppercase tracking-widest">Active_Model:</div>
+                  <select 
+                    className="bg-transparent border-none text-[9px] font-mono text-slate-400 uppercase tracking-widest outline-none cursor-pointer hover:text-white"
+                    value={editFormData.strategyId || ''}
+                    onChange={(e) => setEditFormData({...editFormData, strategyId: e.target.value, selections: {}})}
+                  >
+                    {strategies.map(s => <option key={s.id} value={s.id} className="bg-slate-900">{s.name}</option>)}
+                  </select>
+                </div>
               </div>
               <button type="button" onClick={closeModal} className="text-slate-600 hover:text-white transition-colors p-1">
                 <X size={24} />
@@ -471,7 +496,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
                     )}
                   </div>
 
-                  {currentActiveStrategy?.layers.layer1.map(cat => (
+                  {editStrategy?.layers.layer1.map(cat => (
                     cat.name !== 'INSTRUMENT' && <CategoryDropdown key={cat.id} cat={cat} />
                   ))}
                 </div>
@@ -481,7 +506,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
               <div className="space-y-4">
                 <SectionHeader title="LAYER_02 // STRATEGY & LOGIC" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {currentActiveStrategy?.layers.layer2.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
+                  {editStrategy?.layers.layer2.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
                 </div>
               </div>
 
@@ -489,7 +514,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
               <div className="space-y-4">
                 <SectionHeader title="LAYER_03 // TEMPORAL & RISK" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {currentActiveStrategy?.layers.layer3.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
+                  {editStrategy?.layers.layer3.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
                 </div>
               </div>
 
@@ -507,7 +532,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
                     />
                   </div>
                   <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {currentActiveStrategy?.layers.layer4.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
+                    {editStrategy?.layers.layer4.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
                   </div>
                   <div className="col-span-full space-y-2">
                     <label className="text-[8px] text-slate-500 uppercase font-black tracking-widest">NEURAL REFLECTION</label>
