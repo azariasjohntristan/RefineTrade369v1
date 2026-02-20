@@ -113,7 +113,7 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
 
   const SectionHeader = ({ title }: { title: string }) => (
     <div className="pt-4 mb-6">
-      <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">{title}</span>
+      <span className="text-[14px] font-black text-slate-400 uppercase tracking-[0.3em]">{title}</span>
     </div>
   );
 
@@ -123,7 +123,7 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
 
     return (
       <div className="space-y-2 flex-1 min-w-[200px] relative">
-        <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">{cat.name}</label>
+        <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">{cat.name}</label>
         <div 
           onClick={() => setOpenDropdownId(isDropdownOpen ? null : cat.id)}
           className={`w-full bg-slate-900 border border-slate-800/80 p-3.5 flex flex-wrap gap-2 min-h-[48px] cursor-pointer transition-all hover:bg-slate-800/40 ${
@@ -132,12 +132,12 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
         >
           {selections.length > 0 ? (
             selections.map(t => (
-              <span key={t} className="bg-slate-800 text-slate-100 px-2.5 py-1 text-[10px] font-mono border border-slate-700 uppercase">
+              <span key={t} className="bg-slate-800 text-slate-100 px-2.5 py-1 text-[14px] font-mono border border-slate-700 uppercase">
                 {t}
               </span>
             ))
           ) : (
-            <span className="text-slate-700 text-[10px] font-mono uppercase">---</span>
+            <span className="text-slate-700 text-[14px] font-mono uppercase">---</span>
           )}
           <ChevronDown className={`absolute right-4 top-[38px] transition-transform ${isDropdownOpen ? 'rotate-180 text-accent-gain' : 'text-slate-700'}`} size={14} />
         </div>
@@ -154,7 +154,7 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                     e.stopPropagation();
                     toggleTag(cat.id, tag.text, cat.selectionType);
                   }}
-                  className={`w-full text-left px-4 py-3 text-[10px] font-mono transition-colors flex justify-between items-center uppercase ${
+                  className={`w-full text-left px-4 py-3 text-[14px] font-mono transition-colors flex justify-between items-center uppercase ${
                     isSelected ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:bg-slate-700/50'
                   }`}
                 >
@@ -185,11 +185,11 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
           <div className="relative w-full max-w-5xl bg-slate-900/95 backdrop-blur-md border border-white/5 shadow-2xl animate-slide-up flex flex-col max-h-[95vh] overflow-hidden" onClick={e => e.stopPropagation()}>
             <div className="p-10 flex justify-between items-start">
               <div>
-                <h3 className="text-[13px] font-black text-slate-100 uppercase tracking-[0.5em] mb-4">INITIALIZE EXECUTION LOG</h3>
+                <h3 className="text-[18px] font-black text-slate-100 uppercase tracking-[0.5em] mb-4">INITIALIZE EXECUTION LOG</h3>
                 <div className="flex items-center gap-3">
-                  <div className="text-[9px] font-mono text-slate-600 uppercase tracking-widest">Active_Model:</div>
+                  <div className="text-[13px] font-mono text-slate-600 uppercase tracking-widest">Active_Model:</div>
                   <select 
-                    className="bg-transparent border-none text-[10px] font-mono text-slate-400 uppercase tracking-widest outline-none cursor-pointer hover:text-white"
+                    className="bg-transparent border-none text-[14px] font-mono text-slate-400 uppercase tracking-widest outline-none cursor-pointer hover:text-white"
                     value={formData.strategyId}
                     onChange={(e) => setFormData({...formData, strategyId: e.target.value, selections: {}})}
                   >
@@ -209,11 +209,11 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                 <SectionHeader title="LAYER_01 // IDENTITY" />
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   <div className="space-y-2">
-                    <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">Execution Date</label>
+                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">Execution Date</label>
                     <div className="relative group/date">
                       <input 
                         type="date"
-                        className="w-full bg-slate-900 border border-slate-800 p-4 text-[11px] font-mono text-slate-200 outline-none focus:border-accent-gain cursor-pointer uppercase appearance-none"
+                        className="w-full bg-slate-900 border border-slate-800 p-4 text-[14px] font-mono text-slate-200 outline-none focus:border-accent-gain cursor-pointer uppercase appearance-none"
                         value={formData.dateValue}
                         onChange={e => setFormData({...formData, dateValue: e.target.value})}
                       />
@@ -222,12 +222,12 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">Trade Type</label>
+                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">Trade Type</label>
                     <div className="grid grid-cols-2 h-[52px] border border-slate-800 bg-slate-900 overflow-hidden">
                       <button 
                         type="button"
                         onClick={() => setFormData({...formData, type: 'LONG'})}
-                        className={`flex items-center justify-center gap-2 text-[10px] font-mono transition-all uppercase tracking-widest ${
+                        className={`flex items-center justify-center gap-2 text-[14px] font-mono transition-all uppercase tracking-widest ${
                           formData.type === 'LONG' 
                             ? 'bg-slate-200 text-slate-950 font-black' 
                             : 'text-slate-600 hover:bg-slate-800/50'
@@ -239,7 +239,7 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                       <button 
                         type="button"
                         onClick={() => setFormData({...formData, type: 'SHORT'})}
-                        className={`flex items-center justify-center gap-2 text-[10px] font-mono transition-all uppercase tracking-widest border-l border-slate-800 ${
+                        className={`flex items-center justify-center gap-2 text-[14px] font-mono transition-all uppercase tracking-widest border-l border-slate-800 ${
                           formData.type === 'SHORT' 
                             ? 'bg-slate-200 text-slate-950 font-black' 
                             : 'text-slate-600 hover:bg-slate-800/50'
@@ -253,14 +253,14 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
 
                   {/* Instrument Selection */}
                   <div className="space-y-2 flex-1 relative">
-                    <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">Instrument</label>
+                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">Instrument</label>
                     <div 
                       onClick={() => setOpenDropdownId(openDropdownId === 'pair-select' ? null : 'pair-select')}
                       className={`w-full bg-slate-900 border border-slate-800/80 p-3.5 flex items-center justify-between min-h-[48px] cursor-pointer transition-all hover:bg-slate-800/40 ${
                         openDropdownId === 'pair-select' ? 'border-accent-gain' : 'hover:border-slate-700'
                       }`}
                     >
-                      <span className={`text-[11px] font-mono uppercase ${formData.pair ? 'text-slate-200' : 'text-slate-700'}`}>
+                      <span className={`text-[14px] font-mono uppercase ${formData.pair ? 'text-slate-200' : 'text-slate-700'}`}>
                         {formData.pair || 'SELECT_INSTRUMENT'}
                       </span>
                       <ChevronDown className={`transition-transform ${openDropdownId === 'pair-select' ? 'rotate-180 text-accent-gain' : 'text-slate-700'}`} size={14} />
@@ -281,7 +281,7 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                               });
                               setOpenDropdownId(null);
                             }}
-                            className={`w-full text-left px-4 py-3 text-[10px] font-mono transition-colors flex justify-between items-center uppercase ${
+                            className={`w-full text-left px-4 py-3 text-[14px] font-mono transition-colors flex justify-between items-center uppercase ${
                               formData.pair === tag.text ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:bg-slate-700/50'
                             }`}
                           >
@@ -320,11 +320,11 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                 <SectionHeader title="LAYER_04 // REFLECTION" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">NET P&L ($)</label>
+                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">NET P&L ($)</label>
                     <input 
                       type="number"
                       step="any"
-                      className="w-full bg-slate-900 border border-slate-800 p-5 text-[15px] font-black font-mono text-slate-100 outline-none focus:border-slate-700"
+                      className="w-full bg-slate-900 border border-slate-800 p-5 text-[18px] font-black font-mono text-slate-100 outline-none focus:border-slate-700"
                       value={formData.pnl}
                       onChange={e => setFormData({...formData, pnl: e.target.value})}
                       placeholder="0.00"
@@ -332,9 +332,9 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                   </div>
                   {selectedStrategy?.layers.layer4.map(cat => <CategoryInput key={cat.id} cat={cat} />)}
                   <div className="col-span-full space-y-3">
-                    <label className="text-[9px] text-slate-500 uppercase font-black tracking-widest">NEURAL REFLECTION</label>
+                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">NEURAL REFLECTION</label>
                     <textarea 
-                      className="w-full bg-slate-900 border border-slate-800 p-6 text-[11px] font-mono text-slate-300 outline-none focus:border-slate-700 min-h-[140px] resize-none leading-relaxed"
+                      className="w-full bg-slate-900 border border-slate-800 p-6 text-[14px] font-mono text-slate-300 outline-none focus:border-slate-700 min-h-[140px] resize-none leading-relaxed"
                       placeholder="LOG INTERNAL STATE AND TACTICAL REFINEMENTS..."
                       value={formData.reflection}
                       onChange={e => setFormData({...formData, reflection: e.target.value})}
@@ -354,7 +354,7 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                     <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Camera size={18} className="text-slate-600 group-hover:text-accent-gain" />
                     </div>
-                    <span className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">UPLOAD_EXECUTION_SCREENSHOTS</span>
+                    <span className="text-[14px] font-mono text-slate-600 uppercase tracking-widest">UPLOAD_EXECUTION_SCREENSHOTS</span>
                     <input 
                       type="file" 
                       ref={fileInputRef} 
@@ -387,7 +387,7 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
               <div className="pb-16 pt-10">
                 <button 
                   type="submit"
-                  className="w-full bg-white text-slate-950 py-7 text-[11px] font-black uppercase tracking-[0.6em] transition-all hover:bg-slate-100 active:scale-[0.98] shadow-2xl"
+                  className="w-full bg-white text-slate-950 py-7 text-[14px] font-black uppercase tracking-[0.6em] transition-all hover:bg-slate-100 active:scale-[0.98] shadow-2xl"
                 >
                   COMMIT_EXECUTION_RECORD
                 </button>

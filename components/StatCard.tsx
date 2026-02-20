@@ -14,7 +14,7 @@ const StatCard: React.FC<StatCardProps> = ({ label, value, delta, deltaType, del
       {/* Decorative Corner Accent */}
       <div className="absolute top-0 right-0 w-10 h-10 bg-gradient-to-bl from-white/5 to-transparent pointer-events-none" />
       
-      <div className="text-[0.7rem] uppercase tracking-widest text-slate-500 mb-4 font-semibold">
+      <div className="text-[12px] uppercase tracking-widest text-slate-500 mb-4 font-semibold">
         {label}
       </div>
       

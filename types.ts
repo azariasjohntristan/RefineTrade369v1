@@ -47,7 +47,7 @@ export interface Strategy {
   createdAt: string;
 }
 
-export type ViewState = 'dashboard' | 'log' | 'analytics' | 'risk' | 'settings' | 'strategy';
+export type ViewState = 'dashboard' | 'log' | 'analytics' | 'risk' | 'settings' | 'strategy' | 'notes';
 
 export type PlanType = 'free' | 'pro';
 export type PlanStatusType = 'active' | 'pending_upgrade' | 'cancelled';
@@ -84,6 +84,23 @@ export interface StrategyConfig {
     layer3: Category[];
     layer4: Category[];
   };
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NoteCategory {
+  id: string;
+  user_id: string;
+  name: string;
+  color: string;
+  created_at: string;
+}
+
+export interface Note {
+  id: string;
+  user_id: string;
+  category_id: string;
+  content: string;
   created_at: string;
   updated_at: string;
 }

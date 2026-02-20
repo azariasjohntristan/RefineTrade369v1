@@ -26,7 +26,7 @@ export default function AuthForm({ mode, onSubmit, onSwitchMode, loading, error 
         <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-3 mb-4">
             <div className="w-2 h-2 rounded-full bg-accent-gain shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
-            <div className="text-[11px] tracking-[0.4em] uppercase font-black text-slate-100">
+            <div className="text-[14px] tracking-[0.4em] uppercase font-black text-slate-100">
               REFINE TRADE
             </div>
           </div>
@@ -41,7 +41,7 @@ export default function AuthForm({ mode, onSubmit, onSwitchMode, loading, error 
         <form onSubmit={handleSubmit} className="space-y-6">
           {mode === 'register' && (
             <div className="space-y-2">
-              <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Name</label>
+              <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Name</label>
               <input
                 type="text"
                 value={name}
@@ -54,7 +54,7 @@ export default function AuthForm({ mode, onSubmit, onSwitchMode, loading, error 
           )}
 
           <div className="space-y-2">
-            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Email</label>
+            <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Email</label>
             <input
               type="email"
               value={email}
@@ -66,7 +66,7 @@ export default function AuthForm({ mode, onSubmit, onSwitchMode, loading, error 
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Password</label>
+            <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}

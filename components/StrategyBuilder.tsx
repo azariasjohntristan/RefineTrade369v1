@@ -136,7 +136,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
                   <span className="text-[clamp(0.6875rem,2vw,0.75rem)] font-bold text-slate-300 uppercase tracking-widest">{cat.name}</span>
                   <button 
                     onClick={() => toggleSelectionType(layerKey, cat.id)} 
-                    className="text-[7px] md:text-[8px] bg-slate-700 px-1.5 py-0.5 border border-slate-600 rounded-sm text-slate-400 hover:text-slate-200 uppercase font-bold tracking-tighter"
+                    className="text-[12px] md:text-[13px] bg-slate-700 px-1.5 py-0.5 border border-slate-600 rounded-sm text-slate-400 hover:text-slate-200 uppercase font-bold tracking-tighter"
                   >
                     {cat.selectionType}
                   </button>
@@ -159,7 +159,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
                   </button>
                 </div>
               ))}
-              {cat.tags.length === 0 && <div className="text-[9px] md:text-[10px] text-slate-700 font-mono italic p-3 border border-dashed border-slate-700/50 w-full text-center uppercase">Empty_Node</div>}
+              {cat.tags.length === 0 && <div className="text-[14px] md:text-[14px] text-slate-700 font-mono italic p-3 border border-dashed border-slate-700/50 w-full text-center uppercase">Empty_Node</div>}
             </div>
 
             <div className="mt-auto space-y-4 pt-4 border-t border-slate-700/30">
@@ -268,7 +268,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
                   <Layers size={16} className="text-accent-gain" />
                   Establish_Neural_Category
                 </div>
-                <div className="text-[9px] text-slate-500 font-mono uppercase tracking-tighter">
+                <div className="text-[14px] text-slate-500 font-mono uppercase tracking-tighter">
                   Layer: {isAddingCategory.layer} // Neural Node Initialization
                 </div>
               </div>
@@ -278,14 +278,14 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
             {categoryModalError && (
               <div className="bg-accent-loss/10 border border-accent-loss/30 p-4 flex gap-3 animate-slide-up">
                 <AlertTriangle size={16} className="text-accent-loss shrink-0" />
-                <p className="text-[9px] font-mono text-accent-loss leading-relaxed uppercase font-bold">
+                <p className="text-[14px] font-mono text-accent-loss leading-relaxed uppercase font-bold">
                   {categoryModalError}
                 </p>
               </div>
             )}
 
             <div className="space-y-2">
-              <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Category Identifier</label>
+              <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Category Identifier</label>
               <input 
                 autoFocus
                 className="w-full bg-slate-950 border border-slate-800 p-5 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
@@ -299,14 +299,14 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
               <div className="w-10 h-10 border border-amber-500/30 bg-amber-500/5 flex items-center justify-center shrink-0">
                 <Hash size={16} className="text-amber-500" />
               </div>
-              <p className="text-[9px] text-slate-500 font-mono leading-relaxed uppercase">
+              <p className="text-[14px] text-slate-500 font-mono leading-relaxed uppercase">
                 Nodes initialized here will manifest as functional input layers within your execution logs.
               </p>
             </div>
 
             <button 
               onClick={handleAddCategory}
-              className="w-full bg-slate-100 text-slate-900 py-6 text-[11px] font-extrabold uppercase tracking-widest hover:bg-white transition-all shadow-xl"
+              className="w-full bg-slate-100 text-slate-900 py-6 text-[14px] font-extrabold uppercase tracking-widest hover:bg-white transition-all shadow-xl"
             >
               Commit_Category_Node
             </button>

@@ -14,7 +14,8 @@ import {
   Plus,
   Edit3,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  FileText
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -25,6 +26,7 @@ import StrategyBuilder from './components/StrategyBuilder';
 import AnalyticsView from './components/AnalyticsView';
 import DashboardView from './components/DashboardView';
 import SettingsView from './components/SettingsView';
+import NotesView from './components/NotesView';
 import AuthForm from './components/AuthForm';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { supabase } from './lib/supabase';
@@ -691,7 +693,7 @@ const AppContent: React.FC = () => {
         <div className="flex items-center justify-between mb-10">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-accent-gain shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
-            <div className="text-[11px] tracking-[0.4em] uppercase font-black text-slate-100">
+            <div className="text-[14px] tracking-[0.4em] uppercase font-black text-slate-100">
               REFINE TRADE
             </div>
           </div>
@@ -704,7 +706,7 @@ const AppContent: React.FC = () => {
         <div className="md:hidden flex items-center gap-4 mb-8 pb-8 border-b border-slate-800">
           <div className="flex-1 flex items-center gap-3 bg-slate-800/40 p-3 rounded-sm border border-slate-800">
             <Search size={16} className="text-slate-500" />
-            <span className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">Search...</span>
+            <span className="text-[14px] font-mono text-slate-600 uppercase tracking-widest">Search...</span>
           </div>
           <button className="relative p-3 bg-slate-800/40 border border-slate-800 rounded-sm text-slate-500">
             <Bell size={16} />
@@ -724,7 +726,7 @@ const AppContent: React.FC = () => {
                 // Actually, I'll just add the button and let it be handled.
                 window.dispatchEvent(new CustomEvent('open-trade-form'));
               }}
-              className="w-full bg-accent-gain text-slate-950 py-3 rounded-sm text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all"
+              className="w-full bg-accent-gain text-slate-950 py-3 rounded-sm text-[14px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all"
             >
               <Plus size={16} /> Initialize Log
             </button>
@@ -735,6 +737,7 @@ const AppContent: React.FC = () => {
             { id: 'log', label: 'Trade Log', icon: ScrollText },
             { id: 'strategy', label: 'Strategy Parameters', icon: Layers },
             { id: 'analytics', label: 'Analytics', icon: BarChart2 },
+            { id: 'notes', label: 'Notes', icon: FileText },
 
             { id: 'settings', label: 'Settings', icon: Settings },
           ].map((item) => {
@@ -744,7 +747,7 @@ const AppContent: React.FC = () => {
                 key={item.id}
                 onClick={() => setActiveView(item.id as ViewState)}
                 className={`
-                  px-4 py-3 rounded-sm text-[13px] flex items-center gap-4 cursor-pointer transition-all duration-300
+                  px-4 py-3 rounded-sm text-[16px] flex items-center gap-4 cursor-pointer transition-all duration-300
                   ${activeView === item.id 
                     ? 'bg-slate-800 text-slate-100 shadow-md ring-1 ring-white/5' 
                     : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/40'
@@ -760,14 +763,6 @@ const AppContent: React.FC = () => {
           {/* New Date Selection Button / Nav Item */}
 
         </nav>
-
-        <div className="mt-8 bg-slate-800/40 p-4 rounded-sm border border-slate-800">
-          <p className="text-[9px] font-black text-slate-600 mb-3 tracking-[0.2em] uppercase">CONNECTION STATUS</p>
-          <div className="flex items-center gap-3 text-[10px] text-slate-400 font-mono">
-             <Wifi size={14} className="text-accent-gain" />
-             <span className="truncate">OANDA / LIVE / 12ms</span>
-          </div>
-        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -794,12 +789,12 @@ const AppContent: React.FC = () => {
             {/* Profile & Strategy Switcher Dropdown */}
             <div className="relative group">
               <div className="flex items-center gap-2 md:gap-4 text-sm cursor-pointer hover:opacity-80 transition-opacity">
-                <div className="w-8 h-8 md:w-9 md:h-9 bg-slate-800 border border-white/5 rounded-sm flex items-center justify-center text-[10px] md:text-[11px] font-bold text-slate-300 uppercase tracking-tighter">
+                <div className="w-8 h-8 md:w-9 md:h-9 bg-slate-800 border border-white/5 rounded-sm flex items-center justify-center text-[14px] md:text-[14px] font-bold text-slate-300 uppercase tracking-tighter">
                   TR
                 </div>
                 <div className="hidden sm:flex flex-col items-start">
-                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Workspace</span>
-                  <span className="text-[11px] font-bold text-slate-200 uppercase truncate max-w-[100px]">
+                  <span className="text-[14px] font-mono text-slate-500 uppercase tracking-widest">Workspace</span>
+                  <span className="text-[14px] font-bold text-slate-200 uppercase truncate max-w-[100px]">
                     {activeStrategy?.name || 'Select'}
                   </span>
                 </div>
@@ -815,11 +810,11 @@ const AppContent: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-xs font-bold text-slate-100">TERMINAL_USER</p>
-                      <p className="text-[9px] font-mono text-slate-500">ID: 230934-ALPHA</p>
+                      <p className="text-[14px] font-mono text-slate-500">ID: 230934-ALPHA</p>
                     </div>
                   </div>
                   <div className="h-px bg-slate-800 w-full mb-4"></div>
-                  <span className="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em]">Switch Workspace</span>
+                  <span className="text-[14px] font-black text-slate-600 uppercase tracking-[0.2em]">Switch Workspace</span>
                 </div>
                 
                 <div className="max-h-64 overflow-y-auto custom-scrollbar">
@@ -829,10 +824,10 @@ const AppContent: React.FC = () => {
                       className={`group/row px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-800 transition-colors ${activeStrategyId === s.id ? 'bg-slate-800/50 border-l-2 border-accent-gain' : ''}`}
                     >
                       <div className="flex flex-col flex-1" onClick={() => setActiveStrategyId(s.id)}>
-                        <span className={`text-[11px] font-bold uppercase ${activeStrategyId === s.id ? 'text-accent-gain' : 'text-slate-300'}`}>
+                        <span className={`text-[14px] font-bold uppercase ${activeStrategyId === s.id ? 'text-accent-gain' : 'text-slate-300'}`}>
                           {s.name}
                         </span>
-                        <span className="text-[9px] font-mono text-slate-500">
+                        <span className="text-[14px] font-mono text-slate-500">
                           Equity: ${(s.startingEquity ?? 10000).toLocaleString()}
                         </span>
                       </div>
@@ -870,17 +865,17 @@ const AppContent: React.FC = () => {
                 <div className="p-2 border-t border-slate-800">
                   <button 
                     onClick={() => setIsAddingWorkspace(true)}
-                    className="w-full text-left px-3 py-2 text-[10px] font-mono text-accent-gain hover:bg-slate-800 transition-all uppercase tracking-[0.2em] flex items-center gap-2"
+                    className="w-full text-left px-3 py-2 text-[14px] font-mono text-accent-gain hover:bg-slate-800 transition-all uppercase tracking-[0.2em] flex items-center gap-2"
                   >
                     <Plus size={12} /> New Workspace
                   </button>
                   <button 
                     onClick={() => setActiveView('settings')}
-                    className="w-full text-left px-3 py-2 text-[10px] font-mono text-slate-500 hover:text-slate-200 hover:bg-slate-800 transition-all uppercase tracking-widest"
+                    className="w-full text-left px-3 py-2 text-[14px] font-mono text-slate-500 hover:text-slate-200 hover:bg-slate-800 transition-all uppercase tracking-widest"
                   >
                     Account Settings
                   </button>
-                  <button className="w-full text-left px-3 py-2 text-[10px] font-mono text-accent-loss hover:bg-slate-800 transition-all uppercase tracking-widest">
+                  <button className="w-full text-left px-3 py-2 text-[14px] font-mono text-accent-loss hover:bg-slate-800 transition-all uppercase tracking-widest">
                     Terminate Session
                   </button>
                 </div>
@@ -912,6 +907,15 @@ const AppContent: React.FC = () => {
 
             {activeView === 'analytics' && (
               <AnalyticsView trades={filteredTrades} strategies={strategies} activeStrategyId={activeStrategyId} />
+            )}
+
+            {activeView === 'notes' && (
+              <NotesView 
+                userId={user?.id}
+                subAccounts={subAccounts}
+                activeStrategyId={activeStrategyId}
+                strategies={strategies}
+              />
             )}
 
             {activeView === 'settings' && (
@@ -947,7 +951,7 @@ const AppContent: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Workspace Name</label>
+                  <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Workspace Name</label>
                   <input 
                     autoFocus
                     className="w-full bg-slate-950 border border-slate-800 p-4 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
@@ -956,7 +960,7 @@ const AppContent: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
+                  <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
                   <input 
                     type="number"
                     className="w-full bg-slate-950 border border-slate-800 p-4 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
@@ -983,7 +987,7 @@ const AppContent: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Workspace Name</label>
+                  <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Workspace Name</label>
                   <input 
                     autoFocus
                     className="w-full bg-slate-950 border border-slate-800 p-4 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
@@ -993,7 +997,7 @@ const AppContent: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
+                  <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
                   <input 
                     type="number"
                     className="w-full bg-slate-950 border border-slate-800 p-4 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
@@ -1019,7 +1023,7 @@ const AppContent: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-lg font-black text-slate-100 uppercase tracking-widest">Delete Workspace?</h3>
-                  <p className="text-[10px] text-slate-500 font-mono uppercase tracking-tighter leading-relaxed">
+                  <p className="text-[14px] text-slate-500 font-mono uppercase tracking-tighter leading-relaxed">
                     This action will permanently purge the workspace <span className="text-slate-300 font-bold">"{workspaceToDelete.name}"</span> and all associated trade data. This cannot be undone.
                   </p>
                 </div>
@@ -1028,7 +1032,7 @@ const AppContent: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <button 
                   onClick={() => setIsDeletingWorkspace(false)}
-                  className="py-4 bg-slate-800 text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-700 hover:text-slate-100 transition-all border border-slate-700"
+                  className="py-4 bg-slate-800 text-slate-400 text-[14px] font-bold uppercase tracking-widest hover:bg-slate-700 hover:text-slate-100 transition-all border border-slate-700"
                 >
                   Abort_Action
                 </button>
@@ -1037,7 +1041,7 @@ const AppContent: React.FC = () => {
                     handleDeleteStrategy(workspaceToDelete.id);
                     setIsDeletingWorkspace(false);
                   }}
-                  className="py-4 bg-accent-loss/80 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-accent-loss transition-all shadow-xl"
+                  className="py-4 bg-accent-loss/80 text-white text-[14px] font-bold uppercase tracking-widest hover:bg-accent-loss transition-all shadow-xl"
                 >
                   Confirm_Delete
                 </button>

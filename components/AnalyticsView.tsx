@@ -100,7 +100,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
       </div>
       <div>
         <h3 className="text-base font-bold text-slate-200 tracking-[0.2em] uppercase">{title}</h3>
-        <p className="text-[10px] text-slate-600 font-mono uppercase tracking-tighter mt-0.5">{desc}</p>
+        <p className="text-[14px] text-slate-600 font-mono uppercase tracking-tighter mt-0.5">{desc}</p>
       </div>
     </div>
   );
@@ -113,23 +113,23 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-800/40">
-                <th className="py-5 px-6 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Variable / Tag</th>
-                <th className="py-5 px-6 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Category</th>
-                <th className="py-5 px-6 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Executions</th>
-                <th className="py-5 px-6 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Win Rate</th>
+                <th className="py-5 px-6 text-[14px] font-black text-slate-500 uppercase tracking-[0.2em]">Variable / Tag</th>
+                <th className="py-5 px-6 text-[14px] font-black text-slate-500 uppercase tracking-[0.2em]">Category</th>
+                <th className="py-5 px-6 text-[14px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Executions</th>
+                <th className="py-5 px-6 text-[14px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Win Rate</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/50">
               {data.length > 0 ? data.map((stat, idx) => (
                 <tr key={idx} className="hover:bg-slate-800/40 transition-colors group">
                   <td className="py-4 px-6">
-                    <span className="text-[11px] font-bold text-slate-200 uppercase tracking-tight group-hover:text-white transition-colors">{stat.tag}</span>
+                    <span className="text-[14px] font-bold text-slate-200 uppercase tracking-tight group-hover:text-white transition-colors">{stat.tag}</span>
                   </td>
                   <td className="py-4 px-6">
-                    <span className="text-[9px] font-mono text-slate-500 uppercase tracking-tighter">{stat.categoryName}</span>
+                    <span className="text-[14px] font-mono text-slate-500 uppercase tracking-tighter">{stat.categoryName}</span>
                   </td>
                   <td className="py-4 px-6 text-center">
-                    <span className="text-[10px] font-mono text-slate-400">{stat.totalTrades}</span>
+                    <span className="text-[14px] font-mono text-slate-400">{stat.totalTrades}</span>
                   </td>
                   <td className="py-4 px-6 text-right">
                     <div className="flex items-center justify-end gap-3">
@@ -139,7 +139,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
                           style={{ width: `${stat.winRate}%` }}
                         />
                       </div>
-                      <span className={`text-[10px] font-black font-mono w-10 ${stat.winRate >= 50 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                      <span className={`text-[14px] font-black font-mono w-10 ${stat.winRate >= 50 ? 'text-accent-gain' : 'text-accent-loss'}`}>
                         {stat.winRate.toFixed(0)}%
                       </span>
                     </div>
@@ -148,7 +148,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
               )) : (
                 <tr>
                   <td colSpan={4} className="py-12 text-center">
-                    <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">No variables detected for this selection.</p>
+                    <p className="text-[14px] font-mono text-slate-600 uppercase tracking-widest">No variables detected for this selection.</p>
                   </td>
                 </tr>
               )}
@@ -163,16 +163,16 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
           <div key={idx} className="bg-slate-800/30 border border-slate-800 p-4 rounded-sm space-y-3">
             <div className="flex justify-between items-start">
               <div className="space-y-1">
-                <span className="text-[8px] font-mono text-slate-600 uppercase tracking-widest">{stat.categoryName}</span>
+                <span className="text-[13px] font-mono text-slate-600 uppercase tracking-widest">{stat.categoryName}</span>
                 <h4 className="text-xs font-black text-slate-100 uppercase tracking-tight">{stat.tag}</h4>
               </div>
               <div className="text-right">
-                <span className="text-[8px] font-mono text-slate-600 uppercase block mb-1">Executions</span>
-                <span className="text-[10px] font-mono text-slate-300">{stat.totalTrades}</span>
+                <span className="text-[13px] font-mono text-slate-600 uppercase block mb-1">Executions</span>
+                <span className="text-[14px] font-mono text-slate-300">{stat.totalTrades}</span>
               </div>
             </div>
             <div className="flex items-center justify-between pt-2 border-t border-slate-800/50">
-              <span className="text-[8px] font-mono text-slate-600 uppercase">Win Rate</span>
+              <span className="text-[13px] font-mono text-slate-600 uppercase">Win Rate</span>
               <div className="flex items-center gap-2">
                 <div className="w-16 h-1 bg-slate-900 rounded-full overflow-hidden">
                   <div 
@@ -180,7 +180,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
                     style={{ width: `${stat.winRate}%` }}
                   />
                 </div>
-                <span className={`text-[10px] font-black font-mono ${stat.winRate >= 50 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                <span className={`text-[14px] font-black font-mono ${stat.winRate >= 50 ? 'text-accent-gain' : 'text-accent-loss'}`}>
                   {stat.winRate.toFixed(0)}%
                 </span>
               </div>
@@ -188,7 +188,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
           </div>
         )) : (
           <div className="bg-slate-800/20 border border-dashed border-slate-800 p-8 text-center">
-            <p className="text-[9px] font-mono text-slate-600 uppercase tracking-widest">No variables detected.</p>
+            <p className="text-[14px] font-mono text-slate-600 uppercase tracking-widest">No variables detected.</p>
           </div>
         )}
       </div>
@@ -219,7 +219,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-[clamp(1.875rem,5vw,3rem)] font-black text-slate-100 uppercase tracking-tight mb-2">Neural Edge Analytics</h2>
-          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em]">Statistical validation of execution variables</p>
+          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-[0.3em]">Statistical validation of execution variables</p>
         </div>
       </div>
 
@@ -227,7 +227,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
       <div className="space-y-6">
         <div className="flex items-center gap-3">
           <Trophy size={18} className="text-accent-gain" />
-          <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">Edge Leaderboard (Min 2 Trades)</h3>
+          <h3 className="text-[14px] font-black text-slate-400 uppercase tracking-[0.4em]">Edge Leaderboard (Min 2 Trades)</h3>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -238,16 +238,16 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
               </div>
               <div className="relative z-10 space-y-6">
                 <div className="space-y-1">
-                  <span className="text-[8px] font-mono text-slate-600 uppercase tracking-widest">{stat.categoryName}</span>
+                  <span className="text-[13px] font-mono text-slate-600 uppercase tracking-widest">{stat.categoryName}</span>
                   <h4 className="text-xl font-black text-slate-100 uppercase tracking-tight">{stat.tag}</h4>
                 </div>
                 <div className="flex items-end justify-between gap-4">
                   <div>
-                    <span className="text-[7px] font-mono text-slate-600 uppercase block mb-1">Win Rate</span>
+                    <span className="text-[12px] font-mono text-slate-600 uppercase block mb-1">Win Rate</span>
                     <span className="text-base font-black text-accent-gain">{stat.winRate.toFixed(1)}%</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-[7px] font-mono text-slate-600 uppercase block mb-1">Net PnL</span>
+                    <span className="text-[12px] font-mono text-slate-600 uppercase block mb-1">Net PnL</span>
                     <span className={`text-base font-black ${stat.totalPnL >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
                       ${stat.totalPnL.toLocaleString()}
                     </span>
@@ -257,7 +257,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
             </div>
           )) : (
             <div className="col-span-full bg-slate-800/20 border border-dashed border-slate-800 p-12 text-center">
-              <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">Insufficient data for leaderboard generation. Record more executions.</p>
+              <p className="text-[14px] font-mono text-slate-600 uppercase tracking-widest">Insufficient data for leaderboard generation. Record more executions.</p>
             </div>
           )}
         </div>
@@ -268,7 +268,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <BarChart3 size={18} className="text-slate-500" />
-            <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.4em]">Variable Performance Matrix</h3>
+            <h3 className="text-[14px] font-black text-slate-400 uppercase tracking-[0.4em]">Variable Performance Matrix</h3>
           </div>
           
           <div className="flex bg-slate-900 border border-slate-800 p-1 rounded-sm">
@@ -276,7 +276,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
               <button
                 key={layer}
                 onClick={() => setSelectedLayer(layer)}
-                className={`px-3 py-1.5 text-[9px] font-mono uppercase tracking-widest transition-all ${
+                className={`px-3 py-1.5 text-[14px] font-mono uppercase tracking-widest transition-all ${
                   selectedLayer === layer 
                     ? 'bg-slate-800 text-white shadow-sm' 
                     : 'text-slate-600 hover:text-slate-400'

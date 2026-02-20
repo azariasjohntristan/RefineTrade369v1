@@ -148,11 +148,11 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-[0.3em] mb-1">CORE_TERMINAL_V4 // ED-230934</p>
+          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-[0.3em] mb-1">CORE_TERMINAL_V4 // ED-230934</p>
           <h2 className="text-4xl md:text-5xl font-black text-slate-100 uppercase tracking-tighter">EQUITY_NEXUS</h2>
         </div>
         <div className="text-right">
-          <p className="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-1 flex items-center justify-end gap-2">
+          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-1 flex items-center justify-end gap-2">
             GLOBAL CUMULATIVE EQUITY <Activity size={10} className="text-accent-gain" />
           </p>
           <p className="text-3xl font-black text-accent-gain tracking-tight">
@@ -164,26 +164,26 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
-          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">NET P&L</p>
+          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-4">NET P&L</p>
           <p className={`text-3xl font-black tracking-tight ${totalPnL >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
             {totalPnL >= 0 ? '' : '-'}${Math.abs(totalPnL).toLocaleString()}
           </p>
-          <p className="text-[9px] font-mono text-slate-600 uppercase mt-2">CUMULATIVE_YIELD</p>
+          <p className="text-[14px] font-mono text-slate-600 uppercase mt-2">CUMULATIVE_YIELD</p>
         </div>
         <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
-          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">PROFIT FACTOR</p>
+          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-4">PROFIT FACTOR</p>
           <p className="text-3xl font-black text-slate-100 tracking-tight">{profitFactor}</p>
-          <p className="text-[9px] font-mono text-accent-gain uppercase mt-2">OPTIMAL</p>
+          <p className="text-[14px] font-mono text-accent-gain uppercase mt-2">OPTIMAL</p>
         </div>
         <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
-          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">AVG R:R</p>
+          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-4">AVG R:R</p>
           <p className="text-3xl font-black text-slate-100 tracking-tight">{avgRR}</p>
-          <p className="text-[9px] font-mono text-slate-600 uppercase mt-2">BASED ON {trades.length} EXECUTIONS</p>
+          <p className="text-[14px] font-mono text-slate-600 uppercase mt-2">BASED ON {trades.length} EXECUTIONS</p>
         </div>
         <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
-          <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-4">MAX DRAWDOWN</p>
+          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-4">MAX DRAWDOWN</p>
           <p className="text-3xl font-black text-slate-100 tracking-tight">0%</p>
-          <p className="text-[9px] font-mono text-orange-500/70 uppercase mt-2">LIMIT: 5.0%</p>
+          <p className="text-[14px] font-mono text-orange-500/70 uppercase mt-2">LIMIT: 5.0%</p>
         </div>
       </div>
 
@@ -191,10 +191,10 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-slate-800/30 border border-slate-800 p-6 rounded-sm flex flex-col min-h-[400px]">
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-[11px] font-black text-orange-500 uppercase tracking-[0.3em]">EQUITY GROWTH // NEURAL PATH</h3>
+            <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">EQUITY GROWTH // NEURAL PATH</h3>
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-accent-gain animate-pulse"></div>
-              <span className="text-[8px] font-mono text-slate-500 uppercase">STREAM_ACTIVE</span>
+              <span className="text-[13px] font-mono text-slate-500 uppercase">STREAM_ACTIVE</span>
             </div>
           </div>
           <div className="flex-1">
@@ -242,7 +242,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
 
         <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm flex flex-col">
           <div className="flex justify-between items-center mb-8">
-            <h3 className="text-[11px] font-black text-orange-500 uppercase tracking-[0.3em]">LOGIC DISTRIBUTION</h3>
+            <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">LOGIC DISTRIBUTION</h3>
             <PieChartIcon size={14} className="text-slate-600" />
           </div>
           <div className="flex-1 flex flex-col items-center justify-center">
@@ -265,7 +265,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[10px] font-mono text-slate-500 uppercase">WIN RATE</span>
+                <span className="text-[14px] font-mono text-slate-500 uppercase">WIN RATE</span>
                 <span className="text-4xl font-black text-slate-100">{winRate}%</span>
               </div>
             </div>
@@ -273,7 +273,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
             <div className="w-full mt-8 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <div className="flex justify-between text-[10px] font-mono text-slate-500 uppercase">
+                  <div className="flex justify-between text-[14px] font-mono text-slate-500 uppercase">
                     <span>WINS</span>
                     <span>{winCount}</span>
                   </div>
@@ -282,7 +282,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between text-[10px] font-mono text-slate-500 uppercase">
+                  <div className="flex justify-between text-[14px] font-mono text-slate-500 uppercase">
                     <span>LOSSES</span>
                     <span>{lossCount}</span>
                   </div>
@@ -293,7 +293,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
               </div>
 
               <div className="pt-4 border-t border-slate-800/50">
-                <p className="text-[8px] font-mono text-slate-600 uppercase tracking-widest mb-3">STRATEGY_PERFORMANCE</p>
+                <p className="text-[13px] font-mono text-slate-600 uppercase tracking-widest mb-3">STRATEGY_PERFORMANCE</p>
                 <div className="space-y-2 max-h-[100px] overflow-y-auto custom-scrollbar pr-2">
                   {Object.entries(trades.reduce((acc, t) => {
                     const stratName = t.strategyId || 'UNTAGGED';
@@ -302,7 +302,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                     if (t.pnl > 0) acc[stratName].w++;
                     return acc;
                   }, {} as Record<string, { w: number; t: number }>)).map(([name, stats]: [string, { w: number; t: number }]) => (
-                    <div key={name} className="flex items-center justify-between text-[9px] font-mono">
+                    <div key={name} className="flex items-center justify-between text-[14px] font-mono">
                       <span className="text-slate-400 truncate max-w-[120px]">{name.replace('strat-', '').replace('-', ' ').toUpperCase()}</span>
                       <span className="text-slate-200">{(stats.w / stats.t * 100).toFixed(0)}% WR</span>
                     </div>
@@ -320,10 +320,10 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
               <CalendarIcon size={14} className="text-orange-500" />
-              <h3 className="text-[11px] font-black text-orange-500 uppercase tracking-[0.3em]">P&L CALENDAR</h3>
+              <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">P&L CALENDAR</h3>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-[10px] font-mono text-slate-300 uppercase tracking-widest">
+              <span className="text-[14px] font-mono text-slate-300 uppercase tracking-widest">
                 {currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </span>
               <div className="flex gap-1">
@@ -346,7 +346,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
           <div className="flex-1 flex flex-col">
             <div className="grid grid-cols-7 gap-1 mb-2">
               {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(d => (
-                <div key={d} className="text-center text-[8px] font-mono text-slate-600 uppercase py-1">{d}</div>
+                <div key={d} className="text-center text-[13px] font-mono text-slate-600 uppercase py-1">{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-1 flex-1">
@@ -361,10 +361,10 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                 >
                   {day.day && (
                     <>
-                      <span className="text-[9px] font-mono text-slate-600 absolute top-2 left-2">{day.day}</span>
+                      <span className="text-[14px] font-mono text-slate-600 absolute top-2 left-2">{day.day}</span>
                       {day.pnl !== 0 && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <span className={`text-[10px] font-black font-mono ${day.pnl > 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                          <span className={`text-[14px] font-black font-mono ${day.pnl > 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
                             {day.pnl > 0 ? '+' : ''}{day.pnl.toFixed(0)}
                           </span>
                         </div>
@@ -381,7 +381,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-3">
               <ShieldCheck size={14} className="text-orange-500" />
-              <h3 className="text-[11px] font-black text-orange-500 uppercase tracking-[0.3em]">TRADING RULES</h3>
+              <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">TRADING RULES</h3>
             </div>
             <button 
               onClick={() => {
@@ -397,7 +397,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
             {rules.map((rule, idx) => (
               <div key={idx} className="group flex items-start gap-3 bg-slate-900/50 p-3 border border-slate-800/50 rounded-sm">
                 <div className="w-1.5 h-1.5 rounded-full bg-orange-500/50 mt-1.5 shrink-0"></div>
-                <p className="text-[11px] font-mono text-slate-300 leading-relaxed flex-1">{rule}</p>
+                <p className="text-[14px] font-mono text-slate-300 leading-relaxed flex-1">{rule}</p>
                 {isEditingRules && (
                   <button 
                     onClick={(e) => {
@@ -420,7 +420,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                   onChange={(e) => setNewRule(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addRule()}
                   placeholder="NEW_RULE..."
-                  className="flex-1 bg-slate-900 border border-slate-800 px-3 py-2 text-[10px] font-mono text-slate-300 outline-none focus:border-orange-500/50"
+                  className="flex-1 bg-slate-900 border border-slate-800 px-3 py-2 text-[14px] font-mono text-slate-300 outline-none focus:border-orange-500/50"
                 />
                 <button 
                   onClick={addRule}
@@ -434,7 +434,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
             {rules.length === 0 && !isEditingRules && (
               <div className="h-full flex flex-col items-center justify-center text-center py-10">
                 <AlertCircle size={24} className="text-slate-800 mb-3" />
-                <p className="text-[10px] font-mono text-slate-700 uppercase tracking-widest">NO_RULES_DEFINED</p>
+                <p className="text-[14px] font-mono text-slate-700 uppercase tracking-widest">NO_RULES_DEFINED</p>
               </div>
             )}
           </div>

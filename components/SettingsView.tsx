@@ -11,7 +11,8 @@ import {
   Check,
   Loader2,
   LogOut,
-  CreditCard
+  CreditCard,
+  Wifi
 } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { Profile, SubAccount, Trade } from '../types'
@@ -330,7 +331,7 @@ export default function SettingsView({
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-slate-100 uppercase tracking-wider">Settings</h1>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-100 uppercase tracking-tighter">Settings</h1>
           <p className="text-xs text-slate-500 font-mono mt-1">Manage your account and preferences</p>
         </div>
         {profile && (
@@ -340,10 +341,19 @@ export default function SettingsView({
             </div>
             <div className="flex flex-col">
               <span className="text-xs font-bold text-slate-200">{profile.name}</span>
-              <span className="text-[10px] text-slate-500 uppercase">{profile.plan} Plan</span>
+              <span className="text-[14px] text-slate-500 uppercase">{profile.plan} Plan</span>
             </div>
           </div>
         )}
+      </div>
+
+      {/* Connection Status */}
+      <div className="bg-slate-800/40 p-4 rounded-sm border border-slate-800">
+        <p className="text-[14px] font-black text-slate-600 mb-3 tracking-[0.2em] uppercase">Connection Status</p>
+        <div className="flex items-center gap-3 text-[14px] text-slate-400 font-mono">
+          <Wifi size={14} className="text-accent-gain" />
+          <span className="truncate">OANDA / LIVE / 12ms</span>
+        </div>
       </div>
 
       {message && (
@@ -385,7 +395,7 @@ export default function SettingsView({
             
             <div className="grid gap-4 max-w-md">
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Display Name</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Display Name</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -404,14 +414,14 @@ export default function SettingsView({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Email</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Email</label>
                 <input
                   type="email"
                   value={profile?.email || ''}
                   disabled
                   className="w-full bg-slate-800 border border-slate-800 px-4 py-3 text-xs text-slate-500 font-mono cursor-not-allowed"
                 />
-                <p className="text-[10px] text-slate-600">Email cannot be changed</p>
+                <p className="text-[14px] text-slate-600">Email cannot be changed</p>
               </div>
             </div>
           </section>
@@ -423,7 +433,7 @@ export default function SettingsView({
             
             <div className="grid gap-4 max-w-md">
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Current Password</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Current Password</label>
                 <input
                   type="password"
                   value={currentPassword}
@@ -432,7 +442,7 @@ export default function SettingsView({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">New Password</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">New Password</label>
                 <input
                   type="password"
                   value={newPassword}
@@ -441,7 +451,7 @@ export default function SettingsView({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Confirm New Password</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Confirm New Password</label>
                 <input
                   type="password"
                   value={confirmPassword}
@@ -467,7 +477,7 @@ export default function SettingsView({
             <div className="flex items-center justify-between max-w-md">
               <div>
                 <p className="text-xs text-slate-300 font-bold">Delete Account</p>
-                <p className="text-[10px] text-slate-500">Permanently delete your account and all data</p>
+                <p className="text-[14px] text-slate-500">Permanently delete your account and all data</p>
               </div>
               <button
                 onClick={() => setIsDeletingAccount(true)}
@@ -503,7 +513,7 @@ export default function SettingsView({
             
             <div className="grid gap-4 max-w-md">
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Timezone</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Timezone</label>
                 <select
                   value={timezone}
                   onChange={(e) => setTimezone(e.target.value)}
@@ -545,7 +555,7 @@ export default function SettingsView({
                   <div key={sub.id} className="flex items-center justify-between p-4 bg-slate-950 border border-slate-800">
                     <div>
                       <p className="text-xs font-bold text-slate-200">{sub.name}</p>
-                      <p className="text-[10px] text-slate-500 font-mono">
+                      <p className="text-[14px] text-slate-500 font-mono">
                         Equity: ${sub.starting_equity.toLocaleString()} · {sub.timezone}
                       </p>
                     </div>
@@ -557,13 +567,13 @@ export default function SettingsView({
                           setEditSubAccountEquity(sub.starting_equity.toString())
                           setEditSubAccountTimezone(sub.timezone)
                         }}
-                        className="px-3 py-1 text-[10px] text-slate-500 hover:text-slate-200"
+                        className="px-3 py-1 text-[14px] text-slate-500 hover:text-slate-200"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteSubAccount(sub.id)}
-                        className="px-3 py-1 text-[10px] text-accent-loss hover:text-accent-loss/80"
+                        className="px-3 py-1 text-[14px] text-accent-loss hover:text-accent-loss/80"
                       >
                         Delete
                       </button>
@@ -574,7 +584,7 @@ export default function SettingsView({
             </div>
 
             {profile?.plan === 'free' && (
-              <p className="text-[10px] text-slate-500 bg-slate-800/50 p-3">
+              <p className="text-[14px] text-slate-500 bg-slate-800/50 p-3">
                 Free plan: {subAccounts.length}/1 sub-accounts · Upgrade to Pro for unlimited
               </p>
             )}
@@ -607,7 +617,7 @@ export default function SettingsView({
                 Export CSV
               </button>
             </div>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[14px] text-slate-500">
               {trades.length} trades available for export
             </p>
           </section>
@@ -633,7 +643,7 @@ export default function SettingsView({
                   disabled:opacity-50"
               />
             </label>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[14px] text-slate-500">
               Import trades from a JSON file. Format: array of trade objects.
             </p>
           </section>
@@ -646,7 +656,7 @@ export default function SettingsView({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-300 font-bold">Clear All Trades</p>
-                <p className="text-[10px] text-slate-500">This action cannot be undone</p>
+                <p className="text-[14px] text-slate-500">This action cannot be undone</p>
               </div>
               <button
                 onClick={() => setIsClearingTrades(true)}
@@ -672,13 +682,13 @@ export default function SettingsView({
             <p className="text-xs text-slate-400">
               This will permanently delete your account and ALL associated data including:
             </p>
-            <ul className="text-[10px] text-slate-500 list-disc pl-4 space-y-1">
+            <ul className="text-[14px] text-slate-500 list-disc pl-4 space-y-1">
               <li>All trades</li>
               <li>All sub-accounts</li>
               <li>Your profile</li>
             </ul>
             <div className="space-y-2">
-              <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Enter your password to confirm</label>
+              <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Enter your password to confirm</label>
               <input
                 type="password"
                 value={deleteAccountPassword}
@@ -734,7 +744,7 @@ export default function SettingsView({
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Name</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Name</label>
                 <input
                   type="text"
                   value={newSubAccountName}
@@ -744,7 +754,7 @@ export default function SettingsView({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
                 <input
                   type="number"
                   value={newSubAccountEquity}
@@ -776,7 +786,7 @@ export default function SettingsView({
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Name</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Name</label>
                 <input
                   type="text"
                   value={editSubAccountName}
@@ -785,7 +795,7 @@ export default function SettingsView({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Starting Equity ($)</label>
                 <input
                   type="number"
                   value={editSubAccountEquity}
@@ -794,7 +804,7 @@ export default function SettingsView({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Timezone</label>
+                <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Timezone</label>
                 <select
                   value={editSubAccountTimezone}
                   onChange={(e) => setEditSubAccountTimezone(e.target.value)}

@@ -242,3 +242,97 @@ create trigger update_trades_updated_at before update on trades
 -- MIGRATION: Add rules column if not exists (run this if table already exists)
 -- ============================================================================
 -- ALTER TABLE sub_accounts ADD COLUMN IF NOT EXISTS rules text[] DEFAULT '{}';
+
+-- ============================================================================
+-- NOTE CATEGORIES TABLE
+-- ============================================================================
+create table note_categories (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references profiles(id) on delete cascade not null,
+  name text not null,
+  color text default '#64748b',
+  created_at timestamptz default now()
+);
+
+-- ============================================================================
+-- NOTES TABLE
+-- ============================================================================
+create table notes (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references profiles(id) on delete cascade not null,
+  category_id uuid references note_categories(id) on delete cascade,
+  content text not null,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+-- ============================================================================
+-- INDEXES
+-- ============================================================================
+create index idx_note_categories_user_id on note_categories(user_id);
+create index idx_notes_user_id on notes(user_id);
+create index idx_notes_category_id on notes(category_id);
+
+-- ============================================================================
+-- ENABLE ROW LEVEL SECURITY
+-- ============================================================================
+alter table note_categories enable row level security;
+alter table notes enable row level security;
+
+-- ============================================================================
+-- RLS POLICIES: NOTE CATEGORIES
+-- ============================================================================
+create policy "Users can view own note categories"
+  on note_categories for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own note categories"
+  on note_categories for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own note categories"
+  on note_categories for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own note categories"
+  on note_categories for delete
+  using (auth.uid() = user_id);
+
+-- ============================================================================
+-- RLS POLICIES: NOTES
+-- ============================================================================
+create policy "Users can view own notes"
+  on notes for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert own notes"
+  on notes for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update own notes"
+  on notes for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete own notes"
+  on notes for delete
+  using (auth.uid() = user_id);
+
+-- ============================================================================
+-- FUNCTION: Update updated_at timestamp for notes
+-- ============================================================================
+create or replace function update_notes_updated_at_column()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists update_notes_updated_at on notes;
+create trigger update_notes_updated_at before update on notes
+  for each row execute function update_notes_updated_at_column();
+
+-- ============================================================================
+-- DEFAULT NOTE CATEGORIES (run after tables are created)
+-- ============================================================================
+-- These will be created via the app when a user first uses the Notes feature
