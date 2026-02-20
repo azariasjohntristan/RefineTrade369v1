@@ -3,7 +3,6 @@ import {
   LayoutDashboard, 
   ScrollText, 
   BarChart2, 
- 
   Settings,
   Bell,
   Search,
@@ -12,7 +11,6 @@ import {
   X,
   Menu,
   Layers,
-  Calendar,
   Plus,
   Edit3,
   Trash2,
@@ -26,201 +24,11 @@ import TradeForm from './components/TradeForm';
 import StrategyBuilder from './components/StrategyBuilder';
 import AnalyticsView from './components/AnalyticsView';
 import DashboardView from './components/DashboardView';
-import { Trade, ViewState, Strategy } from './types';
-
-// Initial Mock Data with 10 Feb Trades updated to match new default strategy structure
-const INITIAL_TRADES: Trade[] = [
-  { 
-    id: 'f10', 
-    time: '2024-02-28T14:20:00Z', 
-    pair: 'NQ', 
-    type: 'SHORT', 
-    size: '1.5 Lot', 
-    entry: 17850.25, 
-    exit: 17900.50, 
-    pnl: -450.00, 
-    status: 'loss', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['NQ'],
-      'cat-sr-logic': ['MINOR_S/R'],
-      'cat-risk-mgt': ['FIXED_1%'],
-      'cat-neural-state': ['HESITANT']
-    },
-    reflection: 'EXITS WERE SLOPPY. MOVED STOP TO BREAKEVEN TOO LATE.'
-  },
-  { 
-    id: 'f9', 
-    time: '2024-02-27T09:15:00Z', 
-    pair: 'NQ', 
-    type: 'LONG', 
-    size: '2.0 Lot', 
-    entry: 17750.00, 
-    exit: 17825.00, 
-    pnl: 1500.00, 
-    status: 'gain', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['NQ'],
-      'cat-sr-logic': ['MAJOR_S/R', 'VBP_POC'],
-      'cat-risk-mgt': ['SCALED_ENTRY'],
-      'cat-neural-state': ['OPTIMAL_FLOW']
-    },
-    reflection: 'SOLID CONFLUENCE AT PSYCHOLOGICAL LEVEL.'
-  },
-  { 
-    id: 'f8', 
-    time: '2024-02-25T20:30:00Z', 
-    pair: 'ES', 
-    type: 'SHORT', 
-    size: '1.0 Lot', 
-    entry: 5080.25, 
-    exit: 5070.25, 
-    pnl: 500.00, 
-    status: 'gain', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['ES'],
-      'cat-sr-logic': ['DYNAMIC_EMA'],
-      'cat-risk-mgt': ['FIXED_1%'],
-      'cat-neural-state': ['OPTIMAL_FLOW']
-    },
-    reflection: 'TREND FOLLOWING AT ITS BEST. CLEAN REJECTION.'
-  },
-  { 
-    id: 'f7', 
-    time: '2024-02-22T15:00:00Z', 
-    pair: 'NQ', 
-    type: 'LONG', 
-    size: '1.0 Lot', 
-    entry: 17950.00, 
-    exit: 17940.00, 
-    pnl: -200.00, 
-    status: 'loss', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['NQ'],
-      'cat-sr-logic': ['VBP_POC'],
-      'cat-risk-mgt': ['AGGRESSIVE'],
-      'cat-neural-state': ['FOMO_IMPULSE']
-    },
-    reflection: 'CHASED THE PUMP. LEARN TO WAIT FOR THE PULLBACK.'
-  },
-  { 
-    id: 'f6', 
-    time: '2024-02-19T11:45:00Z', 
-    pair: 'NQ', 
-    type: 'LONG', 
-    size: '0.5 Lot', 
-    entry: 17815.00, 
-    exit: 17832.00, 
-    pnl: 850.00, 
-    status: 'gain', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['NQ'],
-      'cat-sr-logic': ['MAJOR_S/R'],
-      'cat-risk-mgt': ['FIXED_1%'],
-      'cat-neural-state': ['OPTIMAL_FLOW']
-    },
-    reflection: 'PATIENT EXECUTION AT PREVIOUS DAY LOW.'
-  },
-  { 
-    id: 'f5', 
-    time: '2024-02-15T13:20:00Z', 
-    pair: 'ES', 
-    type: 'SHORT', 
-    size: '3.0 Lot', 
-    entry: 5078.00, 
-    exit: 5081.50, 
-    pnl: -1050.00, 
-    status: 'loss', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['ES'],
-      'cat-sr-logic': ['DYNAMIC_EMA'],
-      'cat-risk-mgt': ['FIXED_1%'],
-      'cat-neural-state': ['HESITANT']
-    },
-    reflection: 'COUNTER-TREND ATTEMPT FAILED. STICK TO THE BIAS.'
-  },
-  { 
-    id: 'f4', 
-    time: '2024-02-12T08:00:00Z', 
-    pair: 'NQ', 
-    type: 'SHORT', 
-    size: '2.0 Lot', 
-    entry: 17989.50, 
-    exit: 17988.20, 
-    pnl: 1730.00, 
-    status: 'gain', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['NQ'],
-      'cat-sr-logic': ['MAJOR_S/R'],
-      'cat-risk-mgt': ['SCALED_ENTRY'],
-      'cat-neural-state': ['OPTIMAL_FLOW']
-    },
-    reflection: 'LONDON OPEN VOLATILITY WORKED IN FAVOR.'
-  },
-  { 
-    id: 'f3', 
-    time: '2024-02-08T16:40:00Z', 
-    pair: 'NQ', 
-    type: 'LONG', 
-    size: '0.1 BTC', 
-    entry: 17844.00, 
-    exit: 17845.00, 
-    pnl: 160.00, 
-    status: 'gain', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['NQ'],
-      'cat-sr-logic': ['VBP_POC', 'MAJOR_S/R'],
-      'cat-risk-mgt': ['FIXED_1%'],
-      'cat-neural-state': ['OPTIMAL_FLOW']
-    },
-    reflection: 'LONG TERM POSITIONING. MACRO BIAS IS BULLISH.'
-  },
-  { 
-    id: 'f2', 
-    time: '2024-02-04T12:10:00Z', 
-    pair: 'NQ', 
-    type: 'SHORT', 
-    size: '1.2 Lot', 
-    entry: 17820.50, 
-    exit: 17830.00, 
-    pnl: -1140.00, 
-    status: 'loss', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['NQ'],
-      'cat-sr-logic': ['MINOR_S/R'],
-      'cat-risk-mgt': ['AGGRESSIVE'],
-      'cat-neural-state': ['FOMO_IMPULSE']
-    },
-    reflection: 'STOP HUNTED BEFORE THE MOVE. SPREADS WERE WIDE.'
-  },
-  { 
-    id: 'f1', 
-    time: '2024-02-01T10:00:00Z', 
-    pair: 'NQ', 
-    type: 'LONG', 
-    size: '2.5 Lot', 
-    entry: 17808.20, 
-    exit: 17810.95, 
-    pnl: 1875.00, 
-    status: 'gain', 
-    strategyId: 'strat-default-sr',
-    selections: {
-      'cat-instrument': ['NQ'],
-      'cat-sr-logic': ['MAJOR_S/R'],
-      'cat-risk-mgt': ['FIXED_1%'],
-      'cat-neural-state': ['OPTIMAL_FLOW']
-    },
-    reflection: 'INITIAL FEB GAIN. FOLLOWED THE PLAN PERFECTLY.'
-  },
-];
+import SettingsView from './components/SettingsView';
+import AuthForm from './components/AuthForm';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { supabase } from './lib/supabase';
+import { Trade, ViewState, Strategy, SubAccount, StrategyConfig } from './types';
 
 const DEFAULT_STRATEGY: Strategy = {
   id: 'strat-default-sr',
@@ -280,13 +88,24 @@ const DEFAULT_STRATEGY: Strategy = {
 };
 
 const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+};
+
+const AppContent: React.FC = () => {
+  const { user, profile, loading: authLoading, signIn, signUp, signOut } = useAuth();
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoadingState, setAuthLoadingState] = useState(false);
   const [activeView, setActiveView] = useState<ViewState>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedDateFilter, setSelectedDateFilter] = useState<string>(new Date().toISOString().split('T')[0]);
   
   const [trades, setTrades] = useState<Trade[]>(() => {
     const saved = localStorage.getItem('trades');
-    return saved ? JSON.parse(saved) : INITIAL_TRADES;
+    return saved ? JSON.parse(saved) : [];
   });
   const [strategies, setStrategies] = useState<Strategy[]>(() => {
     const saved = localStorage.getItem('strategies_v2');
@@ -296,6 +115,8 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('activeStrategyId');
     return saved && strategies.find(s => s.id === saved) ? saved : (strategies[0]?.id || 'strat-default-sr');
   });
+  const [subAccounts, setSubAccounts] = useState<SubAccount[]>([]);
+  const [strategyConfigs, setStrategyConfigs] = useState<Record<string, StrategyConfig>>({});
 
   const [isEditingWorkspace, setIsEditingWorkspace] = useState(false);
   const [isAddingWorkspace, setIsAddingWorkspace] = useState(false);
@@ -324,24 +145,312 @@ const App: React.FC = () => {
     setIsSidebarOpen(false);
   }, [activeView]);
 
-  const handleAddTrade = (newTradeData: Omit<Trade, 'id' | 'status'>) => {
+  // Load subAccounts from Supabase when user logs in
+  useEffect(() => {
+    if (user) {
+      loadSubAccounts();
+    } else {
+      setSubAccounts([]);
+    }
+  }, [user]);
+
+  // Load trades from Supabase when user logs in
+  useEffect(() => {
+    if (user) {
+      loadTrades();
+    }
+  }, [user]);
+
+  // Realtime subscription for profile changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('profile-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` },
+        (payload) => {
+          console.log('Profile changed:', payload);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
+  async function loadSubAccounts() {
+    const { data: subAccountsData } = await supabase
+      .from('sub_accounts')
+      .select('*')
+      .eq('user_id', user?.id)
+      .order('created_at', { ascending: true });
+    
+    if (subAccountsData && subAccountsData.length > 0) {
+      // Load strategy configs for all subaccounts
+      const subAccountIds = subAccountsData.map(sa => sa.id);
+      const { data: configsData } = await supabase
+        .from('strategy_configs')
+        .select('*')
+        .in('sub_account_id', subAccountIds);
+
+      // Build configs map
+      const configsMap: Record<string, StrategyConfig> = {};
+      if (configsData) {
+        configsData.forEach(config => {
+          // Parse layers if it's a string
+          const parsedLayers = typeof config.layers === 'string' 
+            ? JSON.parse(config.layers) 
+            : config.layers;
+          configsMap[config.sub_account_id] = {
+            ...config,
+            layers: parsedLayers
+          };
+        });
+      }
+      setStrategyConfigs(configsMap);
+
+      // Convert sub_accounts to strategies format (merge with config layers if exists)
+      const convertedStrategies = subAccountsData.map(sa => {
+        const config = configsMap[sa.id];
+        return {
+          id: sa.id,
+          name: sa.name,
+          startingEquity: sa.starting_equity,
+          layers: config?.layers || DEFAULT_STRATEGY.layers,
+          createdAt: new Date(sa.created_at).toLocaleDateString()
+        };
+      });
+      setStrategies(convertedStrategies);
+      setSubAccounts(subAccountsData);
+      
+      // Set first workspace as active if none selected
+      if (!activeStrategyId || !subAccountsData.find(s => s.id === activeStrategyId)) {
+        setActiveStrategyId(subAccountsData[0].id);
+      }
+    } else {
+      // First login - create default workspace
+      await createDefaultWorkspace();
+    }
+  }
+
+  async function createDefaultWorkspace() {
+    const { data, error } = await supabase
+      .from('sub_accounts')
+      .insert({
+        user_id: user?.id,
+        name: 'SUPPORT AND RESISTANCE',
+        starting_equity: 10000,
+        timezone: 'UTC'
+      })
+      .select()
+      .single();
+
+    if (data && !error) {
+      const freshLayers = {
+        layer1: DEFAULT_STRATEGY.layers.layer1,
+        layer2: [],
+        layer3: [],
+        layer4: []
+      };
+
+      // Create strategy config in Supabase
+      const { data: configData } = await supabase
+        .from('strategy_configs')
+        .insert({
+          sub_account_id: data.id,
+          name: data.name,
+          layers: freshLayers
+        })
+        .select()
+        .single();
+
+      // Update strategy config state
+      if (configData) {
+        setStrategyConfigs({ [data.id]: configData });
+      }
+
+      const freshStrategy = {
+        ...DEFAULT_STRATEGY,
+        id: data.id,
+        name: data.name,
+        startingEquity: data.starting_equity,
+        layers: freshLayers
+      };
+      setStrategies([freshStrategy]);
+      setActiveStrategyId(data.id);
+      setSubAccounts([data]);
+    }
+  }
+
+  async function loadTrades() {
+    const { data } = await supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', user?.id)
+      .order('created_at', { ascending: false });
+    
+    if (data) {
+      // Map sub_account_id to strategyId for local state
+      const mappedTrades: Trade[] = data.map(t => ({
+        id: t.id,
+        time: t.time,
+        pair: t.pair,
+        type: t.type,
+        size: t.size,
+        entry: t.entry,
+        exit: t.exit,
+        pnl: t.pnl,
+        status: t.status,
+        notes: t.notes,
+        reflection: t.reflection,
+        selections: t.selections,
+        screenshots: t.screenshots,
+        strategyId: t.sub_account_id
+      }));
+      setTrades(mappedTrades);
+    }
+  }
+
+  const handleAuth = async (email: string, password: string, name?: string) => {
+    setAuthError(null);
+    setAuthLoadingState(true);
+    
+    const { error } = authMode === 'login'
+      ? await signIn(email, password)
+      : await signUp(email, password, name || 'Trader');
+    
+    if (error) {
+      setAuthError(error.message);
+    }
+    setAuthLoadingState(false);
+  };
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-slate-500 font-mono text-xs uppercase tracking-widest">Loading...</div>
+      </div>
+    );
+  }
+
+  // Show auth form if not logged in
+  if (!user) {
+    return (
+      <AuthForm
+        mode={authMode}
+        onSubmit={handleAuth}
+        onSwitchMode={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
+        loading={authLoadingState}
+        error={authError}
+      />
+    );
+  }
+
+  const handleAddTrade = async (newTradeData: Omit<Trade, 'id' | 'status'>) => {
+    if (!user || !activeStrategyId) return;
+
     const newTrade: Trade = {
       ...newTradeData,
       id: `t${Date.now()}`,
       status: newTradeData.pnl >= 0 ? 'gain' : 'loss',
-      strategyId: activeStrategyId // Force the active strategy
+      strategyId: activeStrategyId
     };
-    setTrades([newTrade, ...trades]);
+
+    // Save to Supabase
+    const { data, error } = await supabase
+      .from('trades')
+      .insert({
+        user_id: user.id,
+        sub_account_id: activeStrategyId,
+        time: newTradeData.time,
+        pair: newTradeData.pair,
+        type: newTradeData.type,
+        size: newTradeData.size,
+        entry: newTradeData.entry,
+        exit: newTradeData.exit,
+        pnl: newTradeData.pnl,
+        status: newTrade.status,
+        notes: newTradeData.notes,
+        reflection: newTradeData.reflection,
+        selections: newTradeData.selections,
+        screenshots: newTradeData.screenshots
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding trade:', error);
+      return;
+    }
+
+    if (data) {
+      const savedTrade: Trade = {
+        id: data.id,
+        time: data.time,
+        pair: data.pair,
+        type: data.type,
+        size: data.size,
+        entry: data.entry,
+        exit: data.exit,
+        pnl: data.pnl,
+        status: data.status,
+        notes: data.notes,
+        reflection: data.reflection,
+        selections: data.selections,
+        screenshots: data.screenshots,
+        strategyId: data.sub_account_id
+      };
+      setTrades([savedTrade, ...trades]);
+    }
   };
 
-  const handleUpdateTrade = (updatedTrade: Trade) => {
+  const handleUpdateTrade = async (updatedTrade: Trade) => {
+    // Update in Supabase
+    const { error } = await supabase
+      .from('trades')
+      .update({
+        time: updatedTrade.time,
+        pair: updatedTrade.pair,
+        type: updatedTrade.type,
+        size: updatedTrade.size,
+        entry: updatedTrade.entry,
+        exit: updatedTrade.exit,
+        pnl: updatedTrade.pnl,
+        status: updatedTrade.pnl >= 0 ? 'gain' : 'loss',
+        notes: updatedTrade.notes,
+        reflection: updatedTrade.reflection,
+        selections: updatedTrade.selections,
+        screenshots: updatedTrade.screenshots
+      })
+      .eq('id', updatedTrade.id);
+
+    if (error) {
+      console.error('Error updating trade:', error);
+      return;
+    }
+
     setTrades(trades.map(t => t.id === updatedTrade.id ? {
       ...updatedTrade,
       status: updatedTrade.pnl >= 0 ? 'gain' : 'loss'
     } : t));
   };
 
-  const handleDeleteTrade = (id: string) => {
+  const handleDeleteTrade = async (id: string) => {
+    // Delete from Supabase
+    const { error } = await supabase
+      .from('trades')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting trade:', error);
+      return;
+    }
+
     setTrades(trades.filter(t => t.id !== id));
   };
 
@@ -349,52 +458,170 @@ const App: React.FC = () => {
     setStrategies([...strategies, newStrat]);
   };
 
-  const handleCreateWorkspace = (e: React.FormEvent) => {
+  const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newWorkspaceName) return;
 
-    const newModel: Strategy = {
-      id: `strat-${Date.now()}`,
-      name: newWorkspaceName,
-      startingEquity: parseFloat(newWorkspaceEquity) || 10000,
-      layers: { 
-        layer1: [
-          {
-            id: `cat-instrument-${Date.now()}`,
-            name: 'INSTRUMENT',
-            tags: [
-              { text: 'NQ', color: '#06b6d4' },
-              { text: 'ES', color: '#f43f5e' }
-            ],
-            selectionType: 'single'
-          }
-        ], 
-        layer2: [], 
-        layer3: [], 
-        layer4: [] 
-      },
-      createdAt: new Date().toLocaleDateString()
-    };
+    // Create in Supabase first
+    const { data, error } = await supabase
+      .from('sub_accounts')
+      .insert({
+        user_id: user?.id,
+        name: newWorkspaceName,
+        starting_equity: parseFloat(newWorkspaceEquity) || 10000,
+        timezone: 'UTC'
+      })
+      .select()
+      .single();
 
-    handleAddStrategy(newModel);
-    setActiveStrategyId(newModel.id);
+    if (error) {
+      console.error('Error creating workspace:', error);
+      return;
+    }
+
+    if (data) {
+      const freshLayers = {
+        layer1: DEFAULT_STRATEGY.layers.layer1,  // Keep instrument
+        layer2: [],  // Clear
+        layer3: [],  // Clear
+        layer4: []   // Clear
+      };
+
+      // Create strategy config in Supabase
+      const { data: configData } = await supabase
+        .from('strategy_configs')
+        .insert({
+          sub_account_id: data.id,
+          name: newWorkspaceName,
+          layers: freshLayers
+        })
+        .select()
+        .single();
+
+      // Update strategy config state
+      if (configData) {
+        setStrategyConfigs(prev => ({ ...prev, [data.id]: configData }));
+      }
+      
+      const newModel: Strategy = {
+        id: data.id,
+        name: newWorkspaceName,
+        startingEquity: parseFloat(newWorkspaceEquity) || 10000,
+        layers: freshLayers,
+        createdAt: new Date().toLocaleDateString()
+      };
+
+      handleAddStrategy(newModel);
+      setActiveStrategyId(data.id);
+      setSubAccounts([...subAccounts, data]);
+    }
+    
     setNewWorkspaceName('');
     setNewWorkspaceEquity('10000');
     setIsAddingWorkspace(false);
   };
 
-  const handleDeleteStrategy = (id: string) => {
-    if (id === 'strat-default-sr') return;
+  const handleDeleteStrategy = async (id: string) => {
+    // Don't allow deleting if it's the last one
+    if (subAccounts.length <= 1) return;
+    
+    // Delete from Supabase (sub_accounts, strategy_configs - cascade will handle config)
+    const { error } = await supabase
+      .from('sub_accounts')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error deleting workspace:', error);
+      return;
+    }
+
+    // Update strategy configs state
+    const newConfigs = { ...strategyConfigs };
+    delete newConfigs[id];
+    setStrategyConfigs(newConfigs);
+
     setStrategies(strategies.filter(s => s.id !== id));
     setTrades(trades.filter(t => t.strategyId !== id));
+    setSubAccounts(subAccounts.filter(sa => sa.id !== id));
+    
     if (activeStrategyId === id) {
       const remaining = strategies.filter(s => s.id !== id);
-      setActiveStrategyId(remaining[0]?.id || 'strat-default-sr');
+      setActiveStrategyId(remaining[0]?.id || subAccounts[0]?.id);
     }
   };
 
-  const handleUpdateStrategy = (updated: Strategy) => {
+  const handleUpdateStrategy = async (updated: Strategy) => {
+    // Update sub_account in Supabase
+    const { error } = await supabase
+      .from('sub_accounts')
+      .update({
+        name: updated.name,
+        starting_equity: updated.startingEquity
+      })
+      .eq('id', updated.id);
+
+    if (error) {
+      console.error('Error updating workspace:', error);
+      return;
+    }
+
+    // Also update strategy_config (layers/tags) in Supabase
+    // First try to update, if not found then insert
+    const { data: existingConfig } = await supabase
+      .from('strategy_configs')
+      .select('id')
+      .eq('sub_account_id', updated.id)
+      .single();
+
+    let configError = null;
+    
+    if (existingConfig) {
+      // Update existing config
+      const { error } = await supabase
+        .from('strategy_configs')
+        .update({
+          name: updated.name,
+          layers: JSON.stringify(updated.layers),
+          updated_at: new Date().toISOString()
+        })
+        .eq('sub_account_id', updated.id);
+      configError = error;
+    } else {
+      // Insert new config
+      const { error } = await supabase
+        .from('strategy_configs')
+        .insert({
+          sub_account_id: updated.id,
+          name: updated.name,
+          layers: JSON.stringify(updated.layers)
+        });
+      configError = error;
+    }
+
+    if (configError) {
+      console.error('Error updating strategy config:', configError);
+    }
+
+    // Update strategy config state
+    const configData = {
+      id: updated.id,
+      sub_account_id: updated.id,
+      name: updated.name,
+      layers: updated.layers,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    setStrategyConfigs(prev => ({ ...prev, [updated.id]: configData }));
+
     setStrategies(strategies.map(s => s.id === updated.id ? updated : s));
+    
+    // Also update in subAccounts state
+    setSubAccounts(subAccounts.map(sa => 
+      sa.id === updated.id 
+        ? { ...sa, name: updated.name, starting_equity: updated.startingEquity }
+        : sa
+    ));
   };
 
   const handleUpdateWorkspace = (e: React.FormEvent) => {
@@ -414,6 +641,7 @@ const App: React.FC = () => {
 
   // Derived stats
   const activeStrategy = strategies.find(s => s.id === activeStrategyId) || strategies[0];
+  const activeSubAccount = subAccounts.find(sa => sa.id === activeStrategyId);
   const filteredTrades = trades.filter(t => t.strategyId === activeStrategyId);
   
   const totalPnLValue = filteredTrades.reduce((sum, t) => sum + t.pnl, 0);
@@ -421,6 +649,36 @@ const App: React.FC = () => {
   const winRate = filteredTrades.length > 0 ? (winCount / filteredTrades.length * 100).toFixed(1) : '0';
   const totalEquityValue = (activeStrategy?.startingEquity || 10000) + totalPnLValue;
   const totalEquity = totalEquityValue.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+  // Default trading rules
+  const DEFAULT_RULES = [
+    "Wait for 5m candle close for confirmation",
+    "No trades 15m before/after high impact news",
+    "Max 3 losses per day - hard stop",
+    "Risk max 1% per execution",
+    "Always set hard stop loss at entry"
+  ];
+
+  const handleRulesChange = async (newRules: string[]) => {
+    if (!activeStrategyId) return;
+    
+    const { error } = await supabase
+      .from('sub_accounts')
+      .update({ rules: newRules })
+      .eq('id', activeStrategyId);
+
+    if (!error) {
+      setSubAccounts(subAccounts.map(sa => 
+        sa.id === activeStrategyId 
+          ? { ...sa, rules: newRules }
+          : sa
+      ));
+    }
+  };
+
+  const currentRules = activeSubAccount?.rules !== undefined 
+    ? activeSubAccount.rules 
+    : DEFAULT_RULES;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] h-screen bg-slate-900 overflow-hidden font-sans">
@@ -635,12 +893,12 @@ const App: React.FC = () => {
         <main className="flex-1 overflow-y-auto min-h-0 p-4 sm:p-8 md:p-12 scroll-smooth bg-[#0c0d0e]">
           <div className="max-w-7xl mx-auto space-y-6 md:space-y-8 pb-24 md:pb-20">
             {activeView === 'dashboard' && (
-              <DashboardView trades={filteredTrades} startingEquity={activeStrategy?.startingEquity || 10000} />
+              <DashboardView trades={filteredTrades} startingEquity={activeStrategy?.startingEquity || 10000} rules={currentRules} onRulesChange={handleRulesChange} />
             )}
             
             {activeView === 'log' && (
                 <div className="animate-slide-up">
-                    <TradeTable trades={filteredTrades} strategies={strategies} onUpdateTrade={handleUpdateTrade} onDeleteTrade={handleDeleteTrade} showTitle={true} />
+                    <TradeTable trades={filteredTrades} strategies={strategies} activeStrategyId={activeStrategyId} onUpdateTrade={handleUpdateTrade} onDeleteTrade={handleDeleteTrade} showTitle={true} />
                 </div>
             )}
 
@@ -654,6 +912,19 @@ const App: React.FC = () => {
 
             {activeView === 'analytics' && (
               <AnalyticsView trades={filteredTrades} strategies={strategies} activeStrategyId={activeStrategyId} />
+            )}
+
+            {activeView === 'settings' && (
+              <SettingsView 
+                profile={profile}
+                userId={user?.id}
+                subAccounts={subAccounts}
+                trades={trades}
+                onProfileUpdate={(updatedProfile) => {
+                  // Profile is updated via AuthContext
+                }}
+                onSignOut={signOut}
+              />
             )}
 
 

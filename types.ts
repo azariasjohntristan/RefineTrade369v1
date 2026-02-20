@@ -48,3 +48,42 @@ export interface Strategy {
 }
 
 export type ViewState = 'dashboard' | 'log' | 'analytics' | 'risk' | 'settings' | 'strategy';
+
+export type PlanType = 'free' | 'pro';
+export type PlanStatusType = 'active' | 'pending_upgrade' | 'cancelled';
+
+export interface Profile {
+  id: string;
+  email: string;
+  name: string;
+  plan: PlanType;
+  plan_status: PlanStatusType;
+  timezone: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubAccount {
+  id: string;
+  user_id: string;
+  name: string;
+  starting_equity: number;
+  timezone: string;
+  rules?: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface StrategyConfig {
+  id: string;
+  sub_account_id: string;
+  name: string;
+  layers: {
+    layer1: Category[];
+    layer2: Category[];
+    layer3: Category[];
+    layer4: Category[];
+  };
+  created_at: string;
+  updated_at: string;
+}

@@ -1,0 +1,1 @@
+Error: Failed to run sql query: ERROR: 42P07: relation "strategy_configs_sub_account_id_key" already exists

@@ -34,26 +34,21 @@ import { Trade } from '../types';
 interface DashboardViewProps {
   trades: Trade[];
   startingEquity: number;
+  rules: string[];
+  onRulesChange: (rules: string[]) => void;
 }
 
-const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity }) => {
-  const [rules, setRules] = useState<string[]>(() => {
-    const saved = localStorage.getItem('trading_rules');
-    return saved ? JSON.parse(saved) : [
-      "Wait for 5m candle close for confirmation",
-      "No trades 15m before/after high impact news",
-      "Max 3 losses per day - hard stop",
-      "Risk max 1% per execution",
-      "Always set hard stop loss at entry"
-    ];
-  });
+const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, rules: initialRules, onRulesChange }) => {
+  const [rules, setRules] = useState<string[]>(initialRules || []);
   const [isEditingRules, setIsEditingRules] = useState(false);
   const [newRule, setNewRule] = useState('');
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
 
   useEffect(() => {
-    localStorage.setItem('trading_rules', JSON.stringify(rules));
-  }, [rules]);
+    if (initialRules) {
+      setRules(initialRules);
+    }
+  }, [initialRules]);
 
   // Calculations
   const totalPnL = trades.reduce((sum, t) => sum + t.pnl, 0);
@@ -135,13 +130,17 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity })
 
   const addRule = () => {
     if (newRule.trim()) {
-      setRules([...rules, newRule.trim()]);
+      const updatedRules = [...rules, newRule.trim()];
+      setRules(updatedRules);
+      onRulesChange(updatedRules);
       setNewRule('');
     }
   };
 
   const removeRule = (idx: number) => {
-    setRules(rules.filter((_, i) => i !== idx));
+    const updatedRules = rules.filter((_, i) => i !== idx);
+    setRules(updatedRules);
+    onRulesChange(updatedRules);
   };
 
   return (
@@ -385,10 +384,12 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity })
               <h3 className="text-[11px] font-black text-orange-500 uppercase tracking-[0.3em]">TRADING RULES</h3>
             </div>
             <button 
-              onClick={() => setIsEditingRules(!isEditingRules)}
-              className="text-slate-500 hover:text-white transition-colors"
+              onClick={() => {
+                setIsEditingRules(!isEditingRules);
+              }}
+              className={`text-slate-500 hover:text-white transition-colors p-1 ${isEditingRules ? 'text-accent-gain' : ''}`}
             >
-              {isEditingRules ? <Check size={14} className="text-accent-gain" /> : <Edit3 size={14} />}
+              {isEditingRules ? <Check size={18} /> : <Edit3 size={18} />}
             </button>
           </div>
           
@@ -398,8 +399,14 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity })
                 <div className="w-1.5 h-1.5 rounded-full bg-orange-500/50 mt-1.5 shrink-0"></div>
                 <p className="text-[11px] font-mono text-slate-300 leading-relaxed flex-1">{rule}</p>
                 {isEditingRules && (
-                  <button onClick={() => removeRule(idx)} className="text-slate-700 hover:text-accent-loss transition-colors">
-                    <Trash2 size={12} />
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeRule(idx);
+                    }} 
+                    className="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-accent-loss transition-all p-1"
+                  >
+                    <Trash2 size={14} />
                   </button>
                 )}
               </div>

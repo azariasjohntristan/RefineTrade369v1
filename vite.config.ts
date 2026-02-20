@@ -18,6 +18,17 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      build: {
+        minify: 'esbuild',
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              recharts: ['recharts'],
+              lucide: ['lucide-react'],
+            },
+          },
+        },
+      },
     };
 });

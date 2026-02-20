@@ -6,6 +6,7 @@ import { Eye, Edit3, Trash2, X, AlertTriangle, Check, ChevronDown, Calendar, Tre
 interface TradeTableProps {
   trades: Trade[];
   strategies: Strategy[];
+  currentActiveStrategyId?: string;
   onUpdateTrade: (trade: Trade) => void;
   onDeleteTrade: (id: string) => void;
   showTitle?: boolean;
@@ -17,12 +18,15 @@ const SectionHeader = ({ title }: { title: string }) => (
   </div>
 );
 
-const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, onUpdateTrade, onDeleteTrade, showTitle }) => {
+const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActiveStrategyId, onUpdateTrade, onDeleteTrade, showTitle }) => {
   const [selectedTrade, setSelectedTrade] = useState<Trade | null>(null);
   const [modalType, setModalType] = useState<'view' | 'edit' | 'delete' | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Get current active strategy for filtering and display
+  const currentActiveStrategy = strategies.find(s => s.id === currentActiveStrategyId);
 
   const [editFormData, setEditFormData] = useState<Partial<Trade>>({});
 
@@ -107,8 +111,9 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, onUpdateTra
     });
   };
 
-  const activeStrategy = strategies.find(s => s.id === editFormData.strategyId);
-  const instrumentCat = activeStrategy?.layers.layer1.find(c => c.name === 'INSTRUMENT');
+  // Strategy used when editing a trade (based on trade's strategyId)
+  const editStrategy = strategies.find(s => s.id === editFormData.strategyId);
+  const instrumentCat = editStrategy?.layers.layer1.find(c => c.name === 'INSTRUMENT');
 
   const CategoryDropdown: React.FC<{ cat: Category }> = ({ cat }) => {
     const isDropdownOpen = openDropdownId === cat.id;
@@ -466,7 +471,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, onUpdateTra
                     )}
                   </div>
 
-                  {activeStrategy?.layers.layer1.map(cat => (
+                  {currentActiveStrategy?.layers.layer1.map(cat => (
                     cat.name !== 'INSTRUMENT' && <CategoryDropdown key={cat.id} cat={cat} />
                   ))}
                 </div>
@@ -476,7 +481,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, onUpdateTra
               <div className="space-y-4">
                 <SectionHeader title="LAYER_02 // STRATEGY & LOGIC" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {activeStrategy?.layers.layer2.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
+                  {currentActiveStrategy?.layers.layer2.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
                 </div>
               </div>
 
@@ -484,7 +489,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, onUpdateTra
               <div className="space-y-4">
                 <SectionHeader title="LAYER_03 // TEMPORAL & RISK" />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {activeStrategy?.layers.layer3.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
+                  {currentActiveStrategy?.layers.layer3.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
                 </div>
               </div>
 
@@ -502,7 +507,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, onUpdateTra
                     />
                   </div>
                   <div className="md:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {activeStrategy?.layers.layer4.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
+                    {currentActiveStrategy?.layers.layer4.map(cat => <CategoryDropdown key={cat.id} cat={cat} />)}
                   </div>
                   <div className="col-span-full space-y-2">
                     <label className="text-[8px] text-slate-500 uppercase font-black tracking-widest">NEURAL REFLECTION</label>
