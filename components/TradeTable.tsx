@@ -130,6 +130,22 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
     return category?.name || catId.split('-').pop()?.replace('_', ' ') || catId;
   };
 
+  // Helper to get tag color from trade's strategy
+  const getTagColor = (catId: string, tagText: string): string => {
+    const tradeStrategy = strategies.find(s => s.id === selectedTrade?.strategyId);
+    if (!tradeStrategy) return '#64748b';
+    
+    const allCategories = [
+      ...tradeStrategy.layers.layer1,
+      ...tradeStrategy.layers.layer2,
+      ...tradeStrategy.layers.layer3,
+      ...tradeStrategy.layers.layer4
+    ];
+    const category = allCategories.find(c => c.id === catId);
+    const tag = category?.tags.find(t => t.text === tagText);
+    return tag?.color || '#64748b';
+  };
+
   const CategoryDropdown: React.FC<{ cat: Category }> = ({ cat }) => {
     const isDropdownOpen = openDropdownId === cat.id;
     const selections = (editFormData.selections || {})[cat.id] || [];
@@ -190,65 +206,13 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
         </div>
       )}
 
-      {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm text-left border-collapse">
-          <thead className="sticky top-[-48px] bg-[#0c0d0e] z-30">
-            <tr className="border-b border-structural-border">
-              <th className="py-6 px-4 text-slate-500 font-normal uppercase tracking-wider text-[12px]">Date</th>
-              <th className="py-6 px-4 text-slate-500 font-normal uppercase tracking-wider text-[12px]">Instrument</th>
-              <th className="py-6 px-4 text-slate-500 font-normal uppercase tracking-wider text-[12px]">Type</th>
-              <th className="py-6 px-4 text-slate-500 font-normal uppercase tracking-wider text-[12px] text-right">PnL</th>
-              <th className="py-6 px-4 text-slate-500 font-normal uppercase tracking-wider text-[12px] text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {trades.map((trade, idx) => (
-              <tr 
-                key={trade.id} 
-                className="hover:bg-white/[0.02] transition-colors duration-300 group align-top"
-                style={{ animationDelay: `${0.5 + idx * 0.1}s` }}
-              >
-                <td className="py-6 px-4 border-b border-structural-border text-slate-500 font-mono text-[14px] whitespace-nowrap">
-                  {new Date(trade.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}
-                  <div className="text-[14px] text-slate-700 mt-1">{new Date(trade.time).toLocaleTimeString('en-US', { hour12: false })}</div>
-                </td>
-                <td className="py-6 px-4 border-b border-structural-border">
-                  <span className="bg-slate-800 text-slate-200 px-2.5 py-1.5 text-[14px] font-mono border border-slate-700 uppercase shadow-sm">
-                    {trade.pair}
-                  </span>
-                </td>
-                <td className={`py-6 px-4 border-b border-structural-border font-black text-14px ${trade.type === 'LONG' ? 'text-accent-gain' : 'text-accent-loss'}`}>
-                  {trade.type}
-                </td>
-                <td className="py-6 px-4 border-b border-structural-border font-mono text-right">
-                  <div className={`px-3 py-1.5 rounded-sm font-bold text-14px inline-block ${
-                    trade.pnl >= 0 
-                      ? 'bg-accent-gain/5 text-accent-gain border border-accent-gain/10' 
-                      : 'bg-accent-loss/5 text-accent-loss border border-accent-loss/10'
-                  }`}>
-                    {trade.pnl > 0 ? '+' : ''}{trade.pnl.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
-                  </div>
-                </td>
-                <td className="py-6 px-4 border-b border-structural-border text-right">
-                  <div className="flex justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onClick={() => handleOpenModal(trade, 'view')} className="p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-sm" title="View Details"><Eye size={16} /></button>
-                    <button onClick={() => handleOpenModal(trade, 'edit')} className="p-2 text-slate-500 hover:text-accent-gain hover:bg-slate-800 rounded-sm" title="Edit Log"><Edit3 size={16} /></button>
-                    <button onClick={() => handleOpenModal(trade, 'delete')} className="p-2 text-slate-500 hover:text-accent-loss hover:bg-slate-800 rounded-sm" title="Delete Record"><Trash2 size={16} /></button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
         {trades.map((trade, idx) => (
           <div 
             key={trade.id} 
-            className="bg-slate-800/40 border border-slate-800 p-4 rounded-sm space-y-4 animate-slide-up"
+            className="bg-slate-800/40 border border-slate-800 p-4 rounded-sm space-y-4 animate-slide-up cursor-pointer hover:border-slate-700 transition-colors"
+            onClick={() => handleOpenModal(trade, 'view')}
             style={{ animationDelay: `${0.5 + idx * 0.1}s` }}
           >
             <div className="flex justify-between items-start">
@@ -275,12 +239,62 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
             </div>
             
             <div className="flex justify-end gap-4 pt-2 border-t border-slate-800/50">
-              <button onClick={() => handleOpenModal(trade, 'view')} className="flex items-center gap-2 text-[14px] font-bold text-slate-500 uppercase tracking-widest"><Eye size={14} /> View</button>
-              <button onClick={() => handleOpenModal(trade, 'edit')} className="flex items-center gap-2 text-[14px] font-bold text-slate-500 uppercase tracking-widest"><Edit3 size={14} /> Edit</button>
-              <button onClick={() => handleOpenModal(trade, 'delete')} className="flex items-center gap-2 text-[14px] font-bold text-accent-loss uppercase tracking-widest"><Trash2 size={14} /> Delete</button>
+              <button onClick={(e) => { e.stopPropagation(); handleOpenModal(trade, 'view'); }} className="flex items-center gap-2 text-[14px] font-bold text-slate-500 uppercase tracking-widest"><Eye size={14} /> View</button>
+              <button onClick={(e) => { e.stopPropagation(); handleOpenModal(trade, 'edit'); }} className="flex items-center gap-2 text-[14px] font-bold text-slate-500 uppercase tracking-widest"><Edit3 size={14} /> Edit</button>
+              <button onClick={(e) => { e.stopPropagation(); handleOpenModal(trade, 'delete'); }} className="flex items-center gap-2 text-[14px] font-bold text-accent-loss uppercase tracking-widest"><Trash2 size={14} /> Delete</button>
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Desktop Compact Card View */}
+      <div className="hidden md:block">
+        {/* Column Header - Sticky */}
+        <div className="sticky top-0 z-10 bg-[#0c0d0e] flex items-center justify-between gap-4 px-3 py-2 border-b border-slate-800/50 mb-3">
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Date</span>
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Instrument</span>
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">Type</span>
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">PnL</span>
+          <span className="text-[10px] font-mono text-slate-500 uppercase tracking-wider w-[60px] text-right">Actions</span>
+        </div>
+        
+        {/* Trade Cards */}
+        <div className="space-y-3">
+          {trades.map((trade, idx) => (
+          <div 
+            key={trade.id} 
+            className="bg-slate-800/30 border border-slate-800/60 p-3 rounded-sm flex items-center justify-between gap-4 animate-slide-up cursor-pointer hover:bg-slate-800/50 hover:border-slate-700 transition-all"
+            onClick={() => handleOpenModal(trade, 'view')}
+            style={{ animationDelay: `${0.5 + idx * 0.1}s` }}
+          >
+            <div className="text-[11px] font-mono text-slate-500 uppercase whitespace-nowrap">
+              {new Date(trade.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              <span className="text-slate-600 ml-1">{new Date(trade.time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+            </div>
+            
+            <span className="bg-slate-900 text-slate-200 px-2 py-1 text-[11px] font-mono border border-slate-800 uppercase">
+              {trade.pair}
+            </span>
+            
+            <span className={`font-black text-[11px] ${trade.type === 'LONG' ? 'text-accent-gain' : 'text-accent-loss'}`}>
+              {trade.type}
+            </span>
+            
+            <div className={`px-2 py-1 rounded font-bold text-[11px] ${
+              trade.pnl >= 0 
+                ? 'bg-accent-gain/5 text-accent-gain border border-accent-gain/10' 
+                : 'bg-accent-loss/5 text-accent-loss border border-accent-loss/10'
+            }`}>
+              {trade.pnl > 0 ? '+' : ''}{trade.pnl.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+            </div>
+            
+            <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+              <button onClick={() => handleOpenModal(trade, 'edit')} className="p-1.5 text-slate-500 hover:text-accent-gain hover:bg-slate-800 rounded-sm" title="Edit Log"><Edit3 size={14} /></button>
+              <button onClick={() => handleOpenModal(trade, 'delete')} className="p-1.5 text-slate-500 hover:text-accent-loss hover:bg-slate-800 rounded-sm" title="Delete Record"><Trash2 size={14} /></button>
+            </div>
+          </div>
+        ))}
+        </div>
       </div>
 
       {/* --- View Modal --- */}
@@ -336,7 +350,11 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
                         <div className="text-[12px] text-slate-600 font-mono uppercase tracking-tighter">{getCategoryName(catId)}</div>
                         <div className="flex flex-wrap gap-1.5">
                           {(tags as string[]).map(tag => (
-                            <span key={tag} className="bg-slate-800 text-slate-100 px-2 py-1 text-[13px] font-mono border border-slate-700 uppercase">
+                            <span 
+                              key={tag} 
+                              className="bg-slate-800 text-slate-100 px-2 py-1 text-[13px] font-mono border border-slate-700 uppercase"
+                              style={{ borderLeftColor: getTagColor(catId, tag) }}
+                            >
                               {tag}
                             </span>
                           ))}

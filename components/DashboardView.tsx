@@ -27,7 +27,9 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
-  Cell
+  Cell,
+  BarChart,
+  Bar
 } from 'recharts';
 import { Trade } from '../types';
 
@@ -123,6 +125,36 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
     
     return days;
   }, [currentCalendarDate, trades]);
+
+  // Day of Week Stats
+  const dayOfWeekStats = useMemo(() => {
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const shortDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayMap: Record<string, { trades: number; pnl: number }> = {};
+    
+    dayNames.forEach(day => dayMap[day] = { trades: 0, pnl: 0 });
+    
+    trades.forEach(trade => {
+      const dayIndex = (new Date(trade.time).getDay() + 6) % 7;
+      dayMap[dayNames[dayIndex]].trades++;
+      dayMap[dayNames[dayIndex]].pnl += trade.pnl;
+    });
+    
+    return dayNames.map((day, idx) => ({
+      day,
+      shortDay: shortDays[idx],
+      dayIndex: idx,
+      trades: dayMap[day].trades,
+      pnl: dayMap[day].pnl
+    }));
+  }, [trades]);
+
+  // Recent Trades (5 most recent)
+  const recentTrades = useMemo(() => {
+    return [...trades]
+      .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+      .slice(0, 5);
+  }, [trades]);
 
   const changeMonth = (offset: number) => {
     setCurrentCalendarDate(new Date(currentCalendarDate.getFullYear(), currentCalendarDate.getMonth() + offset, 1));
@@ -435,6 +467,88 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
               <div className="h-full flex flex-col items-center justify-center text-center py-10">
                 <AlertCircle size={24} className="text-slate-800 mb-3" />
                 <p className="text-[14px] font-mono text-slate-700 uppercase tracking-widest">NO_RULES_DEFINED</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Row 2: Day of Week + Recent Trades */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Day of Week Performance - col-span-2 */}
+        <div className="lg:col-span-2 bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <CalendarIcon size={14} className="text-orange-500" />
+            <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">DAY OF WEEK PERFORMANCE</h3>
+          </div>
+          
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dayOfWeekStats} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                <XAxis 
+                  dataKey="shortDay" 
+                  stroke="#64748b" 
+                  tick={{ fill: '#64748b', fontSize: 12 }}
+                  axisLine={{ stroke: '#334155' }}
+                />
+                <YAxis 
+                  stroke="#64748b" 
+                  tick={{ fill: '#64748b', fontSize: 12 }} 
+                  tickFormatter={(value) => `$${value.toLocaleString()}`}
+                  axisLine={{ stroke: '#334155' }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: '#1e293b', 
+                    border: '1px solid #334155',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace'
+                  }}
+                  labelStyle={{ color: '#e2e8f0', fontWeight: 'bold' }}
+                  formatter={(value: number) => [`$${value.toLocaleString()}`, 'P&L']}
+                />
+                <Bar dataKey="pnl" radius={[4, 4, 0, 0]}>
+                  {dayOfWeekStats.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.pnl >= 0 ? '#4ade80' : '#f87171'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Recent Trades */}
+        <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm flex flex-col">
+          <div className="flex items-center gap-3 mb-4">
+            <Activity size={14} className="text-orange-500" />
+            <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">RECENT TRADES</h3>
+          </div>
+          
+          <div className="flex-1 space-y-2">
+            {recentTrades.length > 0 ? (
+              recentTrades.map((trade, idx) => (
+                <div key={idx} className="flex items-center justify-between py-2 border-b border-slate-800/50 last:border-0">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] font-mono text-slate-500 uppercase">
+                      {new Date(trade.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </span>
+                    <span className="text-[12px] font-mono text-slate-300 uppercase bg-slate-900 px-2 py-0.5 border border-slate-800">
+                      {trade.pair}
+                    </span>
+                    <span className={`text-[10px] font-black uppercase ${trade.type === 'LONG' ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                      {trade.type}
+                    </span>
+                  </div>
+                  <span className={`text-[12px] font-mono font-bold ${trade.pnl >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                    {trade.pnl > 0 ? '+' : ''}{trade.pnl.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center py-8">
+                <AlertCircle size={24} className="text-slate-800 mb-3" />
+                <p className="text-[14px] font-mono text-slate-700 uppercase tracking-widest">NO RECENT TRADES</p>
               </div>
             )}
           </div>

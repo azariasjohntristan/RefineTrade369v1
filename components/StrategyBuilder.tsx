@@ -173,6 +173,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
                       const color = input.getAttribute('data-active-color') || COLOR_OPTIONS[0];
                       handleAddTag(layerKey, cat.id, input.value, color);
                       input.value = '';
+                      input.focus();
                     }
                   }}
                 />
@@ -183,6 +184,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
                     const color = input.getAttribute('data-active-color') || COLOR_OPTIONS[0];
                     handleAddTag(layerKey, cat.id, input.value, color);
                     input.value = '';
+                    input.focus();
                   }}
                 >
                   <Plus size={16} />

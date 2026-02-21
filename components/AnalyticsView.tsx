@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Trade, Strategy } from '../types';
-import { Trophy, BarChart3, Target, TrendingUp, TrendingDown, ChevronRight, Filter, Layers } from 'lucide-react';
+import { Trophy, BarChart3, Target, TrendingUp, TrendingDown, ChevronRight, Filter, Layers, Calendar } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface AnalyticsViewProps {
   trades: Trade[];
@@ -92,6 +93,50 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
       statsByTag.find(s => s.layerKey === layerKey && s.totalTrades >= 2)
     ).filter(Boolean) as (TagStats & { layerKey: string })[];
   }, [statsByTag]);
+
+  const dayOfWeekStats = useMemo(() => {
+    if (!selectedStrategy) return [];
+
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const shortDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayMap: Record<string, { totalTrades: number; wins: number; losses: number; totalPnL: number }> = {};
+    
+    dayNames.forEach(day => {
+      dayMap[day] = { totalTrades: 0, wins: 0, losses: 0, totalPnL: 0 };
+    });
+
+    const strategyTrades = trades.filter(t => t.strategyId === activeStrategyId);
+
+    strategyTrades.forEach(trade => {
+      const date = new Date(trade.time);
+      const dayIndex = (date.getDay() + 6) % 7;
+      const dayName = dayNames[dayIndex];
+      
+      dayMap[dayName].totalTrades += 1;
+      if (trade.pnl >= 0) dayMap[dayName].wins += 1;
+      else dayMap[dayName].losses += 1;
+      dayMap[dayName].totalPnL += trade.pnl;
+    });
+
+    const results = dayNames.map((day, idx) => {
+      const stats = dayMap[day];
+      return {
+        day,
+        shortDay: shortDays[idx],
+        dayIndex: idx,
+        totalTrades: stats.totalTrades,
+        wins: stats.wins,
+        losses: stats.losses,
+        winRate: stats.totalTrades > 0 ? (stats.wins / stats.totalTrades) * 100 : 0,
+        totalPnL: stats.totalPnL,
+        avgPnL: stats.totalTrades > 0 ? stats.totalPnL / stats.totalTrades : 0
+      };
+    });
+
+    return results.sort((a, b) => a.dayIndex - b.dayIndex);
+  }, [trades, selectedStrategy, activeStrategyId]);
+
+  const mostProfitableDay = dayOfWeekStats.length > 0 ? dayOfWeekStats[0] : null;
 
   const LayerHeader = ({ title, desc }: { title: string, desc: string }) => (
     <div className="flex items-center gap-4 border-b border-slate-800 pb-4 mb-6">

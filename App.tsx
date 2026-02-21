@@ -875,7 +875,10 @@ const AppContent: React.FC = () => {
                   >
                     Account Settings
                   </button>
-                  <button className="w-full text-left px-3 py-2 text-[14px] font-mono text-accent-loss hover:bg-slate-800 transition-all uppercase tracking-widest">
+<button 
+                    onClick={() => signOut()}
+                    className="w-full text-left px-3 py-2 text-[14px] font-mono text-accent-loss hover:bg-slate-800 transition-all uppercase tracking-widest"
+                  >
                     Terminate Session
                   </button>
                 </div>
