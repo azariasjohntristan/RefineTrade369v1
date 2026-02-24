@@ -112,8 +112,8 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
   };
 
   const SectionHeader = ({ title }: { title: string }) => (
-    <div className="pt-4 mb-6">
-      <span className="text-[14px] font-black text-slate-400 uppercase tracking-[0.3em]">{title}</span>
+    <div className="mb-4 border-b border-gray-100 pb-2">
+      <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-[0.25em]">{title}</span>
     </div>
   );
 
@@ -122,30 +122,42 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
     const selections = formData.selections[cat.id] || [];
 
     return (
-      <div className="space-y-2 flex-1 min-w-[200px] relative">
-        <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">{cat.name}</label>
-        <div 
+      <div className="space-y-1.5 flex-1 min-w-[180px] relative">
+        <label className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">{cat.name}</label>
+        <div
           onClick={() => setOpenDropdownId(isDropdownOpen ? null : cat.id)}
-          className={`w-full bg-slate-900 border border-slate-800/80 p-3.5 flex flex-wrap gap-2 min-h-[48px] cursor-pointer transition-all hover:bg-slate-800/40 ${
-            isDropdownOpen ? 'border-accent-gain' : 'hover:border-slate-700'
-          }`}
+          className={`w-full bg-gray-50 border rounded-xl p-2.5 flex flex-wrap gap-1.5 min-h-[42px] cursor-pointer transition-all ${isDropdownOpen ? 'border-gray-400 ring-2 ring-gray-100' : 'border-gray-200 hover:border-gray-300'
+            }`}
         >
           {selections.length > 0 ? (
-            selections.map(t => (
-              <span key={t} className="bg-slate-800 text-slate-100 px-2.5 py-1 text-[14px] font-mono border border-slate-700 uppercase">
-                {t}
-              </span>
-            ))
+            selections.map(t => {
+              const tagObj = cat.tags.find(tag => tag.text === t);
+              const tagColor = tagObj?.color || '#64748b';
+              return (
+                <span 
+                  key={t} 
+                  style={{ 
+                    backgroundColor: `${tagColor}15`,
+                    color: tagColor,
+                    borderColor: `${tagColor}30`
+                  }}
+                  className="px-2 py-0.5 text-[12px] font-medium border rounded-md"
+                >
+                  {t}
+                </span>
+              );
+            })
           ) : (
-            <span className="text-slate-700 text-[14px] font-mono uppercase">---</span>
+            <span className="text-gray-400 text-[12px]">Select...</span>
           )}
-          <ChevronDown className={`absolute right-4 top-[38px] transition-transform ${isDropdownOpen ? 'rotate-180 text-accent-gain' : 'text-slate-700'}`} size={14} />
+          <ChevronDown className={`absolute right-3 top-[34px] transition-transform ${isDropdownOpen ? 'rotate-180 text-gray-600' : 'text-gray-400'}`} size={12} />
         </div>
-        
+
         {isDropdownOpen && (
-          <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-slate-800 border border-slate-700 shadow-2xl z-[150] p-1.5 space-y-1">
+          <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white border border-gray-200 shadow-card-lg rounded-xl z-[150] p-1.5 space-y-0.5 max-h-[200px] overflow-y-auto">
             {cat.tags.map(tag => {
               const isSelected = selections.includes(tag.text);
+              const tagColor = tag.color || '#64748b';
               return (
                 <button
                   key={tag.text}
@@ -154,12 +166,17 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                     e.stopPropagation();
                     toggleTag(cat.id, tag.text, cat.selectionType);
                   }}
-                  className={`w-full text-left px-4 py-3 text-[14px] font-mono transition-colors flex justify-between items-center uppercase ${
-                    isSelected ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:bg-slate-700/50'
-                  }`}
+                  className={`w-full text-left px-3 py-2 text-[12px] font-medium rounded-lg transition-colors flex justify-between items-center ${isSelected ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'
+                    }`}
                 >
-                  {tag.text}
-                  {isSelected && <Check size={12} className="text-accent-gain" />}
+                  <span className="flex items-center gap-2">
+                    <span 
+                      className="w-2 h-2 rounded-full" 
+                      style={{ backgroundColor: tagColor }}
+                    />
+                    {tag.text}
+                  </span>
+                  {isSelected && <Check size={11} style={{ color: tagColor }} />}
                 </button>
               );
             })}
@@ -171,124 +188,119 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
 
   return (
     <>
+      {/* FAB button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="hidden md:flex fixed bottom-8 right-8 w-14 h-14 bg-white text-slate-950 rounded-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)] items-center justify-center z-50 transition-all hover:scale-105 active:scale-95 group border border-white/10"
+        className="hidden md:flex fixed bottom-8 right-8 w-14 h-14 bg-gray-900 text-white rounded-2xl shadow-premium-lg items-center justify-center z-50 transition-all hover:scale-105 hover:bg-gray-800 active:scale-95 group"
       >
-        <Plus size={28} className="group-hover:rotate-90 transition-transform duration-500" />
+        <Plus size={22} className="group-hover:rotate-90 transition-transform duration-300" />
       </button>
 
       {isOpen && createPortal(
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4" onClick={() => setOpenDropdownId(null)}>
-          <div className="absolute inset-0 bg-slate-900/85 backdrop-blur-md" onClick={() => setIsOpen(false)} />
-          
-          <div className="relative w-full max-w-5xl bg-slate-900/95 backdrop-blur-md border border-white/5 shadow-2xl animate-slide-up flex flex-col max-h-[95vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="p-10 flex justify-between items-start">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
+
+          <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-modal animate-slide-up flex flex-col max-h-[95vh] overflow-hidden" onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div className="px-7 py-5 flex justify-between items-start shrink-0 border-b border-gray-100">
               <div>
-                <h3 className="text-[18px] font-black text-slate-100 uppercase tracking-[0.5em] mb-4">INITIALIZE EXECUTION LOG</h3>
-                <div className="flex items-center gap-3">
-                  <div className="text-[13px] font-mono text-slate-600 uppercase tracking-widest">Active_Model:</div>
-                  <select 
-                    className="bg-transparent border-none text-[14px] font-mono text-slate-400 uppercase tracking-widest outline-none cursor-pointer hover:text-white"
+                <h3 className="text-lg font-bold text-gray-900">Log a Trade</h3>
+                <div className="flex items-center gap-2 mt-1.5">
+                  <span className="text-xs text-gray-400">Strategy:</span>
+                  <select
+                    className="text-sm font-medium text-gray-700 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 outline-none focus:border-gray-400"
                     value={formData.strategyId}
-                    onChange={(e) => setFormData({...formData, strategyId: e.target.value, selections: {}})}
+                    onChange={(e) => setFormData({ ...formData, strategyId: e.target.value, selections: {} })}
                   >
-                    {strategies.map(s => <option key={s.id} value={s.id} className="bg-slate-900">{s.name}</option>)}
+                    {strategies.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-slate-600 hover:text-white transition-colors p-2">
-                <X size={24} />
+              <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-700 transition-colors p-1.5 rounded-lg hover:bg-gray-100">
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-12 pt-0 space-y-12 custom-scrollbar">
-              
-              {/* Layer 01: Identity */}
-              <div className="space-y-6">
-                <SectionHeader title="LAYER_01 // IDENTITY" />
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  <div className="space-y-2">
-                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">Execution Date</label>
-                    <div className="relative group/date">
-                      <input 
-                        type="date"
-                        className="w-full bg-slate-900 border border-slate-800 p-4 text-[14px] font-mono text-slate-200 outline-none focus:border-accent-gain cursor-pointer uppercase appearance-none"
-                        value={formData.dateValue}
-                        onChange={e => setFormData({...formData, dateValue: e.target.value})}
-                      />
-                      <Calendar size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 group-hover/date:text-accent-gain pointer-events-none" />
-                    </div>
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-7 py-5 space-y-6">
+
+              {/* Identity */}
+              <div className="space-y-3">
+                <SectionHeader title="Identity" />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">Trade Date</label>
+                    <input
+                      type="date"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-sm text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 cursor-pointer"
+                      value={formData.dateValue}
+                      onChange={e => setFormData({ ...formData, dateValue: e.target.value })}
+                    />
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">Trade Type</label>
-                    <div className="grid grid-cols-2 h-[52px] border border-slate-800 bg-slate-900 overflow-hidden">
-                      <button 
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">Trade Type</label>
+                    <div className="grid grid-cols-2 h-[42px] border border-gray-200 bg-gray-50 rounded-xl overflow-hidden">
+                      <button
                         type="button"
-                        onClick={() => setFormData({...formData, type: 'LONG'})}
-                        className={`flex items-center justify-center gap-2 text-[14px] font-mono transition-all uppercase tracking-widest ${
-                          formData.type === 'LONG' 
-                            ? 'bg-slate-200 text-slate-950 font-black' 
-                            : 'text-slate-600 hover:bg-slate-800/50'
-                        }`}
+                        onClick={() => setFormData({ ...formData, type: 'LONG' })}
+                        className={`flex items-center justify-center gap-1.5 text-sm font-medium transition-all ${formData.type === 'LONG' ? 'bg-accent-gain/10 text-accent-gain font-semibold' : 'text-gray-500 hover:bg-gray-100'
+                          }`}
                       >
-                        <TrendingUp size={14} className={formData.type === 'LONG' ? 'text-accent-gain' : 'text-slate-700'} />
-                        Long
+                        <TrendingUp size={12} /> Long
                       </button>
-                      <button 
+                      <button
                         type="button"
-                        onClick={() => setFormData({...formData, type: 'SHORT'})}
-                        className={`flex items-center justify-center gap-2 text-[14px] font-mono transition-all uppercase tracking-widest border-l border-slate-800 ${
-                          formData.type === 'SHORT' 
-                            ? 'bg-slate-200 text-slate-950 font-black' 
-                            : 'text-slate-600 hover:bg-slate-800/50'
-                        }`}
+                        onClick={() => setFormData({ ...formData, type: 'SHORT' })}
+                        className={`flex items-center justify-center gap-1.5 text-sm font-medium transition-all border-l border-gray-200 ${formData.type === 'SHORT' ? 'bg-accent-loss/10 text-accent-loss font-semibold' : 'text-gray-500 hover:bg-gray-100'
+                          }`}
                       >
-                        <TrendingDown size={14} className={formData.type === 'SHORT' ? 'text-accent-loss' : 'text-slate-700'} />
-                        Short
+                        <TrendingDown size={12} /> Short
                       </button>
                     </div>
                   </div>
 
-                  {/* Instrument Selection */}
-                  <div className="space-y-2 flex-1 relative">
-                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">Instrument</label>
-                    <div 
+                  {/* Instrument */}
+                  <div className="space-y-1.5 flex-1 relative">
+                    <label className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">Instrument</label>
+                    <div
                       onClick={() => setOpenDropdownId(openDropdownId === 'pair-select' ? null : 'pair-select')}
-                      className={`w-full bg-slate-900 border border-slate-800/80 p-3.5 flex items-center justify-between min-h-[48px] cursor-pointer transition-all hover:bg-slate-800/40 ${
-                        openDropdownId === 'pair-select' ? 'border-accent-gain' : 'hover:border-slate-700'
-                      }`}
+                      className={`w-full bg-gray-50 border rounded-xl p-2.5 flex items-center justify-between min-h-[42px] cursor-pointer transition-all ${openDropdownId === 'pair-select' ? 'border-gray-400 ring-2 ring-gray-100' : 'border-gray-200 hover:border-gray-300'
+                        }`}
                     >
-                      <span className={`text-[14px] font-mono uppercase ${formData.pair ? 'text-slate-200' : 'text-slate-700'}`}>
-                        {formData.pair || 'SELECT_INSTRUMENT'}
+                      <span className={`text-sm font-medium ${formData.pair ? 'text-gray-700' : 'text-gray-400'}`}>
+                        {formData.pair || 'Select instrument'}
                       </span>
-                      <ChevronDown className={`transition-transform ${openDropdownId === 'pair-select' ? 'rotate-180 text-accent-gain' : 'text-slate-700'}`} size={14} />
+                      <ChevronDown className={`transition-transform ${openDropdownId === 'pair-select' ? 'rotate-180 text-gray-600' : 'text-gray-400'}`} size={12} />
                     </div>
-                    
+
                     {openDropdownId === 'pair-select' && instrumentCat && (
-                      <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-slate-800 border border-slate-700 shadow-2xl z-[150] p-1.5 space-y-1 max-h-[200px] overflow-y-auto custom-scrollbar">
-                        {instrumentCat.tags.map(tag => (
-                          <button
-                            key={tag.text}
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFormData({
-                                ...formData, 
-                                pair: tag.text,
-                                selections: { ...formData.selections, [instrumentCat.id]: [tag.text] }
-                              });
-                              setOpenDropdownId(null);
-                            }}
-                            className={`w-full text-left px-4 py-3 text-[14px] font-mono transition-colors flex justify-between items-center uppercase ${
-                              formData.pair === tag.text ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:bg-slate-700/50'
-                            }`}
-                          >
-                            {tag.text}
-                            {formData.pair === tag.text && <Check size={12} className="text-accent-gain" />}
-                          </button>
-                        ))}
+                      <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white border border-gray-200 shadow-card-lg rounded-xl z-[150] p-1.5 space-y-0.5 max-h-[200px] overflow-y-auto">
+                        {instrumentCat.tags.map(tag => {
+                          const tagColor = tag.color || '#64748b';
+                          return (
+                            <button
+                              key={tag.text}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setFormData({ ...formData, pair: tag.text, selections: { ...formData.selections, [instrumentCat.id]: [tag.text] } });
+                                setOpenDropdownId(null);
+                              }}
+                              className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex justify-between items-center ${formData.pair === tag.text ? 'bg-gray-100 text-gray-900 font-medium' : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                              <span className="flex items-center gap-2">
+                                <span 
+                                  className="w-2 h-2 rounded-full" 
+                                  style={{ backgroundColor: tagColor }}
+                                />
+                                {tag.text}
+                              </span>
+                              {formData.pair === tag.text && <Check size={11} style={{ color: tagColor }} />}
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
                   </div>
@@ -299,83 +311,74 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                 </div>
               </div>
 
-              {/* Layer 02: Strategy & Logic */}
-              <div className="space-y-6">
-                <SectionHeader title="LAYER_02 // STRATEGY & LOGIC" />
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Strategy & Logic */}
+              <div className="space-y-3">
+                <SectionHeader title="Strategy & Logic" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {selectedStrategy?.layers.layer2.map(cat => <CategoryInput key={cat.id} cat={cat} />)}
                 </div>
               </div>
 
-              {/* Layer 03: Temporal & Risk */}
-              <div className="space-y-6">
-                <SectionHeader title="LAYER_03 // TEMPORAL & RISK" />
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              {/* Temporal & Risk */}
+              <div className="space-y-3">
+                <SectionHeader title="Temporal & Risk" />
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                   {selectedStrategy?.layers.layer3.map(cat => <CategoryInput key={cat.id} cat={cat} />)}
                 </div>
               </div>
 
-              {/* Layer 04: Reflection */}
-              <div className="space-y-8">
-                <SectionHeader title="LAYER_04 // REFLECTION" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">NET P&L ($)</label>
-                    <input 
+              {/* Reflection */}
+              <div className="space-y-3">
+                <SectionHeader title="Reflection" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">Net P&L ($)</label>
+                    <input
                       type="number"
                       step="any"
-                      className="w-full bg-slate-900 border border-slate-800 p-5 text-[18px] font-black font-mono text-slate-100 outline-none focus:border-slate-700"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-lg font-bold text-gray-900 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
                       value={formData.pnl}
-                      onChange={e => setFormData({...formData, pnl: e.target.value})}
+                      onChange={e => setFormData({ ...formData, pnl: e.target.value })}
                       placeholder="0.00"
                     />
                   </div>
                   {selectedStrategy?.layers.layer4.map(cat => <CategoryInput key={cat.id} cat={cat} />)}
-                  <div className="col-span-full space-y-3">
-                    <label className="text-[13px] text-slate-500 uppercase font-black tracking-widest">NEURAL REFLECTION</label>
-                    <textarea 
-                      className="w-full bg-slate-900 border border-slate-800 p-6 text-[14px] font-mono text-slate-300 outline-none focus:border-slate-700 min-h-[140px] resize-none leading-relaxed"
-                      placeholder="LOG INTERNAL STATE AND TACTICAL REFINEMENTS..."
+                  <div className="col-span-full space-y-1.5">
+                    <label className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">Notes / Reflection</label>
+                    <textarea
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-sm text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 min-h-[90px] resize-none leading-relaxed"
+                      placeholder="Add your trade notes and reflection..."
                       value={formData.reflection}
-                      onChange={e => setFormData({...formData, reflection: e.target.value})}
+                      onChange={e => setFormData({ ...formData, reflection: e.target.value })}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Layer 05: Visual Assets */}
-              <div className="space-y-6">
-                <SectionHeader title="LAYER_05 // VISUAL ASSETS" />
-                <div className="space-y-6">
-                  <div 
+              {/* Screenshots */}
+              <div className="space-y-3">
+                <SectionHeader title="Screenshots" />
+                <div className="space-y-3">
+                  <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-32 bg-slate-900 border border-dashed border-slate-800 flex flex-col items-center justify-center gap-2 cursor-pointer hover:border-accent-gain/40 hover:bg-slate-800/40 transition-all group"
+                    className="w-full h-20 bg-gray-50 border border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-gray-400 hover:bg-gray-100 transition-all group"
                   >
-                    <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Camera size={18} className="text-slate-600 group-hover:text-accent-gain" />
-                    </div>
-                    <span className="text-[14px] font-mono text-slate-600 uppercase tracking-widest">UPLOAD_EXECUTION_SCREENSHOTS</span>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      multiple 
-                      accept="image/*"
-                      onChange={handleFileChange}
-                    />
+                    <Camera size={14} className="text-gray-400 group-hover:text-gray-600" />
+                    <span className="text-xs text-gray-400 group-hover:text-gray-600">Click to upload screenshots</span>
+                    <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*" onChange={handleFileChange} />
                   </div>
 
                   {screenshots.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
                       {screenshots.map((src, idx) => (
-                        <div key={idx} className="relative aspect-video bg-slate-950 border border-slate-800 group/item overflow-hidden">
-                          <img src={src} className="w-full h-full object-cover opacity-70 group-hover/item:opacity-100 transition-opacity" alt={`Trace ${idx}`} />
-                          <button 
+                        <div key={idx} className="relative aspect-video bg-gray-100 rounded-xl group/item overflow-hidden">
+                          <img src={src} className="w-full h-full object-cover" alt={`Screenshot ${idx}`} />
+                          <button
                             type="button"
                             onClick={(e) => { e.stopPropagation(); removeScreenshot(idx); }}
-                            className="absolute top-2 right-2 p-1.5 bg-slate-950/80 text-slate-500 hover:text-accent-loss opacity-0 group-hover/item:opacity-100 transition-opacity"
+                            className="absolute top-1 right-1 p-1 bg-white/90 rounded-full text-gray-500 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-opacity shadow-sm"
                           >
-                            <X size={12} />
+                            <X size={10} />
                           </button>
                         </div>
                       ))}
@@ -384,12 +387,12 @@ const TradeForm: React.FC<TradeFormProps> = ({ onAddTrade, strategies }) => {
                 </div>
               </div>
 
-              <div className="pb-16 pt-10">
-                <button 
+              <div className="pb-4 pt-2">
+                <button
                   type="submit"
-                  className="w-full bg-white text-slate-950 py-7 text-[14px] font-black uppercase tracking-[0.6em] transition-all hover:bg-slate-100 active:scale-[0.98] shadow-2xl"
+                  className="w-full bg-gray-900 text-white py-3.5 text-sm font-semibold rounded-xl hover:bg-gray-800 active:scale-[0.99] transition-all"
                 >
-                  COMMIT_EXECUTION_RECORD
+                  Save Trade
                 </button>
               </div>
 
