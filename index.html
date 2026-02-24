@@ -3,30 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal / Journal</title>
+    <title>RefineTrade / Journal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        slate: {
-                            900: '#0c0d0e', // Background
-                            850: '#111315', // Slightly lighter bg
-                            800: '#16181a', // Cards/Sidebar
-                            700: '#232629', // Borders/Hover
-                            600: '#3a3f44',
-                            500: '#848a91', // Muted text
+                        gray: {
+                            50: '#fafafa',
+                            100: '#f4f4f5',
+                            200: '#e4e4e7',
+                            300: '#d4d4d8',
+                            400: '#a1a1aa',
+                            500: '#71717a',
+                            600: '#52525b',
+                            700: '#3f3f46',
+                            800: '#27272a',
+                            900: '#18181b',
+                            950: '#09090b',
                         },
                         accent: {
-                            gain: '#4ade80',
+                            gain: '#22c55e',
                             loss: '#f87171',
+                            DEFAULT: '#18181b',
                         },
                         structural: {
-                            border: 'rgba(255, 255, 255, 0.04)',
+                            border: '#e4e4e7',
                         }
                     },
                     fontFamily: {
@@ -34,14 +40,22 @@
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     boxShadow: {
-                        'honed': 'inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.5)',
+                        'card': '0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.04)',
+                        'card-lg': '0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)',
+                        'modal': '0 24px 64px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.07)',
+                        'premium': '0 4px 20px rgba(0, 0, 0, 0.08)',
+                        'premium-lg': '0 10px 40px rgba(0, 0, 0, 0.12)',
+                    },
+                    borderRadius: {
+                        'card': '16px',
+                        'card-sm': '12px',
                     },
                     animation: {
-                        'slide-up': 'slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'slide-up': 'slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards',
                     },
                     keyframes: {
                         slideUp: {
-                            'from': { opacity: '0', transform: 'translateY(20px)' },
+                            'from': { opacity: '0', transform: 'translateY(10px)' },
                             'to': { opacity: '1', transform: 'translateY(0)' },
                         }
                     }
@@ -51,31 +65,20 @@
     </script>
     <style>
         body {
-            background-color: #0c0d0e;
-            color: #e2e4e7;
+            background-color: #f4f4f5;
+            color: #18181b;
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Honed Texture Overlay */
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            opacity: 0.03;
-            z-index: 9999;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-        }
-
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0c0d0e; }
-        ::-webkit-scrollbar-thumb { background: #232629; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #3a3f44; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a1a1aa; }
 
         .recharts-cartesian-grid-horizontal line,
         .recharts-cartesian-grid-vertical line {
-            stroke: #232629;
+            stroke: #f0f0f1;
         }
     </style>
 <script type="importmap">

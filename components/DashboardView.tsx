@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Target, 
-  AlertCircle, 
-  Plus, 
-  Trash2, 
-  Edit3, 
-  Check, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Target,
+  AlertCircle,
+  Plus,
+  Trash2,
+  Edit3,
+  Check,
   X,
   PieChart as PieChartIcon,
   BarChart as BarChartIcon,
@@ -17,13 +17,13 @@ import {
   ChevronRight,
   Calendar as CalendarIcon
 } from 'lucide-react';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
@@ -57,7 +57,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
   const winCount = trades.filter(t => t.pnl > 0).length;
   const lossCount = trades.filter(t => t.pnl < 0).length;
   const winRate = trades.length > 0 ? (winCount / trades.length * 100).toFixed(0) : '0';
-  
+
   const profitFactor = (() => {
     const grossProfit = trades.filter(t => t.pnl > 0).reduce((sum, t) => sum + t.pnl, 0);
     const grossLoss = Math.abs(trades.filter(t => t.pnl < 0).reduce((sum, t) => sum + t.pnl, 0));
@@ -75,13 +75,13 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
   const equityData = (() => {
     let currentEquity = startingEquity; // Starting base
     const sortedTrades = [...trades].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-    
+
     // If no trades, show a flat line
     if (sortedTrades.length === 0) {
-        return [
-            { name: 'Start', equity: startingEquity },
-            { name: 'Now', equity: startingEquity }
-        ];
+      return [
+        { name: 'Start', equity: startingEquity },
+        { name: 'Now', equity: startingEquity }
+      ];
     }
 
     return sortedTrades.map((t, idx) => {
@@ -95,7 +95,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
   })();
 
   const pieData = [
-    { name: 'Wins', value: winCount, color: '#4ade80' },
+    { name: 'Wins', value: winCount, color: '#22c55e' },
     { name: 'Losses', value: lossCount, color: '#f87171' }
   ];
 
@@ -105,24 +105,24 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
     const month = currentCalendarDate.getMonth();
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
+
     const days = [];
-    
+
     // Padding for previous month
     for (let i = 0; i < firstDayOfMonth; i++) {
       days.push({ day: null, date: null });
     }
-    
+
     // Actual days
     for (let i = 1; i <= daysInMonth; i++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
       const dailyPnL = trades
         .filter(t => new Date(t.time).toISOString().split('T')[0] === dateStr)
         .reduce((sum, t) => sum + t.pnl, 0);
-      
+
       days.push({ day: i, date: dateStr, pnl: dailyPnL });
     }
-    
+
     return days;
   }, [currentCalendarDate, trades]);
 
@@ -131,15 +131,15 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
     const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const shortDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const dayMap: Record<string, { trades: number; pnl: number }> = {};
-    
+
     dayNames.forEach(day => dayMap[day] = { trades: 0, pnl: 0 });
-    
+
     trades.forEach(trade => {
       const dayIndex = (new Date(trade.time).getDay() + 6) % 7;
       dayMap[dayNames[dayIndex]].trades++;
       dayMap[dayNames[dayIndex]].pnl += trade.pnl;
     });
-    
+
     return dayNames.map((day, idx) => ({
       day,
       shortDay: shortDays[idx],
@@ -180,11 +180,11 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-[0.3em] mb-1">CORE_TERMINAL_V4 // ED-230934</p>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-100 uppercase tracking-tighter">EQUITY_NEXUS</h2>
+          <p className="text-[14px] font-mono text-gray-500 uppercase tracking-[0.3em] mb-1">CORE_TERMINAL_V4 // ED-230934</p>
+          <h2 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter">EQUITY_NEXUS</h2>
         </div>
         <div className="text-right">
-          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-1 flex items-center justify-end gap-2">
+          <p className="text-[14px] font-mono text-gray-500 uppercase tracking-widest mb-1 flex items-center justify-end gap-2">
             GLOBAL CUMULATIVE EQUITY <Activity size={10} className="text-accent-gain" />
           </p>
           <p className="text-3xl font-black text-accent-gain tracking-tight">
@@ -195,38 +195,43 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
-          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-4">NET P&L</p>
-          <p className={`text-3xl font-black tracking-tight ${totalPnL >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+        <div className="bg-white rounded-2xl shadow-card p-6">
+          <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mb-3">NET P&L</p>
+          <p className={`text-3xl font-mono font-bold tracking-tight ${totalPnL >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
             {totalPnL >= 0 ? '' : '-'}${Math.abs(totalPnL).toLocaleString()}
           </p>
-          <p className="text-[14px] font-mono text-slate-600 uppercase mt-2">CUMULATIVE_YIELD</p>
+          <p className="text-[11px] font-mono text-gray-400 uppercase mt-2">Cumulative yield</p>
         </div>
-        <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
-          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-4">PROFIT FACTOR</p>
-          <p className="text-3xl font-black text-slate-100 tracking-tight">{profitFactor}</p>
-          <p className="text-[14px] font-mono text-accent-gain uppercase mt-2">OPTIMAL</p>
+        <div className="bg-white rounded-2xl shadow-card p-6">
+          <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mb-3">PROFIT FACTOR</p>
+          <p className="text-3xl font-mono font-bold text-gray-900 tracking-tight">{profitFactor}</p>
+          <p className="text-[11px] font-mono text-accent-gain uppercase mt-2">Optimal range</p>
         </div>
-        <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
-          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-4">AVG R:R</p>
-          <p className="text-3xl font-black text-slate-100 tracking-tight">{avgRR}</p>
-          <p className="text-[14px] font-mono text-slate-600 uppercase mt-2">BASED ON {trades.length} EXECUTIONS</p>
+        <div className="bg-white rounded-2xl shadow-card p-6">
+          <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mb-3">AVG R:R</p>
+          <p className="text-3xl font-mono font-bold text-gray-900 tracking-tight">{avgRR}</p>
+          <p className="text-[11px] font-mono text-gray-400 uppercase mt-2">{trades.length} executions</p>
         </div>
-        <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
-          <p className="text-[14px] font-mono text-slate-500 uppercase tracking-widest mb-4">MAX DRAWDOWN</p>
-          <p className="text-3xl font-black text-slate-100 tracking-tight">0%</p>
-          <p className="text-[14px] font-mono text-orange-500/70 uppercase mt-2">LIMIT: 5.0%</p>
+        <div className="bg-white rounded-2xl shadow-card p-6">
+          <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mb-3">MAX DRAWDOWN</p>
+          <p className="text-3xl font-mono font-bold text-gray-900 tracking-tight">0%</p>
+          <p className="text-[11px] font-mono text-orange-500/80 uppercase mt-2">Limit: 5.0%</p>
         </div>
       </div>
 
       {/* Middle Row: Equity Curve & Logic Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-slate-800/30 border border-slate-800 p-6 rounded-sm flex flex-col min-h-[400px]">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">EQUITY GROWTH // NEURAL PATH</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6 flex flex-col min-h-[360px]">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest">PROJECTED REVENUE</p>
+              <h3 className="text-2xl font-mono font-bold text-gray-900">
+                ${(startingEquity + totalPnL).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </h3>
+            </div>
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-accent-gain animate-pulse"></div>
-              <span className="text-[13px] font-mono text-slate-500 uppercase">STREAM_ACTIVE</span>
+              <span className="text-[11px] font-mono text-gray-400 uppercase">Live</span>
             </div>
           </div>
           <div className="flex-1">
@@ -234,60 +239,63 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
               <AreaChart data={equityData}>
                 <defs>
                   <linearGradient id="colorEquity" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                <XAxis 
-                  dataKey="name" 
-                  stroke="#475569" 
-                  fontSize={10} 
-                  tickLine={false} 
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f1" vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  stroke="#a1a1aa"
+                  fontSize={10}
+                  tickLine={false}
                   axisLine={false}
-                  dy={10}
+                  dy={8}
                 />
-                <YAxis 
-                  stroke="#475569" 
-                  fontSize={10} 
-                  tickLine={false} 
+                <YAxis
+                  stroke="#a1a1aa"
+                  fontSize={10}
+                  tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `$${(value/1000).toFixed(1)}k`}
+                  tickFormatter={(value) => `$${(value / 1000).toFixed(1)}k`}
                   domain={['dataMin - 100', 'dataMax + 100']}
                 />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '4px', fontSize: '10px' }}
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'white', border: '1px solid #e4e4e7', borderRadius: '12px', fontSize: '11px', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}
                   itemStyle={{ color: '#f97316' }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey="equity" 
-                  stroke="#f97316" 
+                <Area
+                  type="monotone"
+                  dataKey="equity"
+                  stroke="#f97316"
                   strokeWidth={2}
-                  fillOpacity={1} 
-                  fill="url(#colorEquity)" 
+                  fillOpacity={1}
+                  fill="url(#colorEquity)"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm flex flex-col">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">LOGIC DISTRIBUTION</h3>
-            <PieChartIcon size={14} className="text-slate-600" />
+        <div className="bg-white rounded-2xl shadow-card p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-5">
+            <div>
+              <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest">SYSTEM INTEGRITY</p>
+              <h3 className="text-2xl font-mono font-bold text-accent-gain">{winRate}%</h3>
+            </div>
+            <PieChartIcon size={16} className="text-gray-300" />
           </div>
           <div className="flex-1 flex flex-col items-center justify-center">
-            <div className="relative w-full h-[240px] flex items-center justify-center">
+            <div className="relative w-full h-[200px] flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={pieData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
+                    innerRadius={55}
+                    outerRadius={75}
+                    paddingAngle={4}
                     dataKey="value"
                   >
                     {pieData.map((entry, index) => (
@@ -297,46 +305,46 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                 </PieChart>
               </ResponsiveContainer>
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[14px] font-mono text-slate-500 uppercase">WIN RATE</span>
-                <span className="text-4xl font-black text-slate-100">{winRate}%</span>
+                <span className="text-[10px] font-mono text-gray-400 uppercase">Win Rate</span>
+                <span className="text-3xl font-mono font-bold text-gray-900">{winRate}%</span>
               </div>
             </div>
-            
-            <div className="w-full mt-8 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-[14px] font-mono text-slate-500 uppercase">
-                    <span>WINS</span>
+
+            <div className="w-full mt-4 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-[11px] font-mono text-gray-500 uppercase">
+                    <span>Wins</span>
                     <span>{winCount}</span>
                   </div>
-                  <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-accent-gain" style={{ width: `${(winCount / (trades.length || 1)) * 100}%` }}></div>
+                  <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-accent-gain rounded-full" style={{ width: `${(winCount / (trades.length || 1)) * 100}%` }}></div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-[14px] font-mono text-slate-500 uppercase">
-                    <span>LOSSES</span>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-[11px] font-mono text-gray-500 uppercase">
+                    <span>Losses</span>
                     <span>{lossCount}</span>
                   </div>
-                  <div className="h-1 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-accent-loss" style={{ width: `${(lossCount / (trades.length || 1)) * 100}%` }}></div>
+                  <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-full bg-accent-loss rounded-full" style={{ width: `${(lossCount / (trades.length || 1)) * 100}%` }}></div>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800/50">
-                <p className="text-[13px] font-mono text-slate-600 uppercase tracking-widest mb-3">STRATEGY_PERFORMANCE</p>
-                <div className="space-y-2 max-h-[100px] overflow-y-auto custom-scrollbar pr-2">
+              <div className="pt-3 border-t border-gray-100">
+                <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mb-2">By Strategy</p>
+                <div className="space-y-1.5 max-h-[90px] overflow-y-auto pr-1">
                   {Object.entries(trades.reduce((acc, t) => {
-                    const stratName = t.strategyId || 'UNTAGGED';
+                    const stratName = t.strategyId || 'Untagged';
                     if (!acc[stratName]) acc[stratName] = { w: 0, t: 0 };
                     acc[stratName].t++;
                     if (t.pnl > 0) acc[stratName].w++;
                     return acc;
                   }, {} as Record<string, { w: number; t: number }>)).map(([name, stats]: [string, { w: number; t: number }]) => (
-                    <div key={name} className="flex items-center justify-between text-[14px] font-mono">
-                      <span className="text-slate-400 truncate max-w-[120px]">{name.replace('strat-', '').replace('-', ' ').toUpperCase()}</span>
-                      <span className="text-slate-200">{(stats.w / stats.t * 100).toFixed(0)}% WR</span>
+                    <div key={name} className="flex items-center justify-between text-[11px] font-mono">
+                      <span className="text-gray-400 truncate max-w-[110px]">{name.replace('strat-', '').replace('-', ' ')}</span>
+                      <span className="text-gray-600 font-semibold">{(stats.w / stats.t * 100).toFixed(0)}%</span>
                     </div>
                   ))}
                 </div>
@@ -347,56 +355,56 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
       </div>
 
       {/* Bottom Row: P&L Calendar & Trading Rules */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-slate-800/30 border border-slate-800 p-6 rounded-sm flex flex-col min-h-[450px]">
-          <div className="flex justify-between items-center mb-8">
-            <div className="flex items-center gap-3">
-              <CalendarIcon size={14} className="text-orange-500" />
-              <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">P&L CALENDAR</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6 flex flex-col min-h-[420px]">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-2">
+              <CalendarIcon size={14} className="text-gray-400" />
+              <h3 className="text-sm font-semibold text-gray-700">P&L Calendar</h3>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-[14px] font-mono text-slate-300 uppercase tracking-widest">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700">
                 {currentCalendarDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
               </span>
               <div className="flex gap-1">
-                <button 
+                <button
                   onClick={() => changeMonth(-1)}
-                  className="p-1.5 bg-slate-900 border border-slate-800 text-slate-500 hover:text-white transition-colors"
+                  className="p-1.5 bg-gray-100 rounded-lg text-gray-500 hover:bg-gray-200 transition-colors"
                 >
-                  <ChevronLeft size={14} />
+                  <ChevronLeft size={13} />
                 </button>
-                <button 
+                <button
                   onClick={() => changeMonth(1)}
-                  className="p-1.5 bg-slate-900 border border-slate-800 text-slate-500 hover:text-white transition-colors"
+                  className="p-1.5 bg-gray-100 rounded-lg text-gray-500 hover:bg-gray-200 transition-colors"
                 >
-                  <ChevronRight size={14} />
+                  <ChevronRight size={13} />
                 </button>
               </div>
             </div>
           </div>
-          
+
           <div className="flex-1 flex flex-col">
             <div className="grid grid-cols-7 gap-1 mb-2">
               {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(d => (
-                <div key={d} className="text-center text-[13px] font-mono text-slate-600 uppercase py-1">{d}</div>
+                <div key={d} className="text-center text-[10px] font-mono text-gray-400 uppercase py-1">{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-1 flex-1">
               {calendarDays.map((day, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className={`
-                    relative min-h-[60px] p-2 border border-slate-800/30 transition-all
-                    ${day.day ? 'bg-slate-900/40' : 'bg-transparent'}
-                    ${day.pnl > 0 ? 'bg-accent-gain/5 border-accent-gain/20' : day.pnl < 0 ? 'bg-accent-loss/5 border-accent-loss/20' : ''}
+                    relative min-h-[56px] p-2 rounded-lg transition-all
+                    ${day.day ? 'bg-gray-50' : 'bg-transparent'}
+                    ${day.pnl > 0 ? 'bg-green-50' : day.pnl < 0 ? 'bg-red-50' : ''}
                   `}
                 >
                   {day.day && (
                     <>
-                      <span className="text-[14px] font-mono text-slate-600 absolute top-2 left-2">{day.day}</span>
+                      <span className="text-[11px] font-mono text-gray-400 absolute top-1.5 left-2">{day.day}</span>
                       {day.pnl !== 0 && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <span className={`text-[14px] font-black font-mono ${day.pnl > 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                          <span className={`text-[11px] font-bold font-mono ${day.pnl > 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
                             {day.pnl > 0 ? '+' : ''}{day.pnl.toFixed(0)}
                           </span>
                         </div>
@@ -409,64 +417,59 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
           </div>
         </div>
 
-        <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-3">
-              <ShieldCheck size={14} className="text-orange-500" />
-              <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">TRADING RULES</h3>
+        <div className="bg-white rounded-2xl shadow-card p-6 flex flex-col">
+          <div className="flex justify-between items-center mb-5">
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={14} className="text-gray-400" />
+              <h3 className="text-sm font-semibold text-gray-700">Trading Rules</h3>
             </div>
-            <button 
-              onClick={() => {
-                setIsEditingRules(!isEditingRules);
-              }}
-              className={`text-slate-500 hover:text-white transition-colors p-1 ${isEditingRules ? 'text-accent-gain' : ''}`}
+            <button
+              onClick={() => setIsEditingRules(!isEditingRules)}
+              className={`p-1.5 rounded-lg transition-colors ${isEditingRules ? 'text-accent-gain bg-green-50' : 'text-gray-400 hover:text-gray-700 hover:bg-gray-100'}`}
             >
-              {isEditingRules ? <Check size={18} /> : <Edit3 size={18} />}
+              {isEditingRules ? <Check size={15} /> : <Edit3 size={15} />}
             </button>
           </div>
-          
-          <div className="flex-1 space-y-3 overflow-y-auto custom-scrollbar pr-2">
+
+          <div className="flex-1 space-y-2 overflow-y-auto pr-1">
             {rules.map((rule, idx) => (
-              <div key={idx} className="group flex items-start gap-3 bg-slate-900/50 p-3 border border-slate-800/50 rounded-sm">
-                <div className="w-1.5 h-1.5 rounded-full bg-orange-500/50 mt-1.5 shrink-0"></div>
-                <p className="text-[14px] font-mono text-slate-300 leading-relaxed flex-1">{rule}</p>
+              <div key={idx} className="group flex items-start gap-3 bg-gray-50 p-3 rounded-xl">
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-300 mt-1.5 shrink-0"></div>
+                <p className="text-sm text-gray-700 leading-relaxed flex-1">{rule}</p>
                 {isEditingRules && (
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      removeRule(idx);
-                    }} 
-                    className="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-accent-loss transition-all p-1"
+                  <button
+                    onClick={(e) => { e.stopPropagation(); removeRule(idx); }}
+                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-0.5"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={13} />
                   </button>
                 )}
               </div>
             ))}
-            
+
             {isEditingRules && (
-              <div className="pt-4 flex gap-2">
-                <input 
+              <div className="pt-3 flex gap-2">
+                <input
                   type="text"
                   value={newRule}
                   onChange={(e) => setNewRule(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addRule()}
-                  placeholder="NEW_RULE..."
-                  className="flex-1 bg-slate-900 border border-slate-800 px-3 py-2 text-[14px] font-mono text-slate-300 outline-none focus:border-orange-500/50"
+                  placeholder="Add a rule..."
+                  className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 outline-none focus:border-gray-400"
                 />
-                <button 
+                <button
                   onClick={addRule}
-                  className="bg-orange-500 text-slate-950 p-2 rounded-sm hover:bg-orange-400 transition-colors"
+                  className="bg-gray-900 text-white p-2 rounded-xl hover:bg-gray-800 transition-colors"
                 >
                   <Plus size={14} />
                 </button>
               </div>
             )}
-            
+
             {rules.length === 0 && !isEditingRules && (
               <div className="h-full flex flex-col items-center justify-center text-center py-10">
-                <AlertCircle size={24} className="text-slate-800 mb-3" />
-                <p className="text-[14px] font-mono text-slate-700 uppercase tracking-widest">NO_RULES_DEFINED</p>
+                <AlertCircle size={22} className="text-gray-200 mb-3" />
+                <p className="text-sm text-gray-400">No rules defined</p>
               </div>
             )}
           </div>
@@ -474,43 +477,46 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
       </div>
 
       {/* Row 2: Day of Week + Recent Trades */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Day of Week Performance - col-span-2 */}
-        <div className="lg:col-span-2 bg-slate-800/30 border border-slate-800 p-6 rounded-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <CalendarIcon size={14} className="text-orange-500" />
-            <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">DAY OF WEEK PERFORMANCE</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Day of Week Performance */}
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <CalendarIcon size={14} className="text-gray-400" />
+            <h3 className="text-sm font-semibold text-gray-700">Day of Week Performance</h3>
           </div>
-          
-          <div className="h-64">
+
+          <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dayOfWeekStats} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-                <XAxis 
-                  dataKey="shortDay" 
-                  stroke="#64748b" 
-                  tick={{ fill: '#64748b', fontSize: 12 }}
-                  axisLine={{ stroke: '#334155' }}
+              <BarChart data={dayOfWeekStats} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f1" vertical={false} />
+                <XAxis
+                  dataKey="shortDay"
+                  stroke="#a1a1aa"
+                  tick={{ fill: '#a1a1aa', fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <YAxis 
-                  stroke="#64748b" 
-                  tick={{ fill: '#64748b', fontSize: 12 }} 
+                <YAxis
+                  stroke="#a1a1aa"
+                  tick={{ fill: '#a1a1aa', fontSize: 11 }}
                   tickFormatter={(value) => `$${value.toLocaleString()}`}
-                  axisLine={{ stroke: '#334155' }}
+                  axisLine={false}
+                  tickLine={false}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: '#1e293b', 
-                    border: '1px solid #334155',
-                    borderRadius: '4px',
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'white',
+                    border: '1px solid #e4e4e7',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
                     fontFamily: 'monospace'
                   }}
-                  labelStyle={{ color: '#e2e8f0', fontWeight: 'bold' }}
+                  labelStyle={{ color: '#18181b', fontWeight: '600', fontSize: '11px' }}
                   formatter={(value: number) => [`$${value.toLocaleString()}`, 'P&L']}
                 />
                 <Bar dataKey="pnl" radius={[4, 4, 0, 0]}>
                   {dayOfWeekStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.pnl >= 0 ? '#4ade80' : '#f87171'} />
+                    <Cell key={`cell-${index}`} fill={entry.pnl >= 0 ? '#22c55e' : '#f87171'} />
                   ))}
                 </Bar>
               </BarChart>
@@ -519,24 +525,24 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
         </div>
 
         {/* Recent Trades */}
-        <div className="bg-slate-800/30 border border-slate-800 p-6 rounded-sm flex flex-col">
-          <div className="flex items-center gap-3 mb-4">
-            <Activity size={14} className="text-orange-500" />
-            <h3 className="text-[14px] font-black text-orange-500 uppercase tracking-[0.3em]">RECENT TRADES</h3>
+        <div className="bg-white rounded-2xl shadow-card p-6 flex flex-col">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity size={14} className="text-gray-400" />
+            <h3 className="text-sm font-semibold text-gray-700">Recent Trades</h3>
           </div>
-          
-          <div className="flex-1 space-y-2">
+
+          <div className="flex-1 space-y-1">
             {recentTrades.length > 0 ? (
               recentTrades.map((trade, idx) => (
-                <div key={idx} className="flex items-center justify-between py-2 border-b border-slate-800/50 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[11px] font-mono text-slate-500 uppercase">
+                <div key={idx} className="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-[11px] font-mono text-gray-400">
                       {new Date(trade.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </span>
-                    <span className="text-[12px] font-mono text-slate-300 uppercase bg-slate-900 px-2 py-0.5 border border-slate-800">
+                    <span className="text-[11px] font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-md">
                       {trade.pair}
                     </span>
-                    <span className={`text-[10px] font-black uppercase ${trade.type === 'LONG' ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                    <span className={`text-[10px] font-bold uppercase ${trade.type === 'LONG' ? 'text-accent-gain' : 'text-accent-loss'}`}>
                       {trade.type}
                     </span>
                   </div>
@@ -547,8 +553,8 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
               ))
             ) : (
               <div className="flex flex-col items-center justify-center text-center py-8">
-                <AlertCircle size={24} className="text-slate-800 mb-3" />
-                <p className="text-[14px] font-mono text-slate-700 uppercase tracking-widest">NO RECENT TRADES</p>
+                <AlertCircle size={22} className="text-gray-200 mb-3" />
+                <p className="text-sm text-gray-400">No trades yet</p>
               </div>
             )}
           </div>

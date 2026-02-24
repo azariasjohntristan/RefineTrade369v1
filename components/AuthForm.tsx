@@ -21,108 +21,112 @@ export default function AuthForm({ mode, onSubmit, onSwitchMode, loading, error 
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-2 h-2 rounded-full bg-accent-gain shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>
-            <div className="text-[14px] tracking-[0.4em] uppercase font-black text-slate-100">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2.5 mb-6">
+            <div className="w-2 h-2 rounded-full bg-accent-gain shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
+            <div className="text-[12px] tracking-[0.4em] uppercase font-black text-gray-900">
               REFINE TRADE
             </div>
           </div>
-          <h1 className="text-xl font-bold text-slate-100 uppercase tracking-wider">
-            {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+          <h1 className="text-2xl font-bold text-gray-900">
+            {mode === 'login' ? 'Welcome back' : 'Create account'}
           </h1>
-          <p className="text-xs text-slate-500 font-mono mt-2">
+          <p className="text-sm text-gray-500 mt-1.5">
             {mode === 'login' ? 'Sign in to your trading journal' : 'Start tracking your trades today'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {mode === 'register' && (
-            <div className="space-y-2">
-              <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your name"
-                required={mode === 'register'}
-                className="w-full bg-slate-950 border border-slate-800 px-4 py-3 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
-              />
-            </div>
-          )}
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-card p-8 space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {mode === 'register' && (
+              <div className="space-y-1.5">
+                <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your name"
+                  required={mode === 'register'}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
+                />
+              </div>
+            )}
 
-          <div className="space-y-2">
-            <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              className="w-full bg-slate-950 border border-slate-800 px-4 py-3 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[14px] text-slate-500 uppercase font-bold tracking-widest">Password</label>
-            <div className="relative">
+            <div className="space-y-1.5">
+              <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Email</label>
               <input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
                 required
-                minLength={6}
-                className="w-full bg-slate-950 border border-slate-800 px-4 py-3 text-xs text-slate-200 font-mono outline-none focus:border-accent-gain pr-12"
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
             </div>
-          </div>
 
-          {error && (
-            <div className="flex items-center gap-2 p-3 bg-accent-loss/10 border border-accent-loss/30 rounded-sm">
-              <AlertCircle size={16} className="text-accent-loss" />
-              <p className="text-xs text-accent-loss font-mono">{error}</p>
+            <div className="space-y-1.5">
+              <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              </div>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-accent-gain text-slate-900 py-4 text-xs font-bold uppercase tracking-widest hover:bg-accent-gain/90 disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading ? (
+            {error && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded-xl">
+                <AlertCircle size={15} className="text-red-500 shrink-0" />
+                <p className="text-xs text-red-600">{error}</p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gray-900 text-white py-3 text-sm font-semibold rounded-xl hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center gap-2 transition-all mt-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  Please wait...
+                </>
+              ) : (
+                mode === 'login' ? 'Sign In' : 'Create Account'
+              )}
+            </button>
+          </form>
+
+          <p className="text-center text-xs text-gray-500">
+            {mode === 'login' ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
-                Processing...
+                Don't have an account?{' '}
+                <button type="button" onClick={onSwitchMode} className="text-accent-gain font-semibold hover:underline">Sign up</button>
               </>
             ) : (
-              mode === 'login' ? 'Sign In' : 'Create Account'
+              <>
+                Already have an account?{' '}
+                <button type="button" onClick={onSwitchMode} className="text-accent-gain font-semibold hover:underline">Sign in</button>
+              </>
             )}
-          </button>
-        </form>
-
-        <p className="text-center text-xs text-slate-500 mt-6">
-          {mode === 'login' ? (
-            <>
-              Don't have an account?{' '}
-              <button type="button" onClick={onSwitchMode} className="text-accent-gain hover:underline">Sign up</button>
-            </>
-          ) : (
-            <>
-              Already have an account?{' '}
-              <button type="button" onClick={onSwitchMode} className="text-accent-gain hover:underline">Sign in</button>
-            </>
-          )}
-        </p>
+          </p>
+        </div>
       </div>
     </div>
   )
