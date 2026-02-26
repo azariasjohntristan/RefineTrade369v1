@@ -46,6 +46,7 @@ export default function NotesView({
   const [isAddingNote, setIsAddingNote] = useState(false)
   const [isAddingCategory, setIsAddingCategory] = useState(false)
   const [editingNote, setEditingNote] = useState<Note | null>(null)
+  const [noteTitle, setNoteTitle] = useState('')
   const [noteContent, setNoteContent] = useState('')
   const [newCategoryName, setNewCategoryName] = useState('')
   const [newCategoryColor, setNewCategoryColor] = useState(COLORS[0])
@@ -167,7 +168,7 @@ export default function NotesView({
   }
 
   const handleAddNote = async () => {
-    if (!noteContent.trim() || !selectedCategory) return
+    if (!noteTitle.trim() || !noteContent.trim() || !selectedCategory) return
 
     try {
       const { data, error } = await supabase
@@ -175,6 +176,7 @@ export default function NotesView({
         .insert({ 
           user_id: userId, 
           category_id: selectedCategory, 
+          title: noteTitle.trim(),
           content: noteContent.trim() 
         })
         .select()
@@ -183,6 +185,7 @@ export default function NotesView({
       if (error) throw error
 
       setNotes([data, ...notes])
+      setNoteTitle('')
       setNoteContent('')
       setIsAddingNote(false)
       showMessage('success', 'Note added')
@@ -192,12 +195,12 @@ export default function NotesView({
   }
 
   const handleUpdateNote = async () => {
-    if (!editingNote || !noteContent.trim()) return
+    if (!editingNote || !noteTitle.trim() || !noteContent.trim()) return
 
     try {
       const { data, error } = await supabase
         .from('notes')
-        .update({ content: noteContent.trim() })
+        .update({ title: noteTitle.trim(), content: noteContent.trim() })
         .eq('id', editingNote.id)
         .select()
         .single()
@@ -206,6 +209,7 @@ export default function NotesView({
 
       setNotes(notes.map(n => n.id === editingNote.id ? data : n))
       setEditingNote(null)
+      setNoteTitle('')
       setNoteContent('')
       showMessage('success', 'Note updated')
     } catch (err) {
@@ -231,6 +235,7 @@ export default function NotesView({
 
   const openEditNote = (note: Note) => {
     setEditingNote(note)
+    setNoteTitle(note.title)
     setNoteContent(note.content)
   }
 
@@ -247,227 +252,174 @@ export default function NotesView({
   }
 
   return (
-    <div className="flex h-full gap-6 animate-fade-in">
-      {/* Categories Sidebar */}
-      <div className="w-64 shrink-0 flex flex-col">
-        <div className="pb-6">
-          <h2 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter">Notes</h2>
-          <p className="text-14px text-gray-400 font-mono mt-1">Capture your trading journey</p>
-        </div>
-
-        <div className="flex-1 overflow-y-auto space-y-2">
-          <button
-            onClick={() => setSelectedCategory(null)}
-            className={`w-full text-left px-4 py-3 rounded-sm text-14px font-bold uppercase tracking-wider transition-all ${
-              selectedCategory === null
-                ? 'bg-gray-100 text-gray-900'
-                : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            All Notes
-          </button>
-
-          {categories.map(cat => (
-            <div key={cat.id} className="group flex items-center">
-              <button
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`flex-1 text-left px-4 py-3 rounded-sm text-14px font-bold uppercase tracking-wider transition-all flex items-center gap-2 ${
-                  selectedCategory === cat.id
-                    ? 'bg-gray-100 text-gray-900'
-                    : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                <span 
-                  className="w-2 h-2 rounded-full" 
-                  style={{ backgroundColor: cat.color }}
-                />
-                {cat.name}
-              </button>
-              {categories.length > 1 && (
-                <button
-                  onClick={() => handleDeleteCategory(cat.id)}
-                  className="opacity-0 group-hover:opacity-100 p-2 text-gray-500 hover:text-accent-loss transition-all"
-                >
-                  <Trash2 size={12} />
-                </button>
-              )}
-            </div>
-          ))}
-
-          {isAddingCategory ? (
-            <div className="p-3 bg-gray-50 border border-gray-200 space-y-2">
-              <input
-                type="text"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="Category name"
-                className="w-full bg-white border border-gray-200 px-3 py-2 text-14px text-gray-800 font-mono outline-none focus:border-accent-gain"
-                autoFocus
-              />
-              <div className="flex gap-1">
-                {COLORS.map(color => (
-                  <button
-                    key={color}
-                    onClick={() => setNewCategoryColor(color)}
-                    className={`w-5 h-5 rounded-full transition-all ${
-                      newCategoryColor === color ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900' : ''
-                    }`}
-                    style={{ backgroundColor: color }}
-                  />
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleAddCategory}
-                  className="flex-1 py-2 bg-accent-gain text-gray-900 text-14px font-bold uppercase hover:bg-accent-gain/90"
-                >
-                  <Check size={12} />
-                </button>
-                <button
-                  onClick={() => { setIsAddingCategory(false); setNewCategoryName(''); }}
-                  className="flex-1 py-2 bg-gray-200 text-gray-700 text-14px font-bold uppercase hover:bg-gray-300"
-                >
-                  <X size={12} />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <button
-              onClick={() => setIsAddingCategory(true)}
-              className="w-full text-left px-4 py-3 rounded-sm text-14px font-bold uppercase tracking-wider text-gray-500 hover:text-gray-500 hover:bg-gray-50 transition-all flex items-center gap-2"
-            >
-              <Plus size={14} /> Add Category
-            </button>
-          )}
+    <div className="pb-20 animate-fade-in">
+      {/* Header Section */}
+      <div className="mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+          <div>
+            <p className="text-[14px] font-mono text-gray-500 uppercase tracking-[0.3em] mb-1">CORE_TERMINAL_V4 // ED-230934</p>
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter">NOTES</h2>
+          </div>
+          <div className="text-right">
+            <p className="text-[14px] font-mono text-gray-500 uppercase tracking-widest mb-1 flex items-center justify-end gap-2">
+              TOTAL NOTES <StickyNote size={10} className="text-accent-gain" />
+            </p>
+            <p className="text-3xl font-black text-gray-900 tracking-tight">{notes.length}</p>
+          </div>
         </div>
       </div>
 
-      {/* Notes Content */}
-      <div className="flex-1 flex flex-col min-h-0">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-6 shrink-0">
-          <div className="flex items-center gap-3">
-            <span className="text-14px font-mono text-gray-400 uppercase tracking-widest">
-              {filteredNotes.length} Note{filteredNotes.length !== 1 ? 's' : ''}
-            </span>
-            {selectedCategory && (
-              <span 
-                className="px-2 py-1 rounded-sm text-[14px] font-bold uppercase"
-                style={{ 
-                  backgroundColor: `${categories.find(c => c.id === selectedCategory)?.color}20`,
-                  color: categories.find(c => c.id === selectedCategory)?.color
-                }}
-              >
-                {categories.find(c => c.id === selectedCategory)?.name}
+      {/* Main Content */}
+      <div className="flex-1">
+
+        {/* Notes Content */}
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Header with Category Tabs */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 shrink-0">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-mono text-gray-400 uppercase tracking-wider">
+                {filteredNotes.length} Note{filteredNotes.length !== 1 ? 's' : ''}
               </span>
+            </div>
+            <div className="flex bg-gray-100 rounded-xl p-1 overflow-x-auto">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all rounded-lg whitespace-nowrap ${
+                  selectedCategory === null 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                All
+              </button>
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all rounded-lg whitespace-nowrap flex items-center gap-1.5 ${
+                    selectedCategory === cat.id 
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: cat.color }} />
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => { setIsAddingNote(true); setNoteTitle(''); setNoteContent(''); }}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-900 text-white text-xs font-semibold uppercase tracking-wider rounded-xl hover:bg-gray-800"
+            >
+              <Plus size={14} /> Add Note
+            </button>
+          </div>
+
+          {/* Notes Grid */}
+          <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 custom-scrollbar">
+            {filteredNotes.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400 col-span-full">
+                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+                  <StickyNote size={32} className="opacity-30" />
+                </div>
+                <p className="text-sm font-semibold uppercase tracking-wider">No notes yet</p>
+                <p className="text-xs mt-1">Start capturing your trading thoughts</p>
+              </div>
+            ) : (
+              filteredNotes.map(note => {
+                const category = categories.find(c => c.id === note.category_id)
+                return (
+                  <div 
+                    key={note.id} 
+                    className="bg-white rounded-2xl shadow-card p-5 hover:shadow-card-lg transition-all group flex flex-col min-h-[180px]"
+                    style={{ borderLeft: `4px solid ${category?.color || '#64748b'}` }}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="flex-1">
+                        <h4 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">{note.title}</h4>
+                      </div>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                        <button
+                          onClick={() => openEditNote(note)}
+                          className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+                        >
+                          <Edit3 size={12} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteNote(note.id)}
+                          className="p-2 text-gray-400 hover:text-red-500 hover:bg-gray-100 rounded-lg"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap flex-1">
+                      {note.content}
+                    </p>
+                    <span className="text-[11px] font-mono text-gray-400 uppercase mt-3 block">
+                      {new Date(note.created_at).toLocaleDateString('en-US', { 
+                        month: 'short', day: 'numeric', year: 'numeric' 
+                      })}
+                    </span>
+                  </div>
+                )
+              })
             )}
           </div>
-          <button
-            onClick={() => { setIsAddingNote(true); setNoteContent(''); }}
-            disabled={!selectedCategory}
-            className="flex items-center gap-2 px-4 py-2 bg-accent-gain text-gray-900 text-14px font-bold uppercase tracking-wider hover:bg-accent-gain/90 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <Plus size={14} /> Add Note
-          </button>
-        </div>
-
-        {/* Notes Grid */}
-        <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 custom-scrollbar">
-          {filteredNotes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-gray-400 col-span-full">
-              <StickyNote size={48} className="mb-4 opacity-20" />
-              <p className="text-14px font-bold uppercase tracking-wider">No notes yet</p>
-              <p className="text-[14px] mt-1">Start capturing your trading thoughts</p>
-            </div>
-          ) : (
-            filteredNotes.map(note => {
-              const category = categories.find(c => c.id === note.category_id)
-              return (
-                <div 
-                  key={note.id} 
-                  className="bg-gray-50 p-4 rounded-sm shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all group flex flex-col min-h-[200px]"
-                  style={{ borderLeft: `3px solid ${category?.color || '#64748b'}` }}
-                >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {category && (
-                        <span 
-                          className="px-2 py-0.5 rounded-sm text-[14px] font-bold uppercase"
-                          style={{ 
-                            backgroundColor: `${category.color}20`,
-                            color: category.color
-                          }}
-                        >
-                          {category.name}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <button
-                        onClick={() => openEditNote(note)}
-                        className="p-1.5 text-gray-400 hover:text-gray-900 hover:bg-gray-200 rounded-sm"
-                      >
-                        <Edit3 size={12} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteNote(note.id)}
-                        className="p-1.5 text-gray-400 hover:text-accent-loss hover:bg-gray-200 rounded-sm"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-[14px] text-gray-700 font-mono leading-relaxed whitespace-pre-wrap flex-1">
-                    {note.content}
-                  </p>
-                  <span className="text-[14px] font-mono text-gray-500 uppercase mt-2 block">
-                    {new Date(note.created_at).toLocaleDateString('en-US', { 
-                      month: 'short', day: 'numeric', year: 'numeric' 
-                    })}
-                  </span>
-                </div>
-              )
-            })
-          )}
         </div>
       </div>
 
       {/* Add/Edit Note Modal */}
       {(isAddingNote || editingNote) && createPortal(
         <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-white/85 backdrop-blur-md" onClick={() => { setIsAddingNote(false); setEditingNote(null); }} />
-          <div className="relative w-full max-w-2xl bg-white border border-gray-200 p-6 space-y-4 animate-slide-up" onClick={e => e.stopPropagation()}>
-            <div className="flex justify-between items-center">
-              <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => { setIsAddingNote(false); setEditingNote(null); }} />
+          <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-modal p-6 space-y-5 animate-slide-up" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center border-b border-gray-100 pb-4">
+              <h3 className="text-lg font-bold text-gray-900">
                 {editingNote ? 'Edit Note' : 'New Note'}
               </h3>
               <button 
                 onClick={() => { setIsAddingNote(false); setEditingNote(null); }}
-                className="text-gray-400 hover:text-gray-900"
+                className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100"
               >
                 <X size={20} />
               </button>
             </div>
             
-            <textarea
-              value={noteContent}
-              onChange={(e) => setNoteContent(e.target.value)}
-              placeholder="Write your thoughts..."
-              className="w-full h-48 bg-gray-50 border border-gray-200 p-4 text-14px text-gray-800 font-mono outline-none focus:border-accent-gain resize-none leading-relaxed"
-              autoFocus
-            />
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Title</label>
+                <input
+                  type="text"
+                  value={noteTitle}
+                  onChange={(e) => setNoteTitle(e.target.value)}
+                  placeholder="Enter note title..."
+                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
+                  autoFocus
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Content</label>
+                <textarea
+                  value={noteContent}
+                  onChange={(e) => setNoteContent(e.target.value)}
+                  placeholder="Write your thoughts..."
+                  className="w-full h-40 bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700 outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 resize-none leading-relaxed"
+                />
+              </div>
+            </div>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => { setIsAddingNote(false); setEditingNote(null); }}
-                className="px-4 py-2 bg-gray-100 text-gray-700 text-14px font-bold uppercase tracking-wider hover:bg-gray-200"
+                className="px-5 py-2.5 bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-200"
               >
                 Cancel
               </button>
               <button
                 onClick={editingNote ? handleUpdateNote : handleAddNote}
-                disabled={!noteContent.trim()}
-                className="px-6 py-2 bg-accent-gain text-gray-900 text-14px font-bold uppercase tracking-wider hover:bg-accent-gain/90 disabled:opacity-50"
+                disabled={!noteTitle.trim() || !noteContent.trim()}
+                className="px-6 py-2.5 bg-gray-900 text-white text-sm font-semibold rounded-xl hover:bg-gray-800 disabled:opacity-50"
               >
                 {editingNote ? 'Update' : 'Save'}
               </button>
@@ -479,10 +431,10 @@ export default function NotesView({
 
       {/* Message Toast */}
       {message && (
-        <div className={`fixed bottom-8 right-8 px-4 py-3 rounded-sm border text-14px font-mono ${
+        <div className={`fixed bottom-8 right-8 px-4 py-3 rounded-xl shadow-card-lg text-sm font-medium ${
           message.type === 'success' 
-            ? 'bg-accent-gain/10 border-accent-gain/30 text-accent-gain'
-            : 'bg-accent-loss/10 border-accent-loss/30 text-accent-loss'
+            ? 'bg-accent-gain/10 text-accent-gain'
+            : 'bg-red-50 text-red-500'
         }`}>
           {message.text}
         </div>
