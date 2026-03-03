@@ -29,7 +29,9 @@ import {
   Pie,
   Cell,
   BarChart,
-  Bar
+  Bar,
+  Label,
+  LabelList
 } from 'recharts';
 import { Trade } from '../types';
 
@@ -45,6 +47,11 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
   const [isEditingRules, setIsEditingRules] = useState(false);
   const [newRule, setNewRule] = useState('');
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
+  const [dayFilterType, setDayFilterType] = useState<'year' | 'month' | 'week'>('week');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const currentWeek = Math.ceil(new Date().getDate() / 7);
+  const [selectedWeek, setSelectedWeek] = useState(currentWeek);
 
   useEffect(() => {
     if (initialRules) {
@@ -71,28 +78,34 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
     return ratio;
   })();
 
-  // Equity Curve Data
-  const equityData = (() => {
-    let currentEquity = startingEquity; // Starting base
-    const sortedTrades = [...trades].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  // Equity Curve Data - exactly matches startingEquity + totalPnL
+  const equityData = useMemo(() => {
+    const sortedTrades = [...trades].sort((a, b) => 
+      new Date(a.time).getTime() - new Date(b.time).getTime()
+    );
 
-    // If no trades, show a flat line
+    // If no trades, show only starting equity
     if (sortedTrades.length === 0) {
-      return [
-        { name: 'Start', equity: startingEquity },
-        { name: 'Now', equity: startingEquity }
-      ];
+      return [{ name: 'Start', equity: startingEquity }];
     }
 
-    return sortedTrades.map((t, idx) => {
-      currentEquity += t.pnl;
-      return {
-        name: new Date(t.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        equity: currentEquity,
-        pnl: t.pnl
-      };
+    // Calculate cumulative equity step by step
+    let cumulative = startingEquity;
+    const data = [{ name: 'Start', equity: startingEquity }];
+
+    sortedTrades.forEach((trade) => {
+      cumulative += trade.pnl;
+      data.push({
+        name: new Date(trade.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        equity: cumulative
+      });
     });
-  })();
+
+    // Add final point that exactly matches startingEquity + totalPnL
+    data.push({ name: 'Now', equity: startingEquity + totalPnL });
+
+    return data;
+  }, [trades, startingEquity, totalPnL]);
 
   const pieData = [
     { name: 'Wins', value: winCount, color: '#22c55e' },
@@ -116,38 +129,180 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
     // Actual days
     for (let i = 1; i <= daysInMonth; i++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-      const dailyPnL = trades
-        .filter(t => new Date(t.time).toISOString().split('T')[0] === dateStr)
-        .reduce((sum, t) => sum + t.pnl, 0);
+      const dailyTrades = trades.filter(t => new Date(t.time).toISOString().split('T')[0] === dateStr);
+      const dailyPnL = dailyTrades.reduce((sum, t) => sum + t.pnl, 0);
 
-      days.push({ day: i, date: dateStr, pnl: dailyPnL });
+      days.push({ day: i, date: dateStr, pnl: dailyPnL, tradeCount: dailyTrades.length });
     }
 
     return days;
   }, [currentCalendarDate, trades]);
 
-  // Day of Week Stats
-  const dayOfWeekStats = useMemo(() => {
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const shortDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const dayMap: Record<string, { trades: number; pnl: number }> = {};
+  // Performance Stats based on filter type
+  const performanceStats = useMemo(() => {
+    // Filter trades based on selected filter
+    const filteredTrades = trades.filter(trade => {
+      const tradeDate = new Date(trade.time);
+      const tradeYear = tradeDate.getFullYear();
+      const tradeMonth = tradeDate.getMonth();
+      const tradeDay = tradeDate.getDate();
+      const tradeWeek = Math.ceil(tradeDay / 7);
 
-    dayNames.forEach(day => dayMap[day] = { trades: 0, pnl: 0 });
-
-    trades.forEach(trade => {
-      const dayIndex = (new Date(trade.time).getDay() + 6) % 7;
-      dayMap[dayNames[dayIndex]].trades++;
-      dayMap[dayNames[dayIndex]].pnl += trade.pnl;
+      if (dayFilterType === 'year') {
+        return tradeYear === selectedYear;
+      } else if (dayFilterType === 'month') {
+        return tradeYear === selectedYear && tradeMonth === selectedMonth;
+      } else if (dayFilterType === 'week') {
+        return tradeYear === selectedYear && tradeMonth === selectedMonth && tradeWeek === selectedWeek;
+      }
+      return true;
     });
 
-    return dayNames.map((day, idx) => ({
-      day,
-      shortDay: shortDays[idx],
-      dayIndex: idx,
-      trades: dayMap[day].trades,
-      pnl: dayMap[day].pnl
-    }));
-  }, [trades]);
+    // Week: Show days (Mon-Fri)
+    if (dayFilterType === 'week') {
+      const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+      const shortLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+      const dayMap: Record<string, { trades: number; pnl: number; wins: number; losses: number }> = {};
+      dayNames.forEach(day => dayMap[day] = { trades: 0, pnl: 0, wins: 0, losses: 0 });
+
+      filteredTrades.forEach(trade => {
+        const dayIndex = new Date(trade.time).getDay();
+        if (dayIndex >= 1 && dayIndex <= 5) { // Mon-Fri
+          dayMap[dayNames[dayIndex - 1]].trades++;
+          dayMap[dayNames[dayIndex - 1]].pnl += trade.pnl;
+          if (trade.pnl > 0) dayMap[dayNames[dayIndex - 1]].wins++;
+          else if (trade.pnl < 0) dayMap[dayNames[dayIndex - 1]].losses++;
+        }
+      });
+
+      return dayNames.map((day, idx) => ({
+        label: shortLabels[idx],
+        fullLabel: day,
+        trades: dayMap[day].trades,
+        pnl: dayMap[day].pnl,
+        netPnLPercent: dayMap[day].trades > 0 ? ((dayMap[day].wins - dayMap[day].losses) / dayMap[day].trades * 100).toFixed(0) : '0'
+      }));
+    }
+
+    // Year: Show months (Jan-Dec)
+    if (dayFilterType === 'year') {
+      const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const shortLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthMap: Record<number, { trades: number; pnl: number; wins: number; losses: number }> = {};
+      for (let i = 0; i < 12; i++) monthMap[i] = { trades: 0, pnl: 0, wins: 0, losses: 0 };
+
+      filteredTrades.forEach(trade => {
+        const month = new Date(trade.time).getMonth();
+        monthMap[month].trades++;
+        monthMap[month].pnl += trade.pnl;
+        if (trade.pnl > 0) monthMap[month].wins++;
+        else if (trade.pnl < 0) monthMap[month].losses++;
+      });
+
+      return shortLabels.map((label, idx) => ({
+        label,
+        fullLabel: monthNames[idx],
+        trades: monthMap[idx].trades,
+        pnl: monthMap[idx].pnl,
+        netPnLPercent: monthMap[idx].trades > 0 ? ((monthMap[idx].wins - monthMap[idx].losses) / monthMap[idx].trades * 100).toFixed(0) : '0'
+      }));
+    }
+
+    // Month: Show weeks (Week 1-5)
+    if (dayFilterType === 'month') {
+      const weekLabels = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'];
+      const weekMap: Record<number, { trades: number; pnl: number; wins: number; losses: number }> = {};
+      for (let i = 1; i <= 5; i++) weekMap[i] = { trades: 0, pnl: 0, wins: 0, losses: 0 };
+
+      filteredTrades.forEach(trade => {
+        const day = new Date(trade.time).getDate();
+        const week = Math.ceil(day / 7);
+        if (week >= 1 && week <= 5) {
+          weekMap[week].trades++;
+          weekMap[week].pnl += trade.pnl;
+          if (trade.pnl > 0) weekMap[week].wins++;
+          else if (trade.pnl < 0) weekMap[week].losses++;
+        }
+      });
+
+      return weekLabels.map((label, idx) => ({
+        label,
+        fullLabel: label,
+        trades: weekMap[idx + 1].trades,
+        pnl: weekMap[idx + 1].pnl,
+        netPnLPercent: weekMap[idx + 1].trades > 0 ? ((weekMap[idx + 1].wins - weekMap[idx + 1].losses) / weekMap[idx + 1].trades * 100).toFixed(0) : '0'
+      }));
+    }
+
+    // Week: Show days (Mon-Fri)
+    if (dayFilterType === 'week') {
+      const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+      const shortLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+      const dayMap: Record<string, { trades: number; pnl: number }> = {};
+      dayNames.forEach(day => dayMap[day] = { trades: 0, pnl: 0 });
+
+      filteredTrades.forEach(trade => {
+        const dayIndex = new Date(trade.time).getDay();
+        if (dayIndex >= 1 && dayIndex <= 5) {
+          dayMap[dayNames[dayIndex - 1]].trades++;
+          dayMap[dayNames[dayIndex - 1]].pnl += trade.pnl;
+        }
+      });
+
+      return shortLabels.map((label, idx) => ({
+        label,
+        fullLabel: dayNames[idx],
+        trades: dayMap[dayNames[idx]].trades,
+        pnl: dayMap[dayNames[idx]].pnl
+      }));
+    }
+
+    return [];
+  }, [trades, dayFilterType, selectedYear, selectedMonth, selectedWeek]);
+
+  // Filtered Stats for Day of Week Performance
+  const filteredStats = useMemo(() => {
+    const filteredTrades = trades.filter(trade => {
+      const tradeDate = new Date(trade.time);
+      const tradeYear = tradeDate.getFullYear();
+      const tradeMonth = tradeDate.getMonth();
+      const tradeDay = tradeDate.getDate();
+      const tradeWeek = Math.ceil(tradeDay / 7);
+
+      if (dayFilterType === 'year') {
+        return tradeYear === selectedYear;
+      } else if (dayFilterType === 'month') {
+        return tradeYear === selectedYear && tradeMonth === selectedMonth;
+      } else if (dayFilterType === 'week') {
+        return tradeYear === selectedYear && tradeMonth === selectedMonth && tradeWeek === selectedWeek;
+      }
+      return true;
+    });
+
+    const totalPnL = filteredTrades.reduce((sum, t) => sum + t.pnl, 0);
+    const winCount = filteredTrades.filter(t => t.pnl > 0).length;
+    const lossCount = filteredTrades.filter(t => t.pnl < 0).length;
+    const winRate = filteredTrades.length > 0 ? (winCount / filteredTrades.length * 100) : 0;
+    const grossWin = filteredTrades.filter(t => t.pnl > 0).reduce((sum, t) => sum + t.pnl, 0);
+    const grossLoss = Math.abs(filteredTrades.filter(t => t.pnl < 0).reduce((sum, t) => sum + t.pnl, 0));
+    const profitFactor = grossLoss === 0 ? (grossWin > 0 ? 'MAX' : '0.00') : (grossWin / grossLoss).toFixed(2);
+    const avgWin = winCount > 0 ? grossWin / winCount : 0;
+    const avgLoss = lossCount > 0 ? grossLoss / lossCount : 0;
+    const avgRR = avgLoss === 0 ? (avgWin > 0 ? 'MAX' : '0') : `1:${(avgWin / avgLoss).toFixed(1)}`;
+
+    return {
+      totalPnL,
+      totalTrades: filteredTrades.length,
+      winCount,
+      lossCount,
+      winRate: winRate.toFixed(0),
+      profitFactor,
+      avgWin,
+      avgLoss,
+      avgRR,
+      netPnLPercent: filteredTrades.length > 0 ? ((winCount - lossCount) / filteredTrades.length * 100).toFixed(0) : '0'
+    };
+  }, [trades, dayFilterType, selectedYear, selectedMonth, selectedWeek]);
 
   // Recent Trades (5 most recent)
   const recentTrades = useMemo(() => {
@@ -394,20 +549,21 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                 <div
                   key={idx}
                   className={`
-                    relative min-h-[56px] p-2 rounded-lg transition-all
+                    relative min-h-[56px] p-1.5 rounded-lg transition-all flex flex-col items-center justify-center gap-0.5
                     ${day.day ? 'bg-gray-50' : 'bg-transparent'}
                     ${day.pnl > 0 ? 'bg-green-50' : day.pnl < 0 ? 'bg-red-50' : ''}
                   `}
                 >
                   {day.day && (
                     <>
-                      <span className="text-[11px] font-mono text-gray-400 absolute top-1.5 left-2">{day.day}</span>
-                      {day.pnl !== 0 && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <span className={`text-[11px] font-bold font-mono ${day.pnl > 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                      <span className="text-[9px] font-mono text-gray-400 absolute top-1 left-2">{day.day}</span>
+                      {day.tradeCount > 0 && (
+                        <>
+                          <span className={`text-[10px] font-bold font-mono ${day.pnl > 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
                             {day.pnl > 0 ? '+' : ''}{day.pnl.toFixed(0)}
                           </span>
-                        </div>
+                          <span className="text-[9px] font-medium text-gray-500">{day.tradeCount} trade{day.tradeCount > 1 ? 's' : ''}</span>
+                        </>
                       )}
                     </>
                   )}
@@ -480,17 +636,111 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Day of Week Performance */}
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <CalendarIcon size={14} className="text-gray-400" />
-            <h3 className="text-sm font-semibold text-gray-700">Day of Week Performance</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+            <div className="flex items-center gap-2">
+              <CalendarIcon size={14} className="text-gray-400" />
+              <h3 className="text-sm font-semibold text-gray-700">Day of Week Performance</h3>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {/* Filter Type Buttons */}
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                {(['year', 'month', 'week'] as const).map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      setDayFilterType(type);
+                      if (type === 'year') {
+                        setSelectedMonth(0);
+                        setSelectedWeek(1);
+                      } else if (type === 'month') {
+                        setSelectedWeek(1);
+                      }
+                    }}
+                    className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider rounded-md transition-all ${
+                      dayFilterType === type 
+                        ? 'bg-white text-gray-900 shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {type === 'year' ? 'Year' : type === 'month' ? 'Month' : 'Week'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Arrow Navigation */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => {
+                    const years = Array.from(new Set(trades.map(t => new Date(t.time).getFullYear()))).sort();
+                    if (years.length === 0) return;
+                    
+                    if (dayFilterType === 'year') {
+                      const currentIdx = years.indexOf(selectedYear);
+                      if (currentIdx > 0) {
+                        setSelectedYear(years[currentIdx - 1]);
+                        setSelectedMonth(0);
+                        setSelectedWeek(1);
+                      }
+                    } else if (dayFilterType === 'month') {
+                      if (selectedMonth > 0) {
+                        setSelectedMonth(selectedMonth - 1);
+                        setSelectedWeek(1);
+                      }
+                    } else if (dayFilterType === 'week') {
+                      if (selectedWeek > 1) {
+                        setSelectedWeek(selectedWeek - 1);
+                      }
+                    }
+                  }}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-sm font-bold"
+                >
+                  ‹
+                </button>
+
+                <span className="text-xs font-semibold text-gray-700 min-w-[60px] text-center">
+                  {dayFilterType === 'year' && selectedYear}
+                  {dayFilterType === 'month' && new Date(2000, selectedMonth).toLocaleDateString('en-US', { month: 'short' })}
+                  {dayFilterType === 'week' && `Week ${selectedWeek}`}
+                </span>
+
+                <button
+                  onClick={() => {
+                    const years = Array.from(new Set(trades.map(t => new Date(t.time).getFullYear()))).sort();
+                    if (years.length === 0) return;
+                    
+                    if (dayFilterType === 'year') {
+                      const currentIdx = years.indexOf(selectedYear);
+                      if (currentIdx < years.length - 1) {
+                        setSelectedYear(years[currentIdx + 1]);
+                        setSelectedMonth(0);
+                        setSelectedWeek(1);
+                      }
+                    } else if (dayFilterType === 'month') {
+                      if (selectedMonth < 11) {
+                        setSelectedMonth(selectedMonth + 1);
+                        setSelectedWeek(1);
+                      }
+                    } else if (dayFilterType === 'week') {
+                      if (selectedWeek < 5) {
+                        setSelectedWeek(selectedWeek + 1);
+                      }
+                    }
+                  }}
+                  className="w-7 h-7 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors text-sm font-bold"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={dayOfWeekStats} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <BarChart data={performanceStats} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f1" vertical={false} />
                 <XAxis
-                  dataKey="shortDay"
+                  dataKey="label"
                   stroke="#a1a1aa"
                   tick={{ fill: '#a1a1aa', fontSize: 11 }}
                   axisLine={false}
@@ -515,12 +765,45 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                   formatter={(value: number) => [`$${value.toLocaleString()}`, 'P&L']}
                 />
                 <Bar dataKey="pnl" radius={[4, 4, 0, 0]}>
-                  {dayOfWeekStats.map((entry, index) => (
+                  {performanceStats.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.pnl >= 0 ? '#22c55e' : '#f87171'} />
                   ))}
+                  <LabelList 
+                    dataKey="netPnLPercent" 
+                    position="top" 
+                    formatter={(value: string) => {
+                      const num = parseInt(value);
+                      return num !== 0 ? `${num > 0 ? '+' : ''}${num}%` : '';
+                    }}
+                    style={{ fill: '#6b7280', fontSize: '10px', fontWeight: '500' }}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
+          </div>
+
+          {/* Filtered Stats Cards */}
+          <div className="grid grid-cols-4 gap-3 mt-4">
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-[10px] font-mono text-gray-400 uppercase tracking-wider mb-1">Total P&L</p>
+              <p className={`text-lg font-bold font-mono ${filteredStats.totalPnL >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                {filteredStats.totalPnL >= 0 ? '' : '-'}${Math.abs(filteredStats.totalPnL).toLocaleString()}
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-[10px] font-mono text-gray-400 uppercase tracking-wider mb-1">Net P&L %</p>
+              <p className={`text-lg font-bold font-mono ${parseInt(filteredStats.netPnLPercent) >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                {parseInt(filteredStats.netPnLPercent) > 0 ? '+' : ''}{filteredStats.netPnLPercent}%
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-[10px] font-mono text-gray-400 uppercase tracking-wider mb-1">Total Trades</p>
+              <p className="text-lg font-bold font-mono text-gray-900">{filteredStats.totalTrades}</p>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-4">
+              <p className="text-[10px] font-mono text-gray-400 uppercase tracking-wider mb-1">Win Rate</p>
+              <p className="text-lg font-bold font-mono text-gray-900">{filteredStats.winRate}%</p>
+            </div>
           </div>
         </div>
 
