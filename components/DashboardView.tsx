@@ -300,9 +300,9 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
       avgWin,
       avgLoss,
       avgRR,
-      netPnLPercent: filteredTrades.length > 0 ? ((winCount - lossCount) / filteredTrades.length * 100).toFixed(0) : '0'
+      netPnLPercent: startingEquity > 0 ? (totalPnL / startingEquity * 100).toFixed(1) : '0.0'
     };
-  }, [trades, dayFilterType, selectedYear, selectedMonth, selectedWeek]);
+  }, [trades, dayFilterType, selectedYear, selectedMonth, selectedWeek, startingEquity]);
 
   // Recent Trades (5 most recent)
   const recentTrades = useMemo(() => {
