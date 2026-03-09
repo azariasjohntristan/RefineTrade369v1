@@ -350,24 +350,24 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl shadow-card p-6">
+        <div className="bg-white rounded-2xl shadow-card p-6 hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mb-3">NET P&L</p>
           <p className={`text-3xl font-mono font-bold tracking-tight ${totalPnL >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
             {totalPnL >= 0 ? '' : '-'}${Math.abs(totalPnL).toLocaleString()}
           </p>
           <p className="text-[11px] font-mono text-gray-400 uppercase mt-2">Cumulative yield</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-card p-6">
+        <div className="bg-white rounded-2xl shadow-card p-6 hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mb-3">PROFIT FACTOR</p>
           <p className="text-3xl font-mono font-bold text-gray-900 tracking-tight">{profitFactor}</p>
           <p className="text-[11px] font-mono text-accent-gain uppercase mt-2">Optimal range</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-card p-6">
+        <div className="bg-white rounded-2xl shadow-card p-6 hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mb-3">AVG R:R</p>
           <p className="text-3xl font-mono font-bold text-gray-900 tracking-tight">{avgRR}</p>
           <p className="text-[11px] font-mono text-gray-400 uppercase mt-2">{trades.length} executions</p>
         </div>
-        <div className="bg-white rounded-2xl shadow-card p-6">
+        <div className="bg-white rounded-2xl shadow-card p-6 hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest mb-3">MAX DRAWDOWN</p>
           <p className="text-3xl font-mono font-bold text-gray-900 tracking-tight">0%</p>
           <p className="text-[11px] font-mono text-orange-500/80 uppercase mt-2">Limit: 5.0%</p>
@@ -376,7 +376,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
 
       {/* Middle Row: Equity Curve & Logic Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6 flex flex-col min-h-[360px]">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6 flex flex-col min-h-[360px] hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <div className="flex justify-between items-center mb-6">
             <div>
               <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest">PROJECTED REVENUE</p>
@@ -432,7 +432,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-card p-6 flex flex-col">
+        <div className="bg-white rounded-2xl shadow-card p-6 flex flex-col hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <div className="flex justify-between items-center mb-5">
             <div>
               <p className="text-[11px] font-mono text-gray-400 uppercase tracking-widest">SYSTEM INTEGRITY</p>
@@ -511,7 +511,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
 
       {/* Bottom Row: P&L Calendar & Trading Rules */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6 flex flex-col min-h-[420px]">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6 flex flex-col min-h-[500px] hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-2">
               <CalendarIcon size={14} className="text-gray-400" />
@@ -556,13 +556,13 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                 >
                   {day.day && (
                     <>
-                      <span className="text-[9px] font-mono text-gray-400 absolute top-1 left-2">{day.day}</span>
+                      <span className="text-[11px] font-mono text-gray-400 absolute top-1 left-2">{day.day}</span>
                       {day.tradeCount > 0 && (
                         <>
-                          <span className={`text-[10px] font-bold font-mono ${day.pnl > 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                          <span className={`text-[12px] font-bold font-mono ${day.pnl > 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
                             {day.pnl > 0 ? '+' : ''}{day.pnl.toFixed(0)}
                           </span>
-                          <span className="text-[9px] font-medium text-gray-500">{day.tradeCount} trade{day.tradeCount > 1 ? 's' : ''}</span>
+                          <span className="text-[10px] font-medium text-gray-500">{day.tradeCount} trade{day.tradeCount > 1 ? 's' : ''}</span>
                         </>
                       )}
                     </>
@@ -573,7 +573,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-card p-6 flex flex-col">
+        <div className="bg-white rounded-2xl shadow-card p-6 flex flex-col hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <div className="flex justify-between items-center mb-5">
             <div className="flex items-center gap-2">
               <ShieldCheck size={14} className="text-gray-400" />
@@ -635,7 +635,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
       {/* Row 2: Day of Week + Recent Trades */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Day of Week Performance */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6">
+        <div className="lg:col-span-2 bg-white rounded-2xl shadow-card p-6 hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
             <div className="flex items-center gap-2">
               <CalendarIcon size={14} className="text-gray-400" />
@@ -643,31 +643,6 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
             </div>
             
             <div className="flex items-center gap-2">
-              {/* Filter Type Buttons */}
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                {(['year', 'month', 'week'] as const).map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => {
-                      setDayFilterType(type);
-                      if (type === 'year') {
-                        setSelectedMonth(0);
-                        setSelectedWeek(1);
-                      } else if (type === 'month') {
-                        setSelectedWeek(1);
-                      }
-                    }}
-                    className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider rounded-md transition-all ${
-                      dayFilterType === type 
-                        ? 'bg-white text-gray-900 shadow-sm' 
-                        : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                  >
-                    {type === 'year' ? 'Year' : type === 'month' ? 'Month' : 'Week'}
-                  </button>
-                ))}
-              </div>
-
               {/* Arrow Navigation */}
               <div className="flex items-center gap-1">
                 <button
@@ -732,6 +707,25 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                   ›
                 </button>
               </div>
+
+              {/* Back Button - appears in Month/Week view */}
+              {(dayFilterType === 'month' || dayFilterType === 'week') && (
+                <button
+                  onClick={() => {
+                    if (dayFilterType === 'month') {
+                      setDayFilterType('year');
+                      setSelectedMonth(0);
+                      setSelectedWeek(1);
+                    } else if (dayFilterType === 'week') {
+                      setDayFilterType('month');
+                      setSelectedWeek(1);
+                    }
+                  }}
+                  className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all bg-gray-100 text-gray-600 hover:bg-gray-200"
+                >
+                  ← Back
+                </button>
+              )}
             </div>
           </div>
 
@@ -766,7 +760,31 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                 />
                 <Bar dataKey="pnl" radius={[4, 4, 0, 0]}>
                   {performanceStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.pnl >= 0 ? '#22c55e' : '#f87171'} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={entry.pnl >= 0 ? '#22c55e' : '#f87171'}
+                      className="cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => {
+                        // Navigate based on current filter type
+                        if (dayFilterType === 'year') {
+                          // Clicked a month in year view → switch to month view
+                          const monthIndex = performanceStats.findIndex(e => e.label === entry.label);
+                          if (monthIndex >= 0) {
+                            setDayFilterType('month');
+                            setSelectedMonth(monthIndex);
+                            setSelectedWeek(1);
+                          }
+                        } else if (dayFilterType === 'month') {
+                          // Clicked a week in month view → switch to week view
+                          const weekMatch = entry.label.match(/Week (\d)/);
+                          if (weekMatch) {
+                            setDayFilterType('week');
+                            setSelectedWeek(parseInt(weekMatch[1]));
+                          }
+                        }
+                        // In week view, do nothing on click
+                      }}
+                    />
                   ))}
                   <LabelList 
                     dataKey="netPnLPercent" 
@@ -808,28 +826,34 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
         </div>
 
         {/* Recent Trades */}
-        <div className="bg-white rounded-2xl shadow-card p-6 flex flex-col">
+        <div className="bg-white rounded-2xl shadow-card p-6 flex flex-col hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
           <div className="flex items-center gap-2 mb-4">
             <Activity size={14} className="text-gray-400" />
             <h3 className="text-sm font-semibold text-gray-700">Recent Trades</h3>
           </div>
 
-          <div className="flex-1 space-y-1">
+          <div className="flex-1 flex flex-col">
+            {/* Header Row */}
+            <div className="flex items-center px-3 pb-2 border-b border-gray-100 mb-2">
+              <span className="flex-1 text-[9px] font-mono text-gray-400 uppercase">Date</span>
+              <span className="flex-1 text-[9px] font-mono text-gray-400 uppercase text-center">Pair</span>
+              <span className="flex-1 text-[9px] font-mono text-gray-400 uppercase text-center">Type</span>
+              <span className="flex-1 text-[9px] font-mono text-gray-400 uppercase text-right">P&L</span>
+            </div>
+            
             {recentTrades.length > 0 ? (
               recentTrades.map((trade, idx) => (
-                <div key={idx} className="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-[11px] font-mono text-gray-400">
-                      {new Date(trade.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </span>
-                    <span className="text-[11px] font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded-md">
-                      {trade.pair}
-                    </span>
-                    <span className={`text-[10px] font-bold uppercase ${trade.type === 'LONG' ? 'text-accent-gain' : 'text-accent-loss'}`}>
-                      {trade.type}
-                    </span>
-                  </div>
-                  <span className={`text-[12px] font-mono font-bold ${trade.pnl >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                <div key={idx} className="flex items-center px-3 py-2.5 bg-gray-50 rounded-lg mb-1.5 last:mb-0">
+                  <span className="flex-1 text-[11px] font-mono text-gray-400">
+                    {new Date(trade.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </span>
+                  <span className="flex-1 text-[11px] font-semibold text-gray-700 text-center">
+                    {trade.pair}
+                  </span>
+                  <span className={`flex-1 text-[10px] font-bold uppercase text-center ${trade.type === 'LONG' ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                    {trade.type}
+                  </span>
+                  <span className={`flex-1 text-[12px] font-mono font-bold text-right ${trade.pnl >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
                     {trade.pnl > 0 ? '+' : ''}{trade.pnl.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                   </span>
                 </div>

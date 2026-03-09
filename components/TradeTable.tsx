@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Trade, Strategy, Category } from '../types';
-import { Eye, Edit3, Trash2, X, AlertTriangle, Check, ChevronDown, Calendar, TrendingUp, TrendingDown, Layers, Brain, Target, Activity, Camera } from 'lucide-react';
+import { Eye, Edit3, Trash2, X, AlertTriangle, Check, ChevronDown, Calendar, TrendingUp, TrendingDown, Layers, Brain, Target, Activity, Camera, Grid, List } from 'lucide-react';
 
 interface TradeTableProps {
   trades: Trade[];
@@ -23,10 +23,20 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
   const [modalType, setModalType] = useState<'view' | 'edit' | 'delete' | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'gallery'>('list');
+  const [tradeFilter, setTradeFilter] = useState<'all' | 'wins' | 'losses'>('all');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get current active strategy for filtering and display
   const currentActiveStrategy = strategies.find(s => s.id === currentActiveStrategyId);
+
+  // Filter trades based on tradeFilter
+  const filteredTrades = useMemo(() => {
+    if (tradeFilter === 'all') return trades;
+    if (tradeFilter === 'wins') return trades.filter(t => t.pnl > 0);
+    if (tradeFilter === 'losses') return trades.filter(t => t.pnl < 0);
+    return trades;
+  }, [trades, tradeFilter]);
 
   const [editFormData, setEditFormData] = useState<Partial<Trade>>({});
 
@@ -261,18 +271,137 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
             <p className="text-[14px] font-mono text-gray-500 uppercase tracking-[0.3em] mb-1">CORE_TERMINAL_V4 // ED-230934</p>
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 uppercase tracking-tighter">PERFORMANCE LOG</h2>
           </div>
-          <div className="text-right">
-            <p className="text-[14px] font-mono text-gray-500 uppercase tracking-widest mb-1 flex items-center justify-end gap-2">
-              TOTAL EXECUTIONS <Activity size={10} className="text-accent-gain" />
-            </p>
-            <p className="text-3xl font-black text-gray-900 tracking-tight">{trades.length}</p>
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-[14px] font-mono text-gray-500 uppercase tracking-widest mb-1 flex items-center justify-end gap-2">
+                TOTAL EXECUTIONS <Activity size={10} className="text-accent-gain" />
+              </p>
+              <p className="text-3xl font-black text-gray-900 tracking-tight">{filteredTrades.length}</p>
+            </div>
+            {/* Trade All/Wins/Losses */}
+            <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setTradeFilter('all')}
+                className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all ${tradeFilter === 'all' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setTradeFilter('wins')}
+                className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all ${tradeFilter === 'wins' ? 'bg-white shadow-sm text-accent-gain' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Wins
+              </button>
+              <button
+                onClick={() => setTradeFilter('losses')}
+                className={`px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider rounded-md transition-all ${tradeFilter === 'losses' ? 'bg-white shadow-sm text-accent-loss' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Losses
+              </button>
+            </div>
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                title="List View"
+              >
+                <List size={16} />
+              </button>
+              <button
+                onClick={() => setViewMode('gallery')}
+                className={`p-2 rounded-md transition-all ${viewMode === 'gallery' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                title="Gallery View"
+              >
+                <Grid size={16} />
+              </button>
+            </div>
           </div>
         </div>
       )}
 
+      {/* Gallery Mode */}
+      {viewMode === 'gallery' && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Grid size={14} className="text-gray-400" />
+            <span className="text-[11px] font-mono text-gray-400 uppercase tracking-widest">Gallery Mode</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {filteredTrades.map((trade, idx) => (
+              <div
+                key={trade.id}
+                className="relative h-[180px] rounded-2xl overflow-hidden hover:scale-[1.02] hover:shadow-xl transition-all duration-200 group"
+                style={{ animationDelay: `${idx * 0.05}s` }}
+              >
+                {/* Clickable area - opens view modal */}
+                <div 
+                  className="absolute inset-0 cursor-pointer z-10"
+                  onClick={() => handleOpenModal(trade, 'view')}
+                >
+                  {trade.screenshots && trade.screenshots.length > 0 ? (
+                    <img 
+                      src={trade.screenshots[0]} 
+                      alt="Trade screenshot" 
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 flex flex-col items-center justify-center">
+                      <Camera size={24} className="text-gray-400 mb-2" />
+                      <span className="text-[10px] font-mono text-gray-400 uppercase">No Screenshots</span>
+                    </div>
+                  )}
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+                  {/* Info at bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-white/90 text-gray-900 px-2 py-0.5 text-[10px] font-semibold rounded uppercase">
+                          {trade.pair}
+                        </span>
+                        <span className={`text-[9px] font-bold uppercase ${trade.type === 'LONG' ? 'text-green-400' : 'text-red-400'}`}>
+                          {trade.type}
+                        </span>
+                      </div>
+                      <span className={`text-[12px] font-bold ${trade.pnl >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {trade.pnl > 0 ? '+' : ''}{trade.pnl.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                      </span>
+                    </div>
+                    <div className="text-[9px] text-gray-300 mt-1">
+                      {new Date(trade.time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </div>
+                  </div>
+                </div>
+                {/* Edit/Delete buttons - top right, separate from clickable area */}
+                <div className="absolute top-2 right-2 flex gap-1 z-20">
+                  <button 
+                    onClick={() => handleOpenModal(trade, 'edit')}
+                    className="p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-gray-900 shadow-sm"
+                    title="Edit"
+                  >
+                    <Edit3 size={12} />
+                  </button>
+                  <button 
+                    onClick={() => handleOpenModal(trade, 'delete')}
+                    className="p-1.5 bg-white/90 rounded-lg text-gray-600 hover:text-red-600 shadow-sm"
+                    title="Delete"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* List View */}
+      {viewMode === 'list' && (
+        <>
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
-        {trades.map((trade, idx) => (
+        {filteredTrades.map((trade, idx) => (
           <div
             key={trade.id}
             className="bg-white rounded-2xl shadow-card p-5 space-y-4 animate-slide-up cursor-pointer hover:shadow-card-lg transition-all"
@@ -314,7 +443,7 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
       <div className="hidden md:block">
         {/* Trade Cards */}
         <div className="grid gap-4">
-          {trades.map((trade, idx) => (
+          {filteredTrades.map((trade, idx) => (
             <div
               key={trade.id}
               className="bg-white rounded-2xl shadow-card p-5 flex items-center justify-between gap-4 animate-slide-up cursor-pointer hover:shadow-card-lg transition-all"
@@ -353,6 +482,8 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
           ))}
         </div>
       </div>
+        </>
+      )}
 
       {/* --- View Modal --- */}
       {modalType === 'view' && selectedTrade && createPortal(
@@ -366,6 +497,26 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
               </div>
               <button onClick={closeModal} className="text-gray-400 hover:text-gray-700 transition-colors p-1.5 rounded-lg hover:bg-gray-100"><X size={20} /></button>
             </div>
+
+            {/* Screenshots - moved to top */}
+            {selectedTrade.screenshots && selectedTrade.screenshots.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-card p-6 -mx-2">
+                <div className="flex items-center gap-2 mb-5">
+                  <Camera size={14} className="text-gray-400" />
+                  <h4 className="text-sm font-semibold text-gray-700">Screenshots</h4>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {selectedTrade.screenshots.map((src, i) => (
+                    <div key={i} onClick={() => setFullScreenImage(src)} className="aspect-video bg-gray-100 rounded-xl overflow-hidden cursor-zoom-in group relative">
+                      <img src={src} className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" alt={`Screenshot ${i}`} />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-xl">
+                        <Eye size={18} className="text-white" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <div className="bg-white rounded-2xl shadow-card p-6">
@@ -528,25 +679,6 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
                   {selectedTrade.reflection || 'No reflection recorded for this trade.'}
                 </div>
               </div>
-
-              {selectedTrade.screenshots && selectedTrade.screenshots.length > 0 && (
-                <div className="bg-white rounded-2xl shadow-card p-6 lg:col-span-2">
-                  <div className="flex items-center gap-2 mb-5">
-                    <Camera size={14} className="text-gray-400" />
-                    <h4 className="text-sm font-semibold text-gray-700">Screenshots</h4>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {selectedTrade.screenshots.map((src, i) => (
-                      <div key={i} onClick={() => setFullScreenImage(src)} className="aspect-video bg-gray-100 rounded-xl overflow-hidden cursor-zoom-in group relative">
-                        <img src={src} className="w-full h-full object-cover group-hover:opacity-90 transition-opacity" alt={`Screenshot ${i}`} />
-                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-xl">
-                          <Eye size={18} className="text-white" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>,
@@ -581,6 +713,38 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
             </div>
 
             <div className="flex-1 overflow-y-auto px-7 py-5 space-y-6">
+
+              {/* Screenshots - moved to top */}
+              <div className="space-y-3">
+                <SectionHeader title="Screenshots" />
+                <div className="space-y-3">
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-20 bg-gray-50 border border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-gray-400 hover:bg-gray-100 transition-all group"
+                  >
+                    <Camera size={14} className="text-gray-400 group-hover:text-gray-600" />
+                    <span className="text-xs text-gray-400 group-hover:text-gray-600">Click to upload screenshots</span>
+                    <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*" onChange={handleFileChange} />
+                  </div>
+
+                  {editFormData.screenshots && editFormData.screenshots.length > 0 && (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                      {editFormData.screenshots.map((src, idx) => (
+                        <div key={idx} className="relative aspect-video bg-gray-100 rounded-xl group/item overflow-hidden">
+                          <img src={src} className="w-full h-full object-cover" alt={`Screenshot ${idx}`} />
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); removeScreenshot(idx); }}
+                            className="absolute top-1 right-1 p-1 bg-white/90 rounded-full text-gray-500 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-opacity shadow-sm"
+                          >
+                            <X size={10} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* Identity */}
               <div className="space-y-3">
@@ -703,38 +867,6 @@ const TradeTable: React.FC<TradeTableProps> = ({ trades, strategies, currentActi
                       placeholder="Add your trade reflection..."
                     />
                   </div>
-                </div>
-              </div>
-
-              {/* Screenshots */}
-              <div className="space-y-3">
-                <SectionHeader title="Screenshots" />
-                <div className="space-y-3">
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-20 bg-gray-50 border border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer hover:border-gray-400 hover:bg-gray-100 transition-all group"
-                  >
-                    <Camera size={14} className="text-gray-400 group-hover:text-gray-600" />
-                    <span className="text-xs text-gray-400 group-hover:text-gray-600">Click to upload screenshots</span>
-                    <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*" onChange={handleFileChange} />
-                  </div>
-
-                  {editFormData.screenshots && editFormData.screenshots.length > 0 && (
-                    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                      {editFormData.screenshots.map((src, idx) => (
-                        <div key={idx} className="relative aspect-video bg-gray-100 rounded-xl group/item overflow-hidden">
-                          <img src={src} className="w-full h-full object-cover" alt={`Screenshot ${idx}`} />
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); removeScreenshot(idx); }}
-                            className="absolute top-1 right-1 p-1 bg-white/90 rounded-full text-gray-500 hover:text-red-500 opacity-0 group-hover/item:opacity-100 transition-opacity shadow-sm"
-                          >
-                            <X size={10} />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
 

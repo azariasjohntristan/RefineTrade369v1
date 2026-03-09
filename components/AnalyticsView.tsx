@@ -1,7 +1,19 @@
 import React, { useState, useMemo } from 'react';
-import { Trade, Strategy } from '../types';
-import { Trophy, BarChart3, Target, TrendingUp, TrendingDown, ChevronRight, Filter, Layers, Calendar } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Trade, Strategy, Category, Tag } from '../types';
+import { Trophy, BarChart3, Target, TrendingUp, TrendingDown, ChevronRight, ChevronLeft, Filter, Layers, Calendar } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
+
+// Helper function to get tag color from Strategy layers
+const getTagColor = (catId: string, tag: string, layers: Strategy['layers']): string => {
+  for (const categories of Object.values(layers)) {
+    const category = (categories as Category[]).find(c => c.id === catId);
+    if (category) {
+      const tagObj = category.tags.find(t => t.text === tag);
+      if (tagObj) return tagObj.color;
+    }
+  }
+  return '#64748b'; // default gray
+};
 
 interface AnalyticsViewProps {
   trades: Trade[];
@@ -22,6 +34,12 @@ interface TagStats {
 
 const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activeStrategyId }) => {
   const [selectedLayer, setSelectedLayer] = useState<string>('all');
+  const [chartFilterType, setChartFilterType] = useState<'year' | 'month' | 'week'>('year');
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const currentWeek = Math.ceil(new Date().getDate() / 7);
+  const [selectedWeek, setSelectedWeek] = useState(currentWeek);
+  const [expandedLayers, setExpandedLayers] = useState<string[]>(['layer1']); // Start with first layer expanded
 
   const selectedStrategy = useMemo(() => 
     strategies.find(s => s.id === activeStrategyId),
@@ -85,6 +103,86 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
 
     return results.sort((a, b) => b.winRate - a.winRate || b.totalPnL - a.totalPnL);
   }, [trades, selectedStrategy, activeStrategyId, selectedLayer]);
+
+  // Chart data for Variable Performance Bar Chart
+  const chartData = useMemo(() => {
+    if (!selectedStrategy) return [];
+
+    const strategyTrades = trades.filter(t => t.strategyId === activeStrategyId);
+    
+    // Filter by year/month/week
+    const filteredTrades = strategyTrades.filter(trade => {
+      const tradeDate = new Date(trade.time);
+      const tradeYear = tradeDate.getFullYear();
+      const tradeMonth = tradeDate.getMonth();
+      const tradeDay = tradeDate.getDate();
+      const tradeWeek = Math.ceil(tradeDay / 7);
+
+      if (chartFilterType === 'year') {
+        return tradeYear === selectedYear;
+      } else if (chartFilterType === 'month') {
+        return tradeYear === selectedYear && tradeMonth === selectedMonth;
+      } else if (chartFilterType === 'week') {
+        return tradeYear === selectedYear && tradeMonth === selectedMonth && tradeWeek === selectedWeek;
+      }
+      return true;
+    });
+
+    // Calculate stats by tag
+    const tagMap: Record<string, { tag: string; categoryName: string; layerKey: string; tagColor: string; totalTrades: number; wins: number; losses: number }> = {};
+
+    filteredTrades.forEach(trade => {
+      Object.entries(trade.selections).forEach(([catId, tags]) => {
+        let categoryName = 'Unknown';
+        let layerKey = '';
+        
+        Object.entries(selectedStrategy.layers).forEach(([layer, categories]) => {
+          const cat = (categories as any[]).find(c => c.id === catId);
+          if (cat) {
+            categoryName = cat.name;
+            layerKey = layer;
+          }
+        });
+
+        const tagColor = getTagColor(catId, '', selectedStrategy.layers);
+
+        (tags as string[]).forEach(tag => {
+          const key = `${catId}-${tag}`;
+          if (!tagMap[key]) {
+            tagMap[key] = { tag, categoryName, layerKey, tagColor: getTagColor(catId, tag, selectedStrategy.layers), totalTrades: 0, wins: 0, losses: 0 };
+          }
+          
+          const stats = tagMap[key];
+          stats.totalTrades += 1;
+          if (trade.pnl >= 0) stats.wins += 1;
+          else stats.losses += 1;
+        });
+      });
+    });
+
+    let results = Object.values(tagMap)
+      .map(s => ({
+        tag: s.tag,
+        categoryName: s.categoryName,
+        tagColor: s.tagColor,
+        totalTrades: s.totalTrades,
+        wins: s.wins,
+        losses: s.losses,
+        winRate: s.totalTrades > 0 ? (s.wins / s.totalTrades) * 100 : 0
+      }))
+      .sort((a, b) => b.winRate - a.winRate)
+      .slice(0, 10); // Top 10 only
+
+    if (selectedLayer !== 'all') {
+      const layerKey = selectedLayer;
+      results = results.filter(r => {
+        const tagStat = statsByTag.find(s => s.tag === r.tag && s.layerKey === layerKey);
+        return !!tagStat;
+      });
+    }
+
+    return results;
+  }, [trades, selectedStrategy, activeStrategyId, chartFilterType, selectedYear, selectedMonth, selectedWeek, selectedLayer, statsByTag]);
 
   const leaderboard = useMemo(() => {
     const layers = ['layer1', 'layer2', 'layer3', 'layer4'];
@@ -328,46 +426,114 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
         </div>
       </div>
 
-      {/* Detailed Table Section */}
-      <div className="space-y-6">
-        <div className="bg-white rounded-2xl shadow-card p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <BarChart3 size={14} className="text-gray-400" />
-              <h3 className="text-sm font-semibold text-gray-700">Variable Performance Matrix</h3>
-            </div>
-            
-            <div className="flex bg-gray-100 rounded-xl p-1">
-              {['all', 'layer1', 'layer2', 'layer3', 'layer4'].map((layer) => (
-                <button
-                  key={layer}
-                  onClick={() => setSelectedLayer(layer)}
-                  className={`px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider transition-all rounded-lg ${
-                    selectedLayer === layer 
-                      ? 'bg-white text-gray-900 shadow-sm' 
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {layer === 'all' ? 'All' : `L${layer.slice(-1)}`}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+      {/* Variable Performance - Expandable Layer Cards */}
+      <div className="space-y-4">
+        {layerConfigs.map((config) => {
+          const isExpanded = expandedLayers.includes(config.key);
+          const layerData = chartData.filter(d => {
+            // Find layer for this tag
+            const tagStat = statsByTag.find(s => s.tag === d.tag && s.layerKey === config.key);
+            return !!tagStat;
+          });
+          
+          const avgWinRate = layerData.length > 0 
+            ? layerData.reduce((sum, d) => sum + d.winRate, 0) / layerData.length 
+            : 0;
+          const totalTrades = layerData.reduce((sum, d) => sum + d.totalTrades, 0);
+          const totalPnL = layerData.reduce((sum, d) => {
+            const tagStat = statsByTag.find(s => s.tag === d.tag);
+            return sum + (tagStat?.totalPnL || 0);
+          }, 0);
 
-        <div className="space-y-6">
-          {layerConfigs.map(config => {
-            if (selectedLayer !== 'all' && selectedLayer !== config.key) return null;
-            const layerData = statsByTag.filter(s => s.layerKey === config.key);
-            
-            return (
-              <div key={config.key} className="animate-slide-up">
-                <LayerHeader title={config.title} desc={config.desc} />
-                <PerformanceTable data={layerData} />
+          return (
+            <div key={config.key} className="bg-white rounded-2xl shadow-card overflow-hidden">
+              {/* Layer Header - Clickable */}
+              <div 
+                className="p-5 cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => {
+                  setExpandedLayers(prev => 
+                    prev.includes(config.key) 
+                      ? prev.filter(l => l !== config.key)
+                      : [...prev, config.key]
+                  );
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
+                      <ChevronRight size={18} className="text-gray-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">{config.title.replace('Layer ', 'Layer ')}</h3>
+                      <p className="text-[11px] text-gray-500 font-mono mt-0.5">{config.desc}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-right">
+                    <div>
+                      <span className="text-[10px] font-mono text-gray-400 uppercase block">{layerData.length} tags</span>
+                      <span className="text-xs font-semibold text-gray-700">{avgWinRate.toFixed(0)}% avg</span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-mono text-gray-400 uppercase block">Net P&L</span>
+                      <span className={`text-xs font-semibold ${totalPnL >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                        {totalPnL >= 0 ? '+' : ''}${totalPnL.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-            );
-          })}
-        </div>
+
+              {/* Expanded Content - Tag Cards Grid */}
+              {isExpanded && (
+                <div className="border-t border-gray-100 p-5">
+                  {layerData.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {layerData.map((item, idx) => {
+                        const tagStat = statsByTag.find(s => s.tag === item.tag && s.layerKey === config.key);
+                        const netPnL = tagStat?.totalPnL || 0;
+                        return (
+                          <div 
+                            key={idx} 
+                            className="bg-gray-50 rounded-xl p-4 hover:scale-[1.02] hover:shadow-lg transition-all duration-200 cursor-pointer"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="text-sm font-bold text-gray-800 uppercase">{item.tag}</span>
+                              <span className={`text-sm font-bold ${item.winRate >= 50 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                                {item.winRate.toFixed(0)}%
+                              </span>
+                            </div>
+                            {/* Progress Bar */}
+                            <div className="w-full h-2 bg-gray-200 rounded-full mb-2 overflow-hidden">
+                              <div 
+                                className="h-full rounded-full transition-all duration-500"
+                                style={{ 
+                                  width: `${item.winRate}%`,
+                                  backgroundColor: item.tagColor
+                                }}
+                              />
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-[10px] font-mono text-gray-400">
+                                {item.wins}W / {item.losses}L
+                              </span>
+                              <span className={`text-xs font-bold font-mono ${netPnL >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                                {netPnL >= 0 ? '+' : ''}${netPnL.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="h-32 flex items-center justify-center">
+                      <p className="text-sm text-gray-400">No data available for this layer</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

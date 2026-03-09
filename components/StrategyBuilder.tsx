@@ -118,7 +118,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
   const LayerSection = ({ title, desc, layerKey }: { title: string, desc: string, layerKey: keyof Strategy['layers'] }) => (
     <div className="space-y-5">
       {/* Layer Header Card */}
-      <div className="bg-white rounded-2xl shadow-card p-5">
+      <div className="bg-white rounded-2xl shadow-card p-5 hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center shrink-0">
             <Layers size={16} className="text-gray-500" />
@@ -133,7 +133,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
       {/* Categories Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
         {activeStrategy?.layers[layerKey].map((cat) => (
-          <div key={cat.id} className="bg-white rounded-2xl shadow-card p-5 flex flex-col group min-h-[240px] relative">
+          <div key={cat.id} className="bg-white rounded-2xl shadow-card p-5 flex flex-col group min-h-[240px] relative hover:scale-[1.02] hover:shadow-xl hover:border hover:border-gray-200 transition-all duration-200 cursor-pointer">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -215,7 +215,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
         {/* Add Category Button */}
         <button 
           onClick={() => { setCategoryModalError(null); setIsAddingCategory({ layer: layerKey }); }}
-          className="bg-white rounded-2xl shadow-card p-5 flex flex-col items-center justify-center gap-3 min-h-[240px] text-gray-400 hover:text-gray-600 hover:shadow-card-lg transition-all group border-2 border-dashed border-gray-200 hover:border-gray-300"
+          className="bg-white rounded-2xl shadow-card p-5 flex flex-col items-center justify-center gap-3 min-h-[240px] text-gray-400 hover:text-gray-600 hover:shadow-card-lg hover:scale-[1.02] hover:border hover:border-gray-200 transition-all duration-200 group border-2 border-dashed border-gray-200 hover:border-gray-300"
         >
           <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center group-hover:scale-110 transition-transform">
             <Plus size={20} />

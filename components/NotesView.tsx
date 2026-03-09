@@ -328,11 +328,22 @@ export default function NotesView({
             ) : (
               filteredNotes.map(note => {
                 const category = categories.find(c => c.id === note.category_id)
+                const glowColor = category?.color || '#64748b'
                 return (
                   <div 
                     key={note.id} 
-                    className="bg-white rounded-2xl shadow-card p-5 hover:shadow-card-lg transition-all group flex flex-col min-h-[180px]"
-                    style={{ borderLeft: `4px solid ${category?.color || '#64748b'}` }}
+                    className="bg-white rounded-2xl shadow-card p-5 transition-all duration-200 group flex flex-col min-h-[180px] cursor-pointer border-l-4"
+                    style={{ 
+                      borderLeftColor: glowColor,
+                      boxShadow: `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 0 ${glowColor}`,
+                      transition: 'box-shadow 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = `0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 0 20px ${glowColor}40`
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = `0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 0 0 0 ${glowColor}`
+                    }}
                   >
                     <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex-1">
