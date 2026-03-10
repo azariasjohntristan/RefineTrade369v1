@@ -25,6 +25,7 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
   const [isAddingCategory, setIsAddingCategory] = useState<{ layer: keyof Strategy['layers'] } | null>(null);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [categoryModalError, setCategoryModalError] = useState<string | null>(null);
+  const [editingCategory, setEditingCategory] = useState<{ layer: keyof Strategy['layers'], categoryId: string, name: string } | null>(null);
 
   const activeStrategy = strategies.find(s => s.id === activeStrategyId);
 
@@ -115,6 +116,47 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
     onUpdateStrategy(updated);
   };
 
+  const handleEditCategory = () => {
+    if (!activeStrategy || !editingCategory) return;
+    
+    const trimmedName = editingCategory.name.trim();
+    if (!trimmedName) {
+      setCategoryModalError("VALIDATION_ERROR: CATEGORY_IDENTIFIER_REQUIRED.");
+      return;
+    }
+
+    if (trimmedName.length < 2) {
+      setCategoryModalError("VALIDATION_ERROR: IDENTIFIER_TOO_SHORT. MINIMUM 2 CHARACTERS.");
+      return;
+    }
+
+    const nameUpper = trimmedName.toUpperCase();
+    
+    // Check for duplicates across all layers (excluding current category)
+    const allCategories = [
+      ...activeStrategy.layers.layer1,
+      ...activeStrategy.layers.layer2,
+      ...activeStrategy.layers.layer3,
+      ...activeStrategy.layers.layer4
+    ];
+    
+    const isDuplicate = allCategories.some(cat => cat.name === nameUpper && cat.id !== editingCategory.categoryId);
+    
+    if (isDuplicate) {
+      setCategoryModalError(`DUPLICATE_ERROR: CATEGORY "${nameUpper}" ALREADY EXISTS IN THIS MODEL.`);
+      return;
+    }
+
+    const updated = { ...activeStrategy };
+    const cat = updated.layers[editingCategory.layer].find(c => c.id === editingCategory.categoryId);
+    if (cat) {
+      cat.name = nameUpper;
+      onUpdateStrategy(updated);
+    }
+    setEditingCategory(null);
+    setCategoryModalError(null);
+  };
+
   const LayerSection = ({ title, desc, layerKey }: { title: string, desc: string, layerKey: keyof Strategy['layers'] }) => (
     <div className="space-y-5">
       {/* Layer Header Card */}
@@ -148,9 +190,17 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
                 <div className="text-[10px] text-gray-400 font-mono uppercase tracking-wider">Parameter Index</div>
               </div>
               {cat.name !== 'INSTRUMENT' && (
-                <button onClick={() => removeCategory(layerKey, cat.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500">
-                  <Trash2 size={14} />
-                </button>
+                <div className="flex gap-1">
+                  <button 
+                    onClick={() => setEditingCategory({ layer: layerKey, categoryId: cat.id, name: cat.name })} 
+                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600"
+                  >
+                    <Edit3 size={14} />
+                  </button>
+                  <button onClick={() => removeCategory(layerKey, cat.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-red-500">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
               )}
             </div>
 
@@ -319,6 +369,62 @@ const StrategyParameters: React.FC<StrategyBuilderProps> = ({ strategies, active
               className="w-full bg-gray-900 text-white py-3.5 text-sm font-semibold rounded-xl hover:bg-gray-800 transition-all"
             >
               Commit Category Node
+            </button>
+          </div>
+        </div>
+      )}
+
+      {editingCategory && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center p-6">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => { setEditingCategory(null); setCategoryModalError(null); }} />
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-modal p-6 space-y-5 animate-slide-up">
+            <div className="flex justify-between items-start border-b border-gray-100 pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wider">
+                  <Edit3 size={14} className="text-gray-500" />
+                  Edit Neural Category
+                </div>
+                <div className="text-[11px] text-gray-400 font-mono uppercase tracking-wider">
+                  Layer {editingCategory.layer.replace('layer', '')} // Neural Node Modification
+                </div>
+              </div>
+              <button onClick={() => { setEditingCategory(null); setCategoryModalError(null); }} className="text-gray-400 hover:text-gray-700 p-1.5 rounded-lg hover:bg-gray-100"><X size={18} /></button>
+            </div>
+
+            {categoryModalError && (
+              <div className="bg-red-50 border border-red-100 p-4 flex gap-3 rounded-xl animate-slide-up">
+                <AlertTriangle size={14} className="text-red-500 shrink-0 mt-0.5" />
+                <p className="text-[11px] font-mono text-red-500 leading-relaxed font-semibold">
+                  {categoryModalError}
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <label className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">Category Identifier</label>
+              <input 
+                autoFocus
+                className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 font-medium outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100"
+                placeholder="E.G. LIQUIDITY_TYPE"
+                value={editingCategory.name}
+                onChange={(e) => { setEditingCategory({ ...editingCategory, name: e.target.value }); setCategoryModalError(null); }}
+              />
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-xl flex gap-3">
+              <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center shrink-0">
+                <Hash size={14} className="text-amber-500" />
+              </div>
+              <p className="text-xs text-gray-500 leading-relaxed">
+                Nodes initialized here will manifest as functional input layers within your execution logs.
+              </p>
+            </div>
+
+            <button 
+              onClick={handleEditCategory}
+              className="w-full bg-gray-900 text-white py-3.5 text-sm font-semibold rounded-xl hover:bg-gray-800 transition-all"
+            >
+              Save Changes
             </button>
           </div>
         </div>

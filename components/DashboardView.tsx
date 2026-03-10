@@ -541,7 +541,7 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
           <div className="flex-1 flex flex-col">
             <div className="grid grid-cols-7 gap-1 mb-2">
               {['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'].map(d => (
-                <div key={d} className="text-center text-[10px] font-mono text-gray-400 uppercase py-1">{d}</div>
+                <div key={d} className="text-center text-[10px] font-mono text-gray-400 uppercase py-1 min-h-[56px] flex items-center justify-center">{d}</div>
               ))}
             </div>
             <div className="grid grid-cols-7 gap-1 flex-1">
@@ -758,43 +758,36 @@ const DashboardView: React.FC<DashboardViewProps> = ({ trades, startingEquity, r
                   labelStyle={{ color: '#18181b', fontWeight: '600', fontSize: '11px' }}
                   formatter={(value: number) => [`$${value.toLocaleString()}`, 'P&L']}
                 />
-                <Bar dataKey="pnl" radius={[4, 4, 0, 0]}>
+                <Bar 
+                  dataKey="pnl" 
+                  radius={[4, 4, 0, 0]} 
+                  barSize={32}
+                  onClick={(data: any, index: number) => {
+                    if (!data) return;
+                    const entry = performanceStats[index];
+                    
+                    if (dayFilterType === 'year') {
+                      const monthIndex = performanceStats.findIndex(e => e.label === entry.label);
+                      if (monthIndex >= 0) {
+                        setDayFilterType('month');
+                        setSelectedMonth(monthIndex);
+                        setSelectedWeek(1);
+                      }
+                    } else if (dayFilterType === 'month') {
+                      const weekMatch = entry.label.match(/Week (\d)/);
+                      if (weekMatch) {
+                        setDayFilterType('week');
+                        setSelectedWeek(parseInt(weekMatch[1]));
+                      }
+                    }
+                  }}
+                >
                   {performanceStats.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
                       fill={entry.pnl >= 0 ? '#22c55e' : '#f87171'}
-                      className="cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => {
-                        // Navigate based on current filter type
-                        if (dayFilterType === 'year') {
-                          // Clicked a month in year view → switch to month view
-                          const monthIndex = performanceStats.findIndex(e => e.label === entry.label);
-                          if (monthIndex >= 0) {
-                            setDayFilterType('month');
-                            setSelectedMonth(monthIndex);
-                            setSelectedWeek(1);
-                          }
-                        } else if (dayFilterType === 'month') {
-                          // Clicked a week in month view → switch to week view
-                          const weekMatch = entry.label.match(/Week (\d)/);
-                          if (weekMatch) {
-                            setDayFilterType('week');
-                            setSelectedWeek(parseInt(weekMatch[1]));
-                          }
-                        }
-                        // In week view, do nothing on click
-                      }}
                     />
                   ))}
-                  <LabelList 
-                    dataKey="netPnLPercent" 
-                    position="top" 
-                    formatter={(value: string) => {
-                      const num = parseInt(value);
-                      return num !== 0 ? `${num > 0 ? '+' : ''}${num}%` : '';
-                    }}
-                    style={{ fill: '#6b7280', fontSize: '10px', fontWeight: '500' }}
-                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
