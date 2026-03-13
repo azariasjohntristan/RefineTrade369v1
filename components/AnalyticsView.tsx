@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Trade, Strategy, Category, Tag } from '../types';
-import { Trophy, BarChart3, Target, TrendingUp, TrendingDown, ChevronRight, ChevronLeft, Filter, Layers, Calendar, Clock, AlertTriangle, ArrowUp, ArrowDown, X, Eye, Download, Info } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, LabelList, LineChart, Line, ComposedChart, Area, AreaChart, Scatter } from 'recharts';
+import { Trophy, BarChart3, Target, TrendingUp, ChevronRight, Filter, Layers, Calendar, AlertTriangle, ArrowUp, ArrowDown, X, Eye } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, AreaChart, Area } from 'recharts';
 
 // Helper function to get tag color from Strategy layers
 const getTagColor = (catId: string, tag: string, layers: Strategy['layers']): string => {
@@ -83,9 +83,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
   const [expandedLayers, setExpandedLayers] = useState<string[]>(['layer1']);
   const [showTrendChart, setShowTrendChart] = useState(true);
   const [showDayOfWeek, setShowDayOfWeek] = useState(true);
-  const [showHourly, setShowHourly] = useState(false);
   const [showDistribution, setShowDistribution] = useState(false);
-  const [showCombinations, setShowCombinations] = useState(false);
   const [selectedTagForDrillDown, setSelectedTagForDrillDown] = useState<TagStats | null>(null);
   const [showTagModal, setShowTagModal] = useState(false);
 
@@ -464,7 +462,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
       const tags = Object.values(trade.selections).flat() as string[];
       if (tags.length < 2) return;
 
-      // Get unique tag pairs
+      // Get unique tag pairs (2-tags combinations)
       for (let i = 0; i < tags.length; i++) {
         for (let j = i + 1; j < tags.length; j++) {
           const pairKey = [tags[i], tags[j]].sort().join('|');
@@ -484,10 +482,15 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
         ...c,
         winRate: c.totalTrades > 0 ? (c.wins / c.totalTrades) * 100 : 0
       }))
-      .filter(c => c.totalTrades >= 3)
-      .sort((a, b) => b.totalPnL - a.totalPnL)
-      .slice(0, 20);
+      .filter(c => c.totalTrades >= 3 && c.totalPnL > 0) // Only profitable combinations with min 3 trades
+      .sort((a, b) => b.totalPnL - a.totalPnL);
   }, [trades, selectedStrategy, activeStrategyId]);
+
+  // Check if there are any multi-tag trades
+  const hasMultiTagTrades = useMemo(() => {
+    const strategyTrades = trades.filter(t => t.strategyId === activeStrategyId);
+    return strategyTrades.some(t => Object.values(t.selections).flat().length >= 2);
+  }, [trades, activeStrategyId]);
 
   // State for tag drill-down modal (already declared above)
 
@@ -645,22 +648,10 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
             <Calendar size={14} className="inline mr-1" /> Days
           </button>
           <button 
-            onClick={() => setShowHourly(!showHourly)}
-            className={`px-3 py-2 text-xs font-semibold rounded-lg transition-all ${showHourly ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            <Clock size={14} className="inline mr-1" /> Hours
-          </button>
-          <button 
             onClick={() => setShowDistribution(!showDistribution)}
             className={`px-3 py-2 text-xs font-semibold rounded-lg transition-all ${showDistribution ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
           >
             <BarChart3 size={14} className="inline mr-1" /> Distribution
-          </button>
-          <button 
-            onClick={() => setShowCombinations(!showCombinations)}
-            className={`px-3 py-2 text-xs font-semibold rounded-lg transition-all ${showCombinations ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-          >
-            <Target size={14} className="inline mr-1" /> Combos
           </button>
         </div>
       </div>
@@ -767,36 +758,6 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
         </div>
       )}
 
-      {/* Hourly Analysis */}
-      {showHourly && (
-        <div className="bg-white rounded-2xl shadow-card p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Clock size={14} className="text-gray-400" />
-              <h3 className="text-sm font-semibold text-gray-700">Performance by Hour of Day</h3>
-            </div>
-          </div>
-          <div className="h-48">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={hourStats.filter(h => h.totalTrades > 0)}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f1" vertical={false} />
-                <XAxis dataKey="hour" stroke="#a1a1aa" tick={{ fill: '#a1a1aa', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `${v}:00`} />
-                <YAxis stroke="#a1a1aa" tick={{ fill: '#a1a1aa', fontSize: 10 }} axisLine={false} tickLine={false} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'white', border: '1px solid #e4e4e7', borderRadius: '12px' }}
-                  formatter={(value: number, name: string) => [name === 'totalPnL' ? `$${value.toLocaleString()}` : value, name === 'totalPnL' ? 'P&L' : 'Win Rate']}
-                />
-                <Bar dataKey="totalPnL" radius={[4, 4, 0, 0]}>
-                  {hourStats.filter(h => h.totalTrades > 0).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.totalPnL >= 0 ? '#22c55e' : '#f87171'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      )}
-
       {/* P&L Distribution */}
       {showDistribution && (
         <div className="bg-white rounded-2xl shadow-card p-6">
@@ -827,37 +788,53 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
         </div>
       )}
 
-      {/* Tag Combinations */}
-      {showCombinations && tagCombinations.length > 0 && (
+      {/* Tag Combinations Matrix - Only show when there are multi-tag trades */}
+      {hasMultiTagTrades && (
         <div className="bg-white rounded-2xl shadow-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Target size={14} className="text-gray-400" />
-              <h3 className="text-sm font-semibold text-gray-700">Top Tag Combinations (Min 3 Trades)</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Profitable Tag Combinations (Min 3 Trades)</h3>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {tagCombinations.slice(0, 9).map((combo, idx) => (
-              <div key={idx} className={`p-4 rounded-xl border ${combo.totalPnL >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold text-gray-700">{combo.tag1}</span>
-                  <span className="text-gray-400">+</span>
-                  <span className="text-xs font-bold text-gray-700">{combo.tag2}</span>
-                </div>
-                <div className="flex justify-between items-end">
-                  <div>
-                    <span className="text-[10px] text-gray-400 uppercase">{combo.totalTrades} trades</span>
-                    <p className={`text-sm font-bold ${combo.winRate >= 50 ? 'text-accent-gain' : 'text-accent-loss'}`}>
-                      {combo.winRate.toFixed(0)}% win
-                    </p>
+          {tagCombinations.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+              {tagCombinations.map((combo, idx) => (
+                <div key={idx} className="p-4 rounded-xl border border-green-200 bg-green-50">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs font-bold text-gray-700 bg-white px-2 py-1 rounded">{combo.tag1}</span>
+                    <span className="text-gray-400">+</span>
+                    <span className="text-xs font-bold text-gray-700 bg-white px-2 py-1 rounded">{combo.tag2}</span>
                   </div>
-                  <p className={`text-sm font-bold ${combo.totalPnL >= 0 ? 'text-accent-gain' : 'text-accent-loss'}`}>
-                    {combo.totalPnL >= 0 ? '+' : ''}${combo.totalPnL.toLocaleString()}
-                  </p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-gray-400 uppercase">{combo.totalTrades} trades</span>
+                      <span className={`text-[10px] font-bold ${combo.winRate >= 50 ? 'text-accent-gain' : 'text-accent-loss'}`}>
+                        {combo.winRate.toFixed(0)}% win
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${combo.winRate >= 50 ? 'bg-accent-gain' : 'bg-accent-loss'}`}
+                        style={{ width: `${combo.winRate}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-green-200">
+                      <span className="text-[10px] text-gray-400">Net P&L</span>
+                      <span className="text-sm font-bold text-accent-gain">
+                        +${combo.totalPnL.toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-400">No profitable combinations found with minimum 3 trades.</p>
+              <p className="text-xs text-gray-400 mt-1">Try recording more trades with multiple tags selected.</p>
+            </div>
+          )}
         </div>
       )}
 
