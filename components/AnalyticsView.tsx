@@ -465,7 +465,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
     return ids;
   }, [selectedStrategy]);
 
-  // Tag combination analysis - only using tags from multi-select categories
+  // Tag combination analysis - only using winning trades with multi-select category tags
   const tagCombinations = useMemo(() => {
     if (!selectedStrategy) return [];
 
@@ -473,6 +473,9 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
     const strategyTrades = trades.filter(t => t.strategyId === activeStrategyId);
 
     strategyTrades.forEach(trade => {
+      // Only consider winning trades
+      if (trade.pnl <= 0) return;
+
       // Get only tags from multi-select categories
       const tags: string[] = [];
       Object.entries(trade.selections).forEach(([catId, catTags]) => {
@@ -490,9 +493,10 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
           if (!comboMap[pairKey]) {
             comboMap[pairKey] = { tag1: tags[i], tag2: tags[j], totalTrades: 0, wins: 0, losses: 0, winRate: 0, totalPnL: 0 };
           }
+          // Only count winning trades
           comboMap[pairKey].totalTrades += 1;
-          if (trade.pnl >= 0) comboMap[pairKey].wins += 1;
-          else comboMap[pairKey].losses += 1;
+          comboMap[pairKey].wins += 1;
+          // Only add P&L from winning trades
           comboMap[pairKey].totalPnL += trade.pnl;
         }
       }
@@ -501,16 +505,19 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
     return Object.values(comboMap)
       .map(c => ({
         ...c,
-        winRate: c.totalTrades > 0 ? (c.wins / c.totalTrades) * 100 : 0
+        winRate: 100 // All trades are wins, so 100%
       }))
-      .filter(c => c.totalTrades >= 3 && c.totalPnL > 0) // Only profitable combinations with min 3 trades
+      .filter(c => c.totalTrades >= 2) // Min 2 winning trades
       .sort((a, b) => b.totalPnL - a.totalPnL);
   }, [trades, selectedStrategy, activeStrategyId, multiSelectCategoryIds]);
 
-  // Check if there are any multi-tag trades (from multi-select categories only)
+  // Check if there are any multi-tag winning trades (from multi-select categories only)
   const hasMultiTagTrades = useMemo(() => {
     const strategyTrades = trades.filter(t => t.strategyId === activeStrategyId);
     return strategyTrades.some(t => {
+      // Only consider winning trades
+      if (t.pnl <= 0) return false;
+      
       const tags: string[] = [];
       Object.entries(t.selections).forEach(([catId, catTags]) => {
         if (multiSelectCategoryIds.has(catId)) {
@@ -817,13 +824,13 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
         </div>
       )}
 
-      {/* Tag Combinations Matrix - Only from multi-select categories, show when there are multi-tag trades */}
+      {/* Tag Combinations Matrix - Only from multi-select categories, show when there are multi-tag winning trades */}
       {hasMultiTagTrades && (
         <div className="bg-white rounded-2xl shadow-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Target size={14} className="text-gray-400" />
-              <h3 className="text-sm font-semibold text-gray-700">Multi-Select Tag Combinations (Min 3 Trades)</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Winning Multi-Select Combinations (Min 2 Wins)</h3>
             </div>
           </div>
           {tagCombinations.length > 0 ? (
@@ -837,19 +844,19 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] text-gray-400 uppercase">{combo.totalTrades} trades</span>
-                      <span className={`text-[10px] font-bold ${combo.winRate >= 50 ? 'text-accent-gain' : 'text-accent-loss'}`}>
-                        {combo.winRate.toFixed(0)}% win
+                      <span className="text-[10px] text-gray-400 uppercase">{combo.totalTrades} winning trades</span>
+                      <span className="text-[10px] font-bold text-accent-gain">
+                        100% win
                       </span>
                     </div>
-                    <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-green-300 rounded-full overflow-hidden">
                       <div 
-                        className={`h-full rounded-full ${combo.winRate >= 50 ? 'bg-accent-gain' : 'bg-accent-loss'}`}
-                        style={{ width: `${combo.winRate}%` }}
+                        className="h-full rounded-full bg-accent-gain"
+                        style={{ width: '100%' }}
                       />
                     </div>
                     <div className="flex justify-between items-center pt-2 border-t border-green-200">
-                      <span className="text-[10px] text-gray-400">Net P&L</span>
+                      <span className="text-[10px] text-gray-400">Net P&L (Wins)</span>
                       <span className="text-sm font-bold text-accent-gain">
                         +${combo.totalPnL.toLocaleString()}
                       </span>
@@ -860,7 +867,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-sm text-gray-400">No profitable combinations found with minimum 3 trades.</p>
+              <p className="text-sm text-gray-400">No winning combinations found with minimum 2 winning trades.</p>
               <p className="text-xs text-gray-400 mt-1">Select multiple tags from multi-select categories when logging trades.</p>
             </div>
           )}
