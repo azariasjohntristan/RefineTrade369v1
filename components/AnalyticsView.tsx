@@ -451,7 +451,21 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
     }));
   }, [trades, selectedStrategy, activeStrategyId]);
 
-  // Tag combination analysis
+  // Get multi-select category IDs from strategy
+  const multiSelectCategoryIds = useMemo(() => {
+    if (!selectedStrategy) return new Set<string>();
+    const ids = new Set<string>();
+    Object.values(selectedStrategy.layers).forEach((categories: Category[]) => {
+      categories.forEach((cat: Category) => {
+        if (cat.selectionType === 'multi') {
+          ids.add(cat.id);
+        }
+      });
+    });
+    return ids;
+  }, [selectedStrategy]);
+
+  // Tag combination analysis - only using tags from multi-select categories
   const tagCombinations = useMemo(() => {
     if (!selectedStrategy) return [];
 
@@ -459,7 +473,14 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
     const strategyTrades = trades.filter(t => t.strategyId === activeStrategyId);
 
     strategyTrades.forEach(trade => {
-      const tags = Object.values(trade.selections).flat() as string[];
+      // Get only tags from multi-select categories
+      const tags: string[] = [];
+      Object.entries(trade.selections).forEach(([catId, catTags]) => {
+        if (multiSelectCategoryIds.has(catId)) {
+          tags.push(...(catTags as string[]));
+        }
+      });
+
       if (tags.length < 2) return;
 
       // Get unique tag pairs (2-tags combinations)
@@ -484,13 +505,21 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
       }))
       .filter(c => c.totalTrades >= 3 && c.totalPnL > 0) // Only profitable combinations with min 3 trades
       .sort((a, b) => b.totalPnL - a.totalPnL);
-  }, [trades, selectedStrategy, activeStrategyId]);
+  }, [trades, selectedStrategy, activeStrategyId, multiSelectCategoryIds]);
 
-  // Check if there are any multi-tag trades
+  // Check if there are any multi-tag trades (from multi-select categories only)
   const hasMultiTagTrades = useMemo(() => {
     const strategyTrades = trades.filter(t => t.strategyId === activeStrategyId);
-    return strategyTrades.some(t => Object.values(t.selections).flat().length >= 2);
-  }, [trades, activeStrategyId]);
+    return strategyTrades.some(t => {
+      const tags: string[] = [];
+      Object.entries(t.selections).forEach(([catId, catTags]) => {
+        if (multiSelectCategoryIds.has(catId)) {
+          tags.push(...(catTags as string[]));
+        }
+      });
+      return tags.length >= 2;
+    });
+  }, [trades, activeStrategyId, multiSelectCategoryIds]);
 
   // State for tag drill-down modal (already declared above)
 
@@ -788,13 +817,13 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
         </div>
       )}
 
-      {/* Tag Combinations Matrix - Only show when there are multi-tag trades */}
+      {/* Tag Combinations Matrix - Only from multi-select categories, show when there are multi-tag trades */}
       {hasMultiTagTrades && (
         <div className="bg-white rounded-2xl shadow-card p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Target size={14} className="text-gray-400" />
-              <h3 className="text-sm font-semibold text-gray-700">Profitable Tag Combinations (Min 3 Trades)</h3>
+              <h3 className="text-sm font-semibold text-gray-700">Multi-Select Tag Combinations (Min 3 Trades)</h3>
             </div>
           </div>
           {tagCombinations.length > 0 ? (
@@ -832,7 +861,7 @@ const AnalyticsView: React.FC<AnalyticsViewProps> = ({ trades, strategies, activ
           ) : (
             <div className="text-center py-8">
               <p className="text-sm text-gray-400">No profitable combinations found with minimum 3 trades.</p>
-              <p className="text-xs text-gray-400 mt-1">Try recording more trades with multiple tags selected.</p>
+              <p className="text-xs text-gray-400 mt-1">Select multiple tags from multi-select categories when logging trades.</p>
             </div>
           )}
         </div>
